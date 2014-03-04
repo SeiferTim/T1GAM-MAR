@@ -1,6 +1,8 @@
 package;
 
+import flash.text.Font;
 import flixel.util.FlxSave;
+@:font("assets/fonts/gomarice_kaiju_monster.ttf") class FontKaiju extends Font { }
 
 /**
  * Handy, pre-built Registry class that can be used to store 
@@ -33,5 +35,46 @@ class Reg
 	 * Generic bucket for storing different <code>FlxSaves</code>.
 	 * Especially useful for setting up multiple save slots.
 	 */
-	static public var saves:Array<FlxSave> = [];
+	static public var save:FlxSave = [];
+	
+	static public inline var FADE_DUR:Float = 0.1;
+	static public var playState:PlayState;
+	public static var FONT_BIG:String = "fonts/gomarice_kaiju_monster.ttf";
+	static public var GameInitialized:Bool = false;
+	#if desktop
+	static public var IsFullscreen:Bool;
+	#end
+	
+	public static function initGame():Void
+	{
+		if (GameInitialized)
+			return;
+		
+		Font.registerFont(FontKaiju);
+		
+		loadData();
+		
+		GameInitialized = true;
+	}
+	
+	public static function loadData():Void
+	{
+		save = new FlxSave();
+		save.bind("flixel");
+		if (save.data.volume != null)
+		{
+			FlxG.sound.volume = save.data.volume;
+		}
+		else
+			FlxG.sound.volume = 1;
+		
+		#if desktop
+		IsFullscreen = (save.data.fullscreen != null) ? save.data.fullscreen : true;
+		screensize = (save.data.screensize != null) ? save.data.screensize : SIZE_LARGE;
+		#end
+
+		save.close();
+		
+	}
+	
 }
