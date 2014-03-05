@@ -40,7 +40,7 @@ class Reg
 	 */
 	static public var save:FlxSave;// = [];
 	
-	static public inline var FADE_DUR:Float = 0.1;
+	static public inline var FADE_DUR:Float = 0.3;
 	static public var playState:PlayState;
 	public static var FONT_BIG:String = "fonts/gomarice_kaiju_monster.ttf";
 	public static var FONT_SCARY:String = "fonts/scary.TTF";

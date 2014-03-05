@@ -55,13 +55,13 @@ class GameFont extends FlxSprite
 		switch(_style)
 		{
 			case STYLE_HUGE_TITLE:
-				size = 80;
+				size = 96;
 				font = Reg.FONT_BIG;
 				_hasShadow = true;
 				_hasInnerGlow = true;
 				_hasOutline = true;
 			case STYLE_BIG_TITLE:
-				size = 48;
+				size = 64;
 				font = Reg.FONT_SCARY;
 				_hasShadow = true;
 				_hasInnerGlow = true;
