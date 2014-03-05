@@ -47,7 +47,7 @@ class PlayState extends FlxState
 	 */
 	override public function update():Void
 	{
-		
+		#if !FLX_NO_KEYBOARD
 		if (FlxG.keys.anyPressed(["RIGHT"]))
 		{
 			if (m._mapTerrain.x > FlxG.width - m._mapTerrain.width)
@@ -76,7 +76,7 @@ class PlayState extends FlxState
 			else 
 				m._mapTerrain.y = FlxG.height - m._mapTerrain.height;
 		}
-		
+		#end
 		m._mapPop.x = m._mapTerrain.x;
 		m._mapPop.y = m._mapTerrain.y;
 		
