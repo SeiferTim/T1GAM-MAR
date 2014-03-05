@@ -1,8 +1,11 @@
 package;
 
 import flash.text.Font;
+import flixel.FlxG;
 import flixel.util.FlxSave;
 @:font("assets/fonts/gomarice_kaiju_monster.ttf") class FontKaiju extends Font { }
+@:font("assets/fonts/scary.TTF") class FontScary extends Font { }
+@:font("assets/fonts/04B_03__.TTF") class FontPixel extends Font { }
 
 /**
  * Handy, pre-built Registry class that can be used to store 
@@ -35,11 +38,13 @@ class Reg
 	 * Generic bucket for storing different <code>FlxSaves</code>.
 	 * Especially useful for setting up multiple save slots.
 	 */
-	static public var save:FlxSave = [];
+	static public var save:FlxSave;// = [];
 	
 	static public inline var FADE_DUR:Float = 0.1;
 	static public var playState:PlayState;
 	public static var FONT_BIG:String = "fonts/gomarice_kaiju_monster.ttf";
+	public static var FONT_SCARY:String = "fonts/scary.TTF";
+	public static var FONT_PIXEL:String = "fonts/04B_03__.TTF";
 	static public var GameInitialized:Bool = false;
 	#if desktop
 	static public var IsFullscreen:Bool;
@@ -51,6 +56,8 @@ class Reg
 			return;
 		
 		Font.registerFont(FontKaiju);
+		Font.registerFont(FontScary);
+		Font.registerFont(FontPixel);
 		
 		loadData();
 		

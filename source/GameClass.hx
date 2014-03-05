@@ -1,5 +1,6 @@
 package;
 
+import flash.display.StageQuality;
 import flash.Lib;
 import flixel.FlxGame;
 import flixel.FlxState;
@@ -19,6 +20,9 @@ class GameClass extends FlxGame
 	 */
 	public function new()
 	{
+		Lib.current.stage.quality = StageQuality.LOW;
+		Reg.initGame();
+		
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;
 
