@@ -31,8 +31,9 @@ class GameMap
 	private var _whichTileRow:Int;
 	private var _whichTileCol:Int;
 	public var loopMax(default, null):Int;
+	private var _parent:PlayState;
 
-	public function new(Width:Int, Height:Int ) 
+	public function new(Width:Int, Height:Int, Parent:PlayState ) 
 	{
 		var seed:Int = FlxRandom.int();
 		var falseColors:Array<Int> = FlxGradient.createGradientArray(1, 255, [0xff0000ff, 0xff00ff00, 0xffff0000], 1, 90);
@@ -43,6 +44,7 @@ class GameMap
 		var _terrainData:BitmapData;
 		var _popData:BitmapData;
 		var _terrainMap:Array<Int>;
+		_parent = Parent;
 		
 		_width = Width;
 		_height = Height;
@@ -108,6 +110,7 @@ class GameMap
 		_mapTerrain.loadMap(_terrainMap, "images/terrain.png", 64, 64, FlxTilemap.OFF, 0, 1, 1);
 		
 		cityTiles = new FlxGroup(_width * _height);
+		
 		_whichTileRow = 0;
 		_whichTileCol = 0;
 		loopMax = _width * _height;
@@ -124,17 +127,7 @@ class GameMap
 		_tileLoop = new FlxAsyncLoop(loopMax, addCityTiles, 100);
 	}
 	
-	private function zSort(Order:Int, A:FlxBasic, B:FlxBasic):Int
-	{
-		var zA:Float = Type.getClassName(Type.getClass(A)) == "ZEmitterExt" ? cast(A, ZEmitterExt).z : cast(A, DisplaySprite).z;
-		var zB:Float = Type.getClassName(Type.getClass(B)) == "ZEmitterExt" ? cast(B, ZEmitterExt).z : cast(B, DisplaySprite).z;
-		var result:Int = 0;
-		if (zA < zB)
-			result = Order;
-		else if (zA > zB)
-			result = -Order;
-		return result;
-	}
+
 	
 	
 	public function addCityTiles():Void
@@ -160,7 +153,7 @@ class GameMap
 			_tileLoop.update();
 			if (_tileLoop.finished)
 			{
-				cityTiles.sort(zSort, FlxSort.ASCENDING);
+				//cityTiles.sort(zSort, FlxSort.ASCENDING);
 				finished = true;
 				_tileLoop.kill();
 				_tileLoop.destroy();
