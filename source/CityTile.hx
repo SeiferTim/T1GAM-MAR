@@ -4,7 +4,6 @@ class CityTile extends DisplaySprite
 {
 
 	public var tier(default, null):Int;
-	
 	private var _onScreen:Bool;
 	
 	public function new(X:Float=0, Y:Float=0, Tier:Int = 1) 
@@ -17,12 +16,11 @@ class CityTile extends DisplaySprite
 		height = 64;
 		offset.y = 64;
 		animation.frameIndex = tier;
-		_onScreen = isOnScreen();
 	}
 	
 	override public function update():Void 
 	{
-		
+		//_onScreen = isOnScreen();
 		if (!_onScreen)
 			return;
 		super.update();
