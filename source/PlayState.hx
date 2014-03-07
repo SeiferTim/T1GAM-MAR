@@ -19,6 +19,7 @@ import flixel.util.FlxAngle;
 import flixel.util.FlxColor;
 import flixel.util.FlxMath;
 import flixel.util.FlxPoint;
+import flixel.util.FlxRect;
 import flixel.util.FlxSort;
 import flixel.util.FlxSpriteUtil;
 
@@ -39,17 +40,21 @@ class PlayState extends FlxState
 	private var _txtLoad:FlxText;
 	private var _startedTween:Bool = false;
 	public var grpDisplay:FlxGroup;
+	private var _grpSmokes:FlxGroup;
+	private var _smokeRect:FlxSprite;
 	
 	
 	
 	override public function create():Void
 	{
+		Reg.playState = this;
 		
 		add(FlxGridOverlay.create(32, 32, -1, -1, false, true));
 		
 		grpDisplay = new FlxGroup();
+		_grpSmokes = new FlxGroup();
 		
-		m = new GameMap(100, 100, this);
+		m = new GameMap(80, 80, this);
 		add(m._mapTerrain);
 		add(grpDisplay);
 		
@@ -68,6 +73,10 @@ class PlayState extends FlxState
 		_txtLoad = new FlxText(0, 0, 100, "Loading...");
 		FlxSpriteUtil.screenCenter(_txtLoad);
 		add(_txtLoad);
+		
+		_smokeRect = new FlxSprite( -16, -16).makeGraphic(FlxG.width + 16 +  48, FlxG.height + 16 + 48, 0x33000000);
+		_smokeRect.scrollFactor.x = _smokeRect.scrollFactor.y = 0;
+		//add(_smokeRect);
 		
 		super.create();
 	}
@@ -95,8 +104,29 @@ class PlayState extends FlxState
 		grpDisplay.add(_player);
 		for (o in m.cityTiles.members)
 		{
-			if (o.alive && o.exists && o.visible && cast(o,CityTile).isOnScreen())
-				grpDisplay.add(o);
+			if (o.alive && o.exists && o.visible)
+			{
+				if (cast(o,CityTile).isOnScreen())
+					grpDisplay.add(o);
+			}
+		}
+		var smk:SmokeSpawner;
+		var added:Bool = false;
+		for (s in _grpSmokes.members)
+		{
+			added = false;
+			smk = cast(s, SmokeSpawner);				
+			if (smk.alive && smk.exists && smk.visible)
+			{
+				if (_smokeRect.overlaps(smk.parent,true))
+				{
+					added = true;
+					smk.on = true;
+					grpDisplay.add(smk);
+				}
+			}
+			if (!added)
+				smk.on = false;
 		}
 		grpDisplay.sort(zSort, FlxSort.ASCENDING);
 	}
@@ -122,17 +152,32 @@ class PlayState extends FlxState
 					grpDisplay.sort(zSort, FlxSort.ASCENDING);
 					
 					var sprTest:FlxSprite = new FlxSprite().makeGraphic(96, 96, FlxColor.BLACK);
-					sprTest.x = (m._mapTerrain.width / 2) - (sprTest.width / 2);
-					sprTest.y = (m._mapTerrain.height / 2) - (sprTest.height / 2);
+					
 					sprTest.moves = false;
 					sprTest.immovable = true;
-					//add(sprTest);
+					sprTest.scrollFactor.x = sprTest.scrollFactor.y = 0;
+					FlxSpriteUtil.screenCenter(sprTest);
+					add(sprTest);
+					sprTest.draw();
+					sprTest.update();
 					
+					for (c in m.cityTiles.members)
+					{
+						if (sprTest.overlaps(c, true))
+						{
+							//c.kill();
+							c.destroy();
+							//m.cityTiles. //.remove(c, true);
+							
+						}
+					}
 					
-					FlxG.collide(sprTest, m.cityTiles, initialSetupCollision);
+					//sprTest.overlaps(m.cityTiles, true);
+					
+					//sprTest.kill();
+					_player.x = sprTest.x + (sprTest.width / 2) - (_player.width / 2) - FlxG.camera.scroll.x;
+					_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
 					sprTest.kill();
-					_player.x = (m._mapTerrain.width / 2) - (_player.width / 2);
-					_player.y = (m._mapTerrain.height / 2) - (_player.height / 2);
 					
 					var _t:FlxTween = FlxTween.singleVar(_sprLoad, "alpha", 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
@@ -155,20 +200,42 @@ class PlayState extends FlxState
 	
 	private function initialSetupCollision(p:FlxSprite, c:CityTile):Void
 	{
-		c.kill();
+		
 	}
 	
 	private function playerTouchCityTile(p:Player, c:CityTile):Void
 	{
-		c.hurt(1);
+		if(!c.isDead)
+			c.hurt(1);	
 	}
 	
 	private function zSort(Order:Int, A:FlxBasic, B:FlxBasic):Int
 	{
 		var result:Int = 0;
+		var aName:String = Type.getClassName(Type.getClass(A));
+		var bName:String = Type.getClassName(Type.getClass(B));
+		var zA:Float = 0;
+		var zB:Float = 0;
 		
-		var zA:Float = Type.getClassName(Type.getClass(A)) == "ZEmitterExt" ? cast(A, ZEmitterExt).z : cast(A, DisplaySprite).z;
-		var zB:Float = Type.getClassName(Type.getClass(B)) == "ZEmitterExt" ? cast(B, ZEmitterExt).z : cast(B, DisplaySprite).z;
+		switch (aName)
+		{
+			case "ZEmitterExt":
+				zA = cast(A, ZEmitterExt).z;
+			case "SmokeSpawner":
+				zA = cast(A, SmokeSpawner).z;
+			default:
+				zA = cast(A, DisplaySprite).z;
+		}
+		switch (bName)
+		{
+			case "ZEmitterExt":
+				zB = cast(B, ZEmitterExt).z;
+			case "SmokeSpawner":
+				zB = cast(B, SmokeSpawner).z;
+			default:
+				zB = cast(B, DisplaySprite).z;
+		}
+		
 		if (zA < zB)
 			result = Order;
 		else if (zA > zB)
@@ -179,6 +246,12 @@ class PlayState extends FlxState
 	private function doneLoad(T:FlxTween):Void
 	{
 		_finished = true;
+	}
+	
+	public function createSmoke(X:Float, Y:Float, C:CityTile):Void
+	{
+		_grpSmokes.add(new SmokeSpawner(X, Y, C));
+		
 	}
 	
 	private function playerMovement():Void

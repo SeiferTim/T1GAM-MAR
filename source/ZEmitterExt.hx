@@ -16,6 +16,7 @@ class ZEmitterExt extends FlxEmitterExt
 	{
 		super(X, Y, Size);	
 		style = Style;
+		
 	}
 	
 }

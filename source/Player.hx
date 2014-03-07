@@ -18,4 +18,34 @@ class Player extends DisplaySprite
 		
 	}
 	
+	override public function update():Void 
+	{
+		
+		switch(facing)
+		{
+			case FlxObject.LEFT:
+				width = 44;
+				height = 24;
+				offset.x = 4;
+				offset.y = 7;
+			case FlxObject.RIGHT:
+				width = 44;
+				height = 24;
+				offset.x = 16;
+				offset.y = 7;
+			case FlxObject.DOWN:
+				width = 22;
+				height = 40;
+				offset.x = 18;
+				offset.y = 20;
+			case FlxObject.UP:
+				width = 22;
+				height = 40;
+				offset.x = 22;
+				offset.y = 4;
+		}
+		
+		super.update();
+	}
+	
 }
