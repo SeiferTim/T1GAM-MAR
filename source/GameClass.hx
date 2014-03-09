@@ -20,7 +20,7 @@ class GameClass extends FlxGame
 	 */
 	public function new()
 	{
-		Lib.current.stage.quality = StageQuality.LOW;
+		//Lib.current.stage.quality = StageQuality.LOW;
 		Reg.initGame();
 		
 		var stageWidth:Int = Lib.current.stage.stageWidth;

@@ -37,19 +37,16 @@ class CityTile extends DisplaySprite
 	
 	override public function update():Void 
 	{
-		//_onScreen = isOnScreen();
 		if (_hurtTimer > 0)
 			_hurtTimer -= FlxG.elapsed;
-		if (!_onScreen)
-			return;
 		super.update();
 	}
 	
 	override public function draw():Void
 	{
-		_onScreen = isOnScreen();
+		/*_onScreen = isOnScreen();
 		if (!_onScreen)
-			return;
+			return;*/
 		super.draw();
 	}
 	
@@ -75,11 +72,10 @@ class CityTile extends DisplaySprite
 		isDead = true;
 		animation.frameIndex = 0;
 		allowCollisions = FlxObject.NONE;
-		//_tmrSmoke = FlxTimer.start(.1, makeSmoke, 0);
 		Reg.playState.createSmoke(x + (width / 2), y + height, this);
 	}
 	
-	override public function get_z():Float
+	override private function get_z():Float
 	{
 		if (!isDead)
 			return y + height;
@@ -88,26 +84,8 @@ class CityTile extends DisplaySprite
 	}
 	override public function destroy():Void 
 	{
-		/*if (_tmrSmoke != null)
-		{	
-			_tmrSmoke.abort();
-			_tmrSmoke.destroy();
-			
-		}
-		_grpSmoke.kill();
-		_grpSmoke.destroy();*/
 		super.destroy();
 	}
 	
-	/*private function makeSmoke(T:FlxTimer):Void
-	{
-		var s:Smoke;
-		s = cast _grpSmoke.recycle(Smoke);
-		if (s != null)
-		{
-			s.reset(FlxRandom.floatRanged(0, width) - (s.width / 2), FlxRandom.floatRanged(0, height) - (s.height / 2));
-			add(s);
-		}
-	}*/
 	
 }

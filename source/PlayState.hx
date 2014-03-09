@@ -49,6 +49,8 @@ class PlayState extends FlxState
 	{
 		Reg.playState = this;
 		
+		FlxG.fixedTimestep = false;
+		
 		add(FlxGridOverlay.create(32, 32, -1, -1, false, true));
 		
 		grpDisplay = new FlxGroup();
@@ -121,12 +123,13 @@ class PlayState extends FlxState
 				if (_smokeRect.overlaps(smk.parent,true))
 				{
 					added = true;
-					smk.on = true;
+					//if (smk.bursted)
+					//	smk.on = true;
 					grpDisplay.add(smk);
 				}
 			}
-			if (!added)
-				smk.on = false;
+			//if (!added && smk.bursted)
+			//	smk.on = false;
 		}
 		grpDisplay.sort(zSort, FlxSort.ASCENDING);
 	}

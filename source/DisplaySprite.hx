@@ -34,4 +34,11 @@ class DisplaySprite extends FlxNestedSprite
 	
 	public var z(get_z, set_z):Float;
 	
+	override public function update():Void 
+	{
+		if (!isOnScreen())
+			return;
+		super.update();
+	}
+	
 }

@@ -12,8 +12,10 @@ class Player extends DisplaySprite
 		animation.add("d", [1], 1);
 		animation.add("u", [2], 1);
 		animation.play("lr");
-		height = 32;
-		width = 64;
+		height = 36;
+		width = 22;
+		offset.x = 20;
+		offset.y = 14;
 		facing = FlxObject.RIGHT;
 		
 	}
@@ -21,13 +23,13 @@ class Player extends DisplaySprite
 	override public function update():Void 
 	{
 		
-		switch(facing)
+		/*switch(facing)
 		{
 			case FlxObject.LEFT:
-				width = 44;
-				height = 24;
-				offset.x = 4;
-				offset.y = 7;
+				//width = 44;
+				//height = 24;
+				//offset.x = 4;
+				//offset.y = 7;
 			case FlxObject.RIGHT:
 				width = 44;
 				height = 24;
@@ -43,7 +45,7 @@ class Player extends DisplaySprite
 				height = 40;
 				offset.x = 22;
 				offset.y = 4;
-		}
+		}*/
 		
 		super.update();
 	}

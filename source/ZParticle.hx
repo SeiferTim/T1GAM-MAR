@@ -18,15 +18,12 @@ class ZParticle extends FlxParticle
 	
 	override public function update():Void 
 	{
-		
 		if (y >= _floor-1)
 		{
 			velocity.x = 0;
 			velocity.y = 0;
 			y = _floor-1;
 		}
-			
-		
 		super.update();
 	}
 	

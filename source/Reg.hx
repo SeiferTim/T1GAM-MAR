@@ -77,7 +77,7 @@ class Reg
 		
 		#if desktop
 		IsFullscreen = (save.data.fullscreen != null) ? save.data.fullscreen : true;
-		screensize = (save.data.screensize != null) ? save.data.screensize : SIZE_LARGE;
+		//screensize = (save.data.screensize != null) ? save.data.screensize : SIZE_LARGE;
 		#end
 
 		save.close();
