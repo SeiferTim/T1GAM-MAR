@@ -1,4 +1,6 @@
 package ;
+import flixel.FlxObject;
+import flixel.system.FlxCollisionType;
 
 
 class CityStreet extends DisplaySprite
@@ -9,6 +11,10 @@ class CityStreet extends DisplaySprite
 		super(X, Y);
 		loadGraphic("images/street.png", true, false, 32, 32);
 		animation.frameIndex = Frame;
+		allowCollisions = FlxObject.NONE;
+		collisionType = FlxCollisionType.NONE;
+		moves = false;
+		immovable = true;
 		
 	}
 	

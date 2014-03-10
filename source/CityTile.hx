@@ -44,9 +44,6 @@ class CityTile extends DisplaySprite
 	
 	override public function draw():Void
 	{
-		/*_onScreen = isOnScreen();
-		if (!_onScreen)
-			return;*/
 		super.draw();
 	}
 	
@@ -84,6 +81,7 @@ class CityTile extends DisplaySprite
 	}
 	override public function destroy():Void 
 	{
+		
 		super.destroy();
 	}
 	

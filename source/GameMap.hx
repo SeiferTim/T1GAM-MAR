@@ -77,25 +77,21 @@ class GameMap
 				if (cur < 35)
 				{
 					_terrainMap.push(1);
-					//_popData.setPixel32(nX*2, nY*2, 0x0);
 					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), 0x0);
 				}
 				else if (cur < 45)
 				{
 					_terrainMap.push(2);
-					//_popData.setPixel32(nX*2, nY*2, 0x0);
 					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), 0x0);
 				}
 				else if (cur < 65)
 				{
 					_terrainMap.push(3);
-					//_popData.setPixel32(nX*2, nY*2,FlxColorUtil.brighten(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.6,1)));
 					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.brighten(_popData.getPixel32(nX*2, nY*2),FlxRandom.floatRanged(.6,1)));
 				}
 				else if (cur < 150)
 				{
 					_terrainMap.push(4);
-					//_popData.setPixel32(nX*2, nY*2,FlxColorUtil.brighten(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.2,.4)));
 					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.brighten(_popData.getPixel32(nX*2, nY*2),FlxRandom.floatRanged(.2,.4)));
 				}
 				else if (cur < 210)
@@ -103,20 +99,16 @@ class GameMap
 					_terrainMap.push(5);
 					if (FlxRandom.chanceRoll())
 					{
-					//	_popData.setPixel32(nX*2, nY*2, FlxColorUtil.brighten(_popData.getPixel32(nX, nY), FlxRandom.floatRanged(0, .1)));
 						_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.brighten(_popData.getPixel32(nX*2, nY*2), FlxRandom.floatRanged(0, .1)));
 					}
 					else
 					{
-						//_popData.setPixel32(nX, nY, FlxColorUtil.darken(_popData.getPixel32(nX, nY), FlxRandom.floatRanged(0, .1)));
 						_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.darken(_popData.getPixel32(nX*2, nY*2), FlxRandom.floatRanged(0, .1)));
 					}
 				}
 				else
 				{
 					_terrainMap.push(6);
-					
-					//_popData.setPixel32(nX, nY,FlxColorUtil.darken(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.6,1)));
 					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.darken(_popData.getPixel32(nX*2, nY*2),FlxRandom.floatRanged(.6,1)));
 				}
 			}
@@ -128,11 +120,11 @@ class GameMap
 		_mapTerrain.loadMap(_terrainMap, "images/terrain.png", 64, 64, FlxTilemap.OFF, 0, 1, 1);
 		
 		cityTiles = new FlxGroup(_width * _height);
-		cityStreets = new FlxGroup();// Std.int(Math.ceil(_width * _height / 8)));
+		cityStreets = new FlxGroup();
 		
 		_whichTileRow = 0;
 		_whichTileCol = 0;
-		loopMax = _width * _height * 2 * 2;
+		loopMax = _popData.width * _popData.height;
 	
 		var pP:Int;
 		for (nX in 0..._popData.width)
@@ -140,7 +132,6 @@ class GameMap
 			for (nY in 0..._popData.height)
 			{
 				pP = FlxColorUtil.getRed(_popData.getPixel32(nX, nY));
-				//trace(Std.int(pP / 32) - 1);
 				_popMap.push(Std.int(pP / 32) - 1);
 			}
 		}
@@ -153,46 +144,48 @@ class GameMap
 	public function addCityTiles():Void
 	{
 				
-		
-		if (_sinceRoadCol == 9 && _sinceRoadRow == 9)
+		if ((_whichTileRow * _width * 2) +_whichTileCol <= _popMap.length)
 		{
-			if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
-				cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 2));
-			_sinceRoadCol = 0;
-		}
-		else if (_sinceRoadCol == 9)
-		{
-			if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
-				cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 0));
-			_sinceRoadCol = 0;
-		}
-		else if (_sinceRoadRow == 9)
-		{
-			if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
-				cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 1));
-			
-		}
-		else if (_sinceRoadCol % 2 == 1 && _sinceRoadRow % 2 == 1)
-		{
-			if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
-				cityTiles.add( new CityTile(_whichTileCol * 32, _whichTileRow * 32, _popMap[(_whichTileRow * _width * 2) +_whichTileCol]));
-		}
-		
-		_sinceRoadCol++;
-		_whichTileCol++;
-		if (_whichTileCol >= _width * 2)
-		{
-			_whichTileCol = 0;
-			_whichTileRow++;
-			_sinceRoadCol = 7;
-			if (_sinceRoadRow == 9)
+			if (_sinceRoadCol == 9 && _sinceRoadRow == 9)
 			{
-				_sinceRoadRow = 0;
+				if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 2));
+				_sinceRoadCol = 0;
 			}
-			//else
-			//{
-				_sinceRoadRow++;
-			//}
+			else if (_sinceRoadCol == 9)
+			{
+				if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 0));
+				_sinceRoadCol = 0;
+			}
+			else if (_sinceRoadRow == 9)
+			{
+				if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 1));
+				
+			}
+			else if (_sinceRoadCol % 2 == 1 && _sinceRoadRow % 2 == 1)
+			{
+				if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+					cityTiles.add( new CityTile(_whichTileCol * 32, _whichTileRow * 32, _popMap[(_whichTileRow * _width * 2) +_whichTileCol]));
+			}
+			
+			_sinceRoadCol++;
+			_whichTileCol++;
+			if (_whichTileCol >= _width * 2)
+			{
+				_whichTileCol = 0;
+				_whichTileRow++;
+				_sinceRoadCol = 7;
+				if (_sinceRoadRow == 9)
+				{
+					_sinceRoadRow = 0;
+				}
+				//else
+				//{
+					_sinceRoadRow++;
+				//}
+			}
 		}
 		
 	}
@@ -219,7 +212,7 @@ class GameMap
 	
 	function get_loopCounter():Int 
 	{
-		return (_whichTileRow * _width) +_whichTileCol;
+		return (_whichTileRow * _width * 2) +_whichTileCol;
 	}
 	
 	public var loopCounter(get_loopCounter, null):Int;

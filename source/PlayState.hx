@@ -14,6 +14,7 @@ import flixel.text.FlxText;
 import flixel.tile.FlxTilemap;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.ui.FlxBar;
 import flixel.ui.FlxButton;
 import flixel.util.FlxAngle;
 import flixel.util.FlxColor;
@@ -37,11 +38,15 @@ class PlayState extends FlxState
 	private var _player:Player;
 	private var _finished:Bool = false;
 	private var _sprLoad:FlxSprite;
-	private var _txtLoad:FlxText;
+	
+	private var _barLoad:FlxBar;
 	private var _startedTween:Bool = false;
 	public var grpDisplay:FlxGroup;
 	private var _grpSmokes:FlxGroup;
 	private var _smokeRect:FlxSprite;
+	
+	private var _grpHUD:FlxGroup;
+	private var _barEnergy:FlxBar;
 	
 	
 	
@@ -60,30 +65,34 @@ class PlayState extends FlxState
 		add(m._mapTerrain);
 		add(m.cityStreets);
 		add(grpDisplay);
-		//var s:FlxSprite = new FlxSprite();
-		//s.pixels = m._popData;
-		//s.dirty = true;
-		//add(s);
+		_grpHUD = new FlxGroup();
+		add(_grpHUD);
+		
 		
 		FlxG.worldBounds.set(0, 0, m._mapTerrain.width, m._mapTerrain.height);
 		
 		_player = new Player();
 		
-		
-		//grpDisplay.add(_player);
+		_barEnergy = new FlxBar(0, 0, FlxBar.FILL_LEFT_TO_RIGHT, 300, 16, _player, "energy", 0, 100, true);
 		
 		FlxG.camera.follow(_player, FlxCamera.STYLE_TOPDOWN);
 		FlxG.camera.setBounds(FlxG.worldBounds.x, FlxG.worldBounds.y, FlxG.worldBounds.width, FlxG.worldBounds.height);
 		
 		_sprLoad = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		_sprLoad.scrollFactor.x = _sprLoad.scrollFactor.y = 0;
 		add(_sprLoad);
-		_txtLoad = new FlxText(0, 0, 100, "Loading...");
-		FlxSpriteUtil.screenCenter(_txtLoad);
-		add(_txtLoad);
+		
+		//_txtLoad = new FlxText(0, 0, 100, "Loading...");
+		//FlxSpriteUtil.screenCenter(_txtLoad);
+		//add(_txtLoad);
+		
+		_barLoad = new FlxBar(0, 0, FlxBar.FILL_LEFT_TO_RIGHT, Std.int(FlxG.width / 2), 32, m, "loopCounter", 0, m.loopMax, true);
+		_barLoad.scrollFactor.x = _barLoad.scrollFactor.y = 0;
+		FlxSpriteUtil.screenCenter(_barLoad);
+		add(_barLoad);
 		
 		_smokeRect = new FlxSprite( -16, -16).makeGraphic(FlxG.width + 16 +  48, FlxG.height + 16 + 48, 0x33000000);
 		_smokeRect.scrollFactor.x = _smokeRect.scrollFactor.y = 0;
-		//add(_smokeRect);
 		
 		super.create();
 	}
@@ -128,13 +137,9 @@ class PlayState extends FlxState
 				if (_smokeRect.overlaps(smk.parent,true))
 				{
 					added = true;
-					//if (smk.bursted)
-					//	smk.on = true;
 					grpDisplay.add(smk);
 				}
 			}
-			//if (!added && smk.bursted)
-			//	smk.on = false;
 		}
 		grpDisplay.sort(zSort, FlxSort.ASCENDING);
 	}
@@ -150,7 +155,7 @@ class PlayState extends FlxState
 			if (!m.finished)
 			{
 				m.update();
-				_txtLoad.text = "Loading..." + Std.string(m.loopMax - m.loopCounter);
+				//_txtLoad.text = "Loading..." + Std.string(m.loopMax - m.loopCounter);
 			}
 			else
 			{
@@ -164,7 +169,8 @@ class PlayState extends FlxState
 					sprTest.moves = false;
 					sprTest.immovable = true;
 					sprTest.scrollFactor.x = sprTest.scrollFactor.y = 0;
-					FlxSpriteUtil.screenCenter(sprTest);
+					sprTest.x = (m._mapTerrain.width / 2) - (sprTest.width / 2);
+					sprTest.y = (m._mapTerrain.height / 2) - (sprTest.height / 2);
 					add(sprTest);
 					sprTest.draw();
 					sprTest.update();
@@ -173,23 +179,17 @@ class PlayState extends FlxState
 					{
 						if (sprTest.overlaps(c, true))
 						{
-							//c.kill();
-							c.destroy();
-							//m.cityTiles. //.remove(c, true);
-							
+							c.destroy();							
 						}
 					}
 					
-					//sprTest.overlaps(m.cityTiles, true);
-					
-					//sprTest.kill();
 					_player.x = sprTest.x + (sprTest.width / 2) - (_player.width / 2) - FlxG.camera.scroll.x;
 					_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
 					sprTest.kill();
 					
 					var _t:FlxTween = FlxTween.singleVar(_sprLoad, "alpha", 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
-				_txtLoad.alpha = _sprLoad.alpha;
+				_barLoad.alpha = _sprLoad.alpha;
 			}
 			
 		}
@@ -200,15 +200,7 @@ class PlayState extends FlxState
 			
 		}
 		
-		
-		
-		
 		super.update();
-	}
-	
-	private function initialSetupCollision(p:FlxSprite, c:CityTile):Void
-	{
-		
 	}
 	
 	private function playerTouchCityTile(p:Player, c:CityTile):Void
