@@ -58,7 +58,12 @@ class PlayState extends FlxState
 		
 		m = new GameMap(80, 80, this);
 		add(m._mapTerrain);
+		add(m.cityStreets);
 		add(grpDisplay);
+		//var s:FlxSprite = new FlxSprite();
+		//s.pixels = m._popData;
+		//s.dirty = true;
+		//add(s);
 		
 		FlxG.worldBounds.set(0, 0, m._mapTerrain.width, m._mapTerrain.height);
 		

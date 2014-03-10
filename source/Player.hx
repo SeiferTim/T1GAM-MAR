@@ -12,10 +12,10 @@ class Player extends DisplaySprite
 		animation.add("d", [1], 1);
 		animation.add("u", [2], 1);
 		animation.play("lr");
-		height = 36;
+		height = 22;
 		width = 22;
 		offset.x = 20;
-		offset.y = 14;
+		offset.y = 28;
 		facing = FlxObject.RIGHT;
 		
 	}

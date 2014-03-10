@@ -3,6 +3,7 @@ import flash.display.BitmapData;
 import flash.display.InterpolationMethod;
 import flash.filters.BlurFilter;
 import flash.geom.Point;
+import flash.geom.Rectangle;
 import flixel.addons.util.FlxAsyncLoop;
 import flixel.FlxBasic;
 import flixel.group.FlxGroup;
@@ -25,6 +26,7 @@ class GameMap
 	public var _mapTerrain:FlxTilemap;
 
 	public var cityTiles:FlxGroup;
+	public var cityStreets:FlxGroup;
 	private var _tileLoop:FlxAsyncLoop;
 	public var finished(default, null):Bool = false;
 	
@@ -32,6 +34,10 @@ class GameMap
 	private var _whichTileCol:Int;
 	public var loopMax(default, null):Int;
 	private var _parent:PlayState;
+	private var _sinceRoadCol:Int = 7;
+	private var _sinceRoadRow:Int = 7;
+	
+	//public var _popData:BitmapData;
 
 	public function new(Width:Int, Height:Int, Parent:PlayState ) 
 	{
@@ -50,7 +56,7 @@ class GameMap
 		_height = Height;
 		_terrainData = new BitmapData(_width, _height, true, 0x0);
 		_terrainData.perlinNoise(50, 50, 8, seed, false, false, 1, true);
-		_popData = new BitmapData(_width, _height, true, 0x0);
+		_popData = new BitmapData(_width*2, _height*2, true, 0x0);
 		_popMap = new Array<Int>();
 		_terrainMap = new Array<Int>();
 		_popData.perlinNoise(256, 256, 8, FlxRandom.int(), false, false, 1, true);
@@ -71,35 +77,47 @@ class GameMap
 				if (cur < 35)
 				{
 					_terrainMap.push(1);
-					_popData.setPixel32(nX, nY, 0x0);
+					//_popData.setPixel32(nX*2, nY*2, 0x0);
+					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), 0x0);
 				}
 				else if (cur < 45)
 				{
 					_terrainMap.push(2);
-					_popData.setPixel32(nX, nY, 0x0);
+					//_popData.setPixel32(nX*2, nY*2, 0x0);
+					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), 0x0);
 				}
 				else if (cur < 65)
 				{
 					_terrainMap.push(3);
-					_popData.setPixel32(nX, nY,FlxColorUtil.brighten(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.6,1)));
+					//_popData.setPixel32(nX*2, nY*2,FlxColorUtil.brighten(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.6,1)));
+					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.brighten(_popData.getPixel32(nX*2, nY*2),FlxRandom.floatRanged(.6,1)));
 				}
 				else if (cur < 150)
 				{
 					_terrainMap.push(4);
-					_popData.setPixel32(nX, nY,FlxColorUtil.brighten(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.2,.4)));
+					//_popData.setPixel32(nX*2, nY*2,FlxColorUtil.brighten(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.2,.4)));
+					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.brighten(_popData.getPixel32(nX*2, nY*2),FlxRandom.floatRanged(.2,.4)));
 				}
 				else if (cur < 210)
 				{
 					_terrainMap.push(5);
 					if (FlxRandom.chanceRoll())
-						_popData.setPixel32(nX, nY, FlxColorUtil.brighten(_popData.getPixel32(nX, nY), FlxRandom.floatRanged(0, .1)));
+					{
+					//	_popData.setPixel32(nX*2, nY*2, FlxColorUtil.brighten(_popData.getPixel32(nX, nY), FlxRandom.floatRanged(0, .1)));
+						_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.brighten(_popData.getPixel32(nX*2, nY*2), FlxRandom.floatRanged(0, .1)));
+					}
 					else
-						_popData.setPixel32(nX, nY, FlxColorUtil.darken(_popData.getPixel32(nX, nY), FlxRandom.floatRanged(0, .1)));
+					{
+						//_popData.setPixel32(nX, nY, FlxColorUtil.darken(_popData.getPixel32(nX, nY), FlxRandom.floatRanged(0, .1)));
+						_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.darken(_popData.getPixel32(nX*2, nY*2), FlxRandom.floatRanged(0, .1)));
+					}
 				}
 				else
 				{
 					_terrainMap.push(6);
-					_popData.setPixel32(nX, nY,FlxColorUtil.darken(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.6,1)));
+					
+					//_popData.setPixel32(nX, nY,FlxColorUtil.darken(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.6,1)));
+					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.darken(_popData.getPixel32(nX*2, nY*2),FlxRandom.floatRanged(.6,1)));
 				}
 			}
 		}
@@ -110,10 +128,11 @@ class GameMap
 		_mapTerrain.loadMap(_terrainMap, "images/terrain.png", 64, 64, FlxTilemap.OFF, 0, 1, 1);
 		
 		cityTiles = new FlxGroup(_width * _height);
+		cityStreets = new FlxGroup();// Std.int(Math.ceil(_width * _height / 8)));
 		
 		_whichTileRow = 0;
 		_whichTileCol = 0;
-		loopMax = _width * _height;
+		loopMax = _width * _height * 2 * 2;
 	
 		var pP:Int;
 		for (nX in 0..._popData.width)
@@ -121,6 +140,7 @@ class GameMap
 			for (nY in 0..._popData.height)
 			{
 				pP = FlxColorUtil.getRed(_popData.getPixel32(nX, nY));
+				//trace(Std.int(pP / 32) - 1);
 				_popMap.push(Std.int(pP / 32) - 1);
 			}
 		}
@@ -132,14 +152,49 @@ class GameMap
 	
 	public function addCityTiles():Void
 	{
-		if (_popMap[(_whichTileRow * _width) +_whichTileCol] > 0)		
-			cityTiles.add( new CityTile(_whichTileCol * 64, _whichTileRow * 64,_popMap[(_whichTileRow * _width) +_whichTileCol]));
+				
+		
+		if (_sinceRoadCol == 9 && _sinceRoadRow == 9)
+		{
+			if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+				cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 2));
+			_sinceRoadCol = 0;
+		}
+		else if (_sinceRoadCol == 9)
+		{
+			if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+				cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 0));
+			_sinceRoadCol = 0;
+		}
+		else if (_sinceRoadRow == 9)
+		{
+			if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+				cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 1));
+			
+		}
+		else if (_sinceRoadCol % 2 == 1 && _sinceRoadRow % 2 == 1)
+		{
+			if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+				cityTiles.add( new CityTile(_whichTileCol * 32, _whichTileRow * 32, _popMap[(_whichTileRow * _width * 2) +_whichTileCol]));
+		}
+		
+		_sinceRoadCol++;
 		_whichTileCol++;
-		if (_whichTileCol >= _width)
+		if (_whichTileCol >= _width * 2)
 		{
 			_whichTileCol = 0;
 			_whichTileRow++;
+			_sinceRoadCol = 7;
+			if (_sinceRoadRow == 9)
+			{
+				_sinceRoadRow = 0;
+			}
+			//else
+			//{
+				_sinceRoadRow++;
+			//}
 		}
+		
 	}
 	
 	public function update():Void
