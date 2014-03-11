@@ -34,7 +34,7 @@ class SmokeSpawner extends ZEmitterExt
 		if (_explode && !bursted && !on)
 		{
 			bursted = true;
-			start(false, 10, .66);
+			start(false, 10, .33);
 			_quantity = 10;
 			_t = FlxTimer.start(.66, reduceQuant, 0);
 		}

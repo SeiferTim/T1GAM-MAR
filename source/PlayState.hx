@@ -187,7 +187,7 @@ class PlayState extends FlxState
 					_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
 					sprTest.kill();
 					
-					var _t:FlxTween = FlxTween.singleVar(_sprLoad, "alpha", 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
+					var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
 				_barLoad.alpha = _sprLoad.alpha;
 			}
@@ -195,9 +195,9 @@ class PlayState extends FlxState
 		}
 		else
 		{
-			playerMovement();
-			FlxG.collide(_player, grpDisplay, playerTouchCityTile);
 			
+			FlxG.collide(_player, grpDisplay, playerTouchCityTile);
+			playerMovement();
 		}
 		
 		super.update();

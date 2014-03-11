@@ -55,13 +55,13 @@ class CityTile extends DisplaySprite
 		
 		super.hurt(Damage);
 		if (!isDead)
-			var _t:FlxTween = FlxTween.singleVar(this, "y", y - 2, .1, { type:FlxTween.ONESHOT, complete:doneBounceUp } );
+			var _t:FlxTween = FlxTween.tween(this, {y: y - 2}, .1, { type:FlxTween.ONESHOT, complete:doneBounceUp } );
 		
 	}
 	
 	private function doneBounceUp(T:FlxTween):Void
 	{
-		var _t:FlxTween = FlxTween.singleVar(this, "y", y+2, .1, { type:FlxTween.ONESHOT } );
+		var _t:FlxTween = FlxTween.tween(this, {y: y + 2}, .1, { type:FlxTween.ONESHOT } );
 	}
 	
 	override public function kill():Void

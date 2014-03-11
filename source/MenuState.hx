@@ -92,7 +92,7 @@ class MenuState extends FlxState
 	
 	private function doneStartWait(T:FlxTimer):Void
 	{
-		var _lTween:FlxTween = FlxTween.singleVar(_sprBonesLight, "alpha", 1, .1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneLightOne } );
+		var _lTween:FlxTween = FlxTween.tween(_sprBonesLight, {alpha:1}, .1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneLightOne } );
 	}
 	
 	private function goPlay():Void
@@ -104,46 +104,46 @@ class MenuState extends FlxState
 	private function doneLightOne(T:FlxTween):Void
 	{
 		
-		var _lTween:FlxTween = FlxTween.singleVar(_sprBonesLight, "alpha", 0, .1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneLightTwo } );
+		var _lTween:FlxTween = FlxTween.tween(_sprBonesLight, {alpha:0}, .1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneLightTwo } );
 	}
 	
 	
 	private function doneLightTwo(T:FlxTween):Void
 	{
 		FlxG.sound.play("sounds/thunder.wav");
-		var _lTween:FlxTween = FlxTween.singleVar(_sprBonesLight, "alpha", 1, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneLightThree } );
+		var _lTween:FlxTween = FlxTween.tween(_sprBonesLight, {alpha:1}, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneLightThree } );
 	}
 	
 	
 	private function doneLightThree(T:FlxTween):Void
 	{
 		
-		var _lTween:FlxTween = FlxTween.singleVar(_sprBonesLight, "alpha", 0, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneLightFour } );
+		var _lTween:FlxTween = FlxTween.tween(_sprBonesLight, {alpha:0}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneLightFour } );
 	}
 	
 	private function doneLightFour(T:FlxTween):Void 
 	{
-		var gTween:FlxTween = FlxTween.singleVar(_sprGhost01, "alpha", .8, 1, { type:FlxTween.ONESHOT, ease:FlxEase.bounceIn, complete:doneGhostIn } );
+		var gTween:FlxTween = FlxTween.tween(_sprGhost01,{alpha:.8}, 1, { type:FlxTween.ONESHOT, ease:FlxEase.bounceIn, complete:doneGhostIn } );
 	}
 	
 	private function doneGhostIn(T:FlxTween):Void
 	{
-		var gTween:FlxTween = FlxTween.singleVar(_sprGhost01, "alpha", 0, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostOneOut } );
+		var gTween:FlxTween = FlxTween.tween(_sprGhost01, {alpha:0}, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostOneOut } );
 	}
 	
 	private function doneGhostOneOut(T:FlxTween):Void
 	{
-		var gTween:FlxTween = FlxTween.singleVar(_sprGhost02, "alpha", .8, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostTwoIn } );
+		var gTween:FlxTween = FlxTween.tween(_sprGhost02, {alpha:.8}, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostTwoIn } );
 	}
 	
 	private function doneGhostTwoIn(T:FlxTween):Void
 	{
 
-		var gTween:FlxTween = FlxTween.singleVar(_sprGhost02, "alpha", 0, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostTwoOut } );
+		var gTween:FlxTween = FlxTween.tween(_sprGhost02, {alpha:0}, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostTwoOut } );
 		if (!_shownText)
 		{
 			_shownText = true;
-			var tTween:FlxTween = FlxTween.singleVar(_textMain, "alpha", 1, 1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+			var tTween:FlxTween = FlxTween.tween(_textMain, {alpha:1}, 1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 			FlxTimer.start(.33, startSubTextIn);
 			FlxTimer.start(.66, startButtonIn);
 		}
@@ -153,17 +153,17 @@ class MenuState extends FlxState
 	private function doneGhostTwoOut(T:FlxTween):Void
 	{
 
-		var gTween:FlxTween = FlxTween.singleVar(_sprGhost03, "alpha", .8, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostThreeIn } );
+		var gTween:FlxTween = FlxTween.tween(_sprGhost03, {alpha:.8}, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostThreeIn } );
 		
 	}
 	
 	private function startSubTextIn(T:FlxTimer):Void
 	{
-		var tTween:FlxTween = FlxTween.singleVar(_textSub, "alpha", 1, 1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		var tTween:FlxTween = FlxTween.tween(_textSub, {alpha:1}, 1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 	}
 	private function startButtonIn(T:FlxTimer):Void
 	{
-		var tTween:FlxTween = FlxTween.singleVar(_btnPlay, "alpha", 1, 1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		var tTween:FlxTween = FlxTween.tween(_btnPlay, {alpha:1}, 1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 	}
 	
 	
@@ -184,7 +184,7 @@ class MenuState extends FlxState
 	
 	private function doneGhostFinalIn(T:FlxTimer):Void
 	{
-		var gTween:FlxTween = FlxTween.singleVar(_sprGhost03, "alpha", 0,2,{ type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostOut } );
+		var gTween:FlxTween = FlxTween.tween(_sprGhost03, {alpha:0},2,{ type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostOut } );
 	}
 	
 	private function doneGhostOut(T:FlxTween):Void
