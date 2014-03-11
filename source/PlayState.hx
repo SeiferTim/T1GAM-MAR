@@ -9,6 +9,7 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
+import flixel.group.FlxTypedGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKeyboard;
 import flixel.text.FlxText;
 import flixel.tile.FlxTilemap;
@@ -30,8 +31,7 @@ import flixel.util.FlxSpriteUtil;
 class PlayState extends FlxState
 {
 
-	
-	 private static inline var SPEED:Int = 200;
+	private static inline var SPEED:Int = 200;
 	private static inline var FRICTION:Float = .8;
 	
 	private var m:GameMap;
@@ -48,7 +48,8 @@ class PlayState extends FlxState
 	private var _grpHUD:FlxGroup;
 	private var _barEnergy:FlxBar;
 	
-	
+	private var _grpTanks:FlxTypedGroup<Tank>;
+	private var _eDistances:Array<Int>;
 	
 	override public function create():Void
 	{
@@ -60,16 +61,16 @@ class PlayState extends FlxState
 		
 		grpDisplay = new FlxGroup();
 		_grpSmokes = new FlxGroup();
+		_grpTanks = new FlxTypedGroup<Tank>();
 		
-		m = new GameMap(80, 80, this);
-		add(m._mapTerrain);
+		m = new GameMap(80, 80);
+		add(m.mapTerrain);
 		add(m.cityStreets);
 		add(grpDisplay);
 		_grpHUD = new FlxGroup();
 		add(_grpHUD);
 		
-		
-		FlxG.worldBounds.set(0, 0, m._mapTerrain.width, m._mapTerrain.height);
+		FlxG.worldBounds.set(0, 0, m.mapTerrain.width, m.mapTerrain.height);
 		
 		_player = new Player();
 		
@@ -81,10 +82,6 @@ class PlayState extends FlxState
 		_sprLoad = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		_sprLoad.scrollFactor.x = _sprLoad.scrollFactor.y = 0;
 		add(_sprLoad);
-		
-		//_txtLoad = new FlxText(0, 0, 100, "Loading...");
-		//FlxSpriteUtil.screenCenter(_txtLoad);
-		//add(_txtLoad);
 		
 		_barLoad = new FlxBar(0, 0, FlxBar.FILL_LEFT_TO_RIGHT, Std.int(FlxG.width / 2), 32, m, "loopCounter", 0, m.loopMax, true);
 		_barLoad.scrollFactor.x = _barLoad.scrollFactor.y = 0;
@@ -127,18 +124,26 @@ class PlayState extends FlxState
 			}
 		}
 		var smk:SmokeSpawner;
-		var added:Bool = false;
+		//var added:Bool = false;
 		for (s in _grpSmokes.members)
 		{
-			added = false;
+			//added = false;
 			smk = cast(s, SmokeSpawner);				
 			if (smk.alive && smk.exists && smk.visible)
 			{
 				if (_smokeRect.overlaps(smk.parent,true))
 				{
-					added = true;
+					//added = true;
 					grpDisplay.add(smk);
 				}
+			}
+		}
+		for (t in _grpTanks.members)
+		{
+			if (t.alive && t.exists && t.visible)
+			{
+				if (cast(t, Tank).isOnScreen())
+					grpDisplay.add(t);
 			}
 		}
 		grpDisplay.sort(zSort, FlxSort.ASCENDING);
@@ -169,8 +174,8 @@ class PlayState extends FlxState
 					sprTest.moves = false;
 					sprTest.immovable = true;
 					sprTest.scrollFactor.x = sprTest.scrollFactor.y = 0;
-					sprTest.x = (m._mapTerrain.width / 2) - (sprTest.width / 2);
-					sprTest.y = (m._mapTerrain.height / 2) - (sprTest.height / 2);
+					sprTest.x = (m.mapTerrain.width / 2) - (sprTest.width / 2);
+					sprTest.y = (m.mapTerrain.height / 2) - (sprTest.height / 2);
 					add(sprTest);
 					sprTest.draw();
 					sprTest.update();
@@ -179,7 +184,8 @@ class PlayState extends FlxState
 					{
 						if (sprTest.overlaps(c, true))
 						{
-							c.destroy();							
+							//c.destroy();							
+							c.kill();
 						}
 					}
 					
@@ -187,6 +193,12 @@ class PlayState extends FlxState
 					_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
 					sprTest.kill();
 					
+					//add(m.mapPathing);
+					
+					var t:Tank = new Tank(_player.x + 128, _player.y + 128);
+					
+					_grpTanks.add(t);
+					calculateDistances();
 					var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
 				_barLoad.alpha = _sprLoad.alpha;
@@ -198,6 +210,7 @@ class PlayState extends FlxState
 			
 			FlxG.collide(_player, grpDisplay, playerTouchCityTile);
 			playerMovement();
+			enemyMovement();
 		}
 		
 		super.update();
@@ -251,11 +264,110 @@ class PlayState extends FlxState
 	public function createSmoke(X:Float, Y:Float, C:CityTile):Void
 	{
 		_grpSmokes.add(new SmokeSpawner(X, Y, C));
+		m.mapPathing.setTile(Math.floor(X/32)-1, Math.floor(Y/32)-2, 0);
+		m.mapPathing.setTile(Math.floor(X/32), Math.floor(Y/32)-2, 0);
+		m.mapPathing.setTile(Math.floor(X/32)-1, Math.floor(Y/32)-1, 0);
+		m.mapPathing.setTile(Math.floor(X/32), Math.floor(Y/32)-1, 0);
 		
+		
+	}
+	
+	private function enemyMovement():Void
+	{
+		
+		
+/*		var maxDistance:Int = 1;
+		for (dist in _eDistances)
+		{
+			if (dist > maxDistance)
+				maxDistance = dist;
+		}
+		
+		for (i in 0..._eDistances.length)
+		{
+			var disti:Int = 0;
+			if (_eDistances[i] < 0)
+				disti = 1000;
+			else 
+				disti = Std.int(999 * (_eDistances[i] / maxDistance));
+			
+		}*/
+		
+		//FlxG.collide(m.mapPathing, _grpTanks);
+		
+		var tank:Tank;
+		for (basic in _grpTanks.members)
+		{
+			tank = cast basic;
+			
+			if (!tank.moving)
+			{
+				var tx:Int = Std.int((tank.x - tank.offset.x) / 32);
+				var ty:Int = Std.int((tank.y - tank.offset.y) / 32);
+				var bestX:Int = 0;
+				var bestY:Int = 0;
+				var bestDist:Float = Math.POSITIVE_INFINITY;
+				var neighbors:Array<Array<Float>> = [[999, 999, 999], [999, 999, 999], [999, 999, 999]];
+				for (yy in -1...2)
+				{
+					for (xx in -1...2)
+					{
+						var theX:Int = tx + xx;
+						var theY:Int = ty + yy;
+						
+						
+						if (theX >= 0 && theY < m.mapPathing.widthInTiles)
+						{
+							if (theY >= 0 && theY < m.mapPathing.heightInTiles)
+							{
+								if (xx == 0 || yy == 0)
+								{
+									//trace(_eDistances);
+									var distance:Float = _eDistances[theY * m.mapPathing.widthInTiles + theX];
+									neighbors[yy + 1][xx + 1] = distance;
+									if (distance > 0)
+									{
+										if (distance < bestDist || (bestX == 0 && bestY == 0))
+										{
+											bestDist = distance;
+											bestX = xx;
+											bestY = yy;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				if (!(bestX == 0 && bestY == 0))
+				{
+					tank.moveTo((tx * 32) + (bestX * 32) + tank.offset.x, (ty * 32) + (bestY * 32) + tank.offset.y, Tank.SPEED);
+				}
+			}
+			
+		}
+	}
+	
+	private function calculateDistances():Void
+	{
+		var pM:FlxPoint = _player.getMidpoint();
+		var startX:Int = Std.int(((pM.y/32) * m.mapPathing.widthInTiles) + (pM.x/32));
+		var endX:Int = 0;
+		if (startX == endX)
+			endX = 1;
+		//trace(startX + " " + (m.mapPathing.widthInTiles * m.mapPathing.heightInTiles));
+		var tmpDistances = m.mapPathing.computePathDistance(startX, endX, true, false);
+		if (tmpDistances == null)
+			return;
+		else
+			_eDistances = tmpDistances;
 	}
 	
 	private function playerMovement():Void
 	{
+		var startX:Float = _player.x;
+		var startY:Float = _player.y;
 		#if (!FLX_NO_KEYBOARD)
 		var _pressingUp:Bool = false;
 		var _pressingDown:Bool = false;
@@ -329,5 +441,7 @@ class PlayState extends FlxState
 			if (Math.abs(_player.velocity.x) > 1)
 				_player.velocity.x *= FRICTION;
 		#end
+		if (startX != _player.x || startY != _player.y)
+			calculateDistances();
 	}
 }

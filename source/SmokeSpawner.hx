@@ -23,10 +23,7 @@ class SmokeSpawner extends ZEmitterExt
 		particleDrag.x = 0;
 		particleDrag.y = 0;
 		makeParticles("images/smoke.png", 20, 0, true, FlxObject.NONE);
-		//start(false, 60, .66);
-		start(true,100,.1,20,100);
-		//_t = FlxTimer.start(.33, reduceQuant, 0);
-		
+		start(true,100,.1,20,100);		
 	}
 	
 	override public function update():Void
@@ -39,19 +36,14 @@ class SmokeSpawner extends ZEmitterExt
 			_t = FlxTimer.start(.66, reduceQuant, 0);
 		}
 		super.update();
-		
 	}
 	
 	private function reduceQuant(T:FlxTimer):Void
 	{
-		//trace(_quantity + " " + frequency);
 		if (bursted)
 		{
 			if (frequency < .8)
 			{
-				//if (_quantity > 1)
-				//	_quantity--;
-				
 				if (frequency < .8)
 					frequency += FlxG.elapsed * .2;
 			}
