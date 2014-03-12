@@ -53,10 +53,7 @@ class PlayState extends FlxState
 	
 	private var _calcTmr:Float;
 	
-	public var distmap:FlxTilemap;
 	
-	
-	private var _tank:Tank;
 	
 	override public function create():Void
 	{
@@ -202,38 +199,15 @@ class PlayState extends FlxState
 					_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
 					sprTest.kill();
 					
-					//add(m.mapPathing);
-					
-					_tank = new Tank(_player.x + 128, _player.y + 128);
-					FlxG.watch.add(_tank, "x");
-					FlxG.watch.add(_tank, "y");
+					var _tank:Tank = new Tank(_player.x + 128, _player.y + 128);
+					_grpTanks.add(_tank);
+					_tank = new Tank(_player.x - 128, _player.y - 128);
+					_grpTanks.add(_tank);
+					_tank = new Tank(_player.x - 128, _player.y + 128);
+					_grpTanks.add(_tank);
+					_tank = new Tank(_player.x + 128, _player.y - 128);
 					_grpTanks.add(_tank);
 					
-					
-					
-					distmap = new FlxTilemap();
-					distmap.scale.set(32, 32);
-					var tw:Int = m.mapPathing.widthInTiles;
-					var th:Int = m.mapPathing.heightInTiles;
-					var arr:Array<Int> = [];
-					var arr2:Array<Int> = [];
-					for (ww in 0...tw)
-					{
-						for (hh in 0...th)
-						{
-							arr.push(0);
-							arr2.push(0);
-						}
-					}
-					
-					distmap.widthInTiles = tw;
-					distmap.heightInTiles = th;
-					
-					distmap.loadMap(arr2, "images/heat-opaque.png", 1, 1);
-					//
-					
-					add(m.mapPathing);
-					add(distmap);
 					calculateDistances();
 					var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
@@ -245,6 +219,7 @@ class PlayState extends FlxState
 		{
 			
 			FlxG.collide(_player, m.cityTiles, playerTouchCityTile);
+			FlxG.collide(_grpTanks, _grpTanks);
 			playerMovement();
 			if (_calcTmr > 0)
 			{
@@ -321,7 +296,7 @@ class PlayState extends FlxState
 	{
 		
 		//FlxG.collide(m.mapPathing, _grpTanks);
-		
+		var pM:FlxPoint = FlxPoint.get(_player.x + (_player.width / 2), _player.y + _player.height);
 		var tank:Tank;
 		for (basic in _grpTanks.members)
 		{
@@ -329,38 +304,42 @@ class PlayState extends FlxState
 			
 			if (!tank.moving)
 			{
-				var tx:Int = Std.int((tank.x - tank.offset.x) / 32);
-				var ty:Int = Std.int((tank.y - tank.offset.y) / 32);
-				//trace(tx + ", " + ty);
-				var bestX:Int = 0;
-				var bestY:Int = 0;
-				var bestDist:Float = Math.POSITIVE_INFINITY;
-				var neighbors:Array<Array<Float>> = [[999, 999, 999], [999, 999, 999], [999, 999, 999]];
-				for (yy in -1...2)
+				//trace(Math.abs(FlxMath.getDistance(FlxPoint.get(tank.x + (tank.width/2), tank.y+(tank.height/2)), pM)));
+				if (Math.abs(FlxMath.getDistance(FlxPoint.get(tank.x + (tank.width/2), tank.y+(tank.height/2)), pM)) >= 128)
 				{
-					for (xx in -1...2)
+					var tx:Int = Std.int((tank.x - tank.offset.x) / 32);
+					var ty:Int = Std.int((tank.y - tank.offset.y) / 32);
+					//trace(tx + ", " + ty);
+					var bestX:Int = 0;
+					var bestY:Int = 0;
+					var bestDist:Float = Math.POSITIVE_INFINITY;
+					var neighbors:Array<Array<Float>> = [[999, 999, 999], [999, 999, 999], [999, 999, 999]];
+					for (yy in -1...2)
 					{
-						var theX:Int = tx + xx;
-						var theY:Int = ty + yy;
-						
-						
-						if (theX >= 0 && theY < distmap.widthInTiles)
+						for (xx in -1...2)
 						{
-							if (theY >= 0 && theY < distmap.heightInTiles)
+							var theX:Int = tx + xx;
+							var theY:Int = ty + yy;
+							
+							
+							if (theX >= 0 && theY <	m.mapPathing.widthInTiles)
 							{
-								if (xx == 0 || yy == 0)
+								if (theY >= 0 && theY < m.mapPathing.heightInTiles)
 								{
-									if (_eDistances != null)
+									if (xx == 0 || yy == 0)
 									{
-										var distance:Float = _eDistances[theY * distmap.widthInTiles + theX];
-										neighbors[yy + 1][xx + 1] = distance;
-										if (distance > 0)
+										if (_eDistances != null)
 										{
-											if (distance < bestDist || (bestX == 0 && bestY == 0))
+											var distance:Float = _eDistances[theY * m.mapPathing.widthInTiles + theX];
+											neighbors[yy + 1][xx + 1] = distance;
+											if (distance > 0)
 											{
-												bestDist = distance;
-												bestX = xx;
-												bestY = yy;
+												if (distance < bestDist || (bestX == 0 && bestY == 0))
+												{
+													bestDist = distance;
+													bestX = xx;
+													bestY = yy;
+												}
 											}
 										}
 									}
@@ -368,11 +347,18 @@ class PlayState extends FlxState
 							}
 						}
 					}
+					
+					if (!(bestX == 0 && bestY == 0))
+					{
+						
+							tank.moveTo((tx * 32) + (bestX * 32) + tank.offset.x, (ty * 32) + (bestY * 32) + tank.offset.y, Tank.SPEED);
+						
+						
+					}
 				}
-				
-				if (!(bestX == 0 && bestY == 0))
+				else
 				{
-					tank.moveTo((tx * 32) + (bestX * 32) + tank.offset.x, (ty * 32) + (bestY * 32) + tank.offset.y, Tank.SPEED);
+					tank.stopMoving();
 				}
 			}
 			
@@ -381,8 +367,12 @@ class PlayState extends FlxState
 	
 	private function calculateDistances():Void
 	{
-		var pM:FlxPoint = FlxPoint.get(Math.floor(_player.x + (_player.width / 2)), Math.floor(_player.y + _player.height));
-		var startX:Int = Std.int(((pM.y/32) * m.mapPathing.widthInTiles) + (pM.x/32));
+		var pM:FlxPoint = FlxPoint.get(_player.x + (_player.width / 2), _player.y + _player.height);
+		pM.x -= (pM.x % 32);
+		pM.y -= (pM.y % 32);
+		pM.x /= 32;
+		pM.y /= 32;
+		var startX:Int = Std.int((pM.y * m.mapPathing.widthInTiles)+ pM.x);
 		var endX:Int = 0;
 		if (startX == endX)
 			endX = 1;
@@ -393,25 +383,7 @@ class PlayState extends FlxState
 		else
 			_eDistances = tmpDistances;
 			
-		// turn off when no heatmap
-		var maxDistance:Int = 1;
-		for (dist in _eDistances) 
-		{
-			if (dist > maxDistance)
-				maxDistance = dist;
-		}
-
-		for (i in 0..._eDistances.length) 
-		{
-			var disti:Int = 0;
-			if (_eDistances[i] < 0) 
-				disti = 1000;
-			else
-				disti = Std.int(999 * (_eDistances[i] / maxDistance));
-
-			distmap.setTileByIndex(i, disti, true);
-		}
-		//
+		
 	}
 	
 	private function playerMovement():Void

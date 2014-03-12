@@ -16,14 +16,17 @@ class Tank extends DisplaySprite
 	public function new(X:Float=0, Y:Float=0) 
 	{
 		super(X, Y);
-		makeGraphic(8, 8, FlxColor.WHITE);
+		//makeGraphic(28, 28, FlxColor.FOREST_GREEN);
+		loadGraphic("images/tank.png", false, false, 28, 28);
+		offset.x = 2;
+		offset.y = 2;
 		_dest = FlxPoint.get();
 		_dest.x = X;
 		_dest.y = Y;
 		_vec = FlxVector.get();
 		setPosition(X, Y);
-		calcZ = false;
-		z = 80 * 64 * 2;
+		/*calcZ = false;
+		z = 80 * 64 * 2;*/
 	}
 	
 	public function moveTo(X:Float, Y:Float, Speed:Float):Void
@@ -42,6 +45,11 @@ class Tank extends DisplaySprite
 	private function finishMoveTo():Void
 	{
 		setPosition(_dest.x, _dest.y);
+		stopMoving();
+	}
+	
+	public function stopMoving():Void
+	{
 		velocity.set();
 		moving = false;
 	}
