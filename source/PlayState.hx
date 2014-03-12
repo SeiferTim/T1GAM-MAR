@@ -229,7 +229,7 @@ class PlayState extends FlxState
 					distmap.widthInTiles = tw;
 					distmap.heightInTiles = th;
 					
-					distmap.loadMap(arr2, "images/heat.png", 1, 1);
+					distmap.loadMap(arr2, "images/heat-opaque.png", 1, 1);
 					//
 					
 					add(m.mapPathing);
@@ -320,24 +320,6 @@ class PlayState extends FlxState
 	private function enemyMovement():Void
 	{
 		
-		
-/*		var maxDistance:Int = 1;
-		for (dist in _eDistances)
-		{
-			if (dist > maxDistance)
-				maxDistance = dist;
-		}
-		
-		for (i in 0..._eDistances.length)
-		{
-			var disti:Int = 0;
-			if (_eDistances[i] < 0)
-				disti = 1000;
-			else 
-				disti = Std.int(999 * (_eDistances[i] / maxDistance));
-			
-		}*/
-		
 		//FlxG.collide(m.mapPathing, _grpTanks);
 		
 		var tank:Tank;
@@ -410,6 +392,8 @@ class PlayState extends FlxState
 			return;
 		else
 			_eDistances = tmpDistances;
+			
+		// turn off when no heatmap
 		var maxDistance:Int = 1;
 		for (dist in _eDistances) 
 		{
@@ -427,6 +411,7 @@ class PlayState extends FlxState
 
 			distmap.setTileByIndex(i, disti, true);
 		}
+		//
 	}
 	
 	private function playerMovement():Void
