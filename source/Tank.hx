@@ -6,7 +6,7 @@ import flixel.util.FlxVector;
 class Tank extends DisplaySprite
 {
 
-	public static inline var SPEED:Int = 20;
+	public static inline var SPEED:Int = 80;
 	
 	public var moving:Bool = false;
 	
@@ -18,11 +18,17 @@ class Tank extends DisplaySprite
 		super(X, Y);
 		makeGraphic(8, 8, FlxColor.WHITE);
 		_dest = FlxPoint.get();
+		_dest.x = X;
+		_dest.y = Y;
 		_vec = FlxVector.get();
+		setPosition(X, Y);
+		calcZ = false;
+		z = 80 * 64 * 2;
 	}
 	
 	public function moveTo(X:Float, Y:Float, Speed:Float):Void
 	{
+		//trace("moveto: " + X + ", " + Y);
 		moving = true;
 		_dest.set(X, Y);
 		_vec.x = _dest.x - x;
@@ -30,7 +36,7 @@ class Tank extends DisplaySprite
 		_vec.normalize();
 		velocity.x = _vec.x * Speed;
 		velocity.y = _vec.y * Speed;
-		z = 80 * 64 * 2;
+		
 	}
 	
 	private function finishMoveTo():Void

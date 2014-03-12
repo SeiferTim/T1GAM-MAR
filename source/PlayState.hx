@@ -51,6 +51,13 @@ class PlayState extends FlxState
 	private var _grpTanks:FlxTypedGroup<Tank>;
 	private var _eDistances:Array<Int>;
 	
+	private var _calcTmr:Float;
+	
+	public var distmap:FlxTilemap;
+	
+	
+	private var _tank:Tank;
+	
 	override public function create():Void
 	{
 		Reg.playState = this;
@@ -90,6 +97,8 @@ class PlayState extends FlxState
 		
 		_smokeRect = new FlxSprite( -16, -16).makeGraphic(FlxG.width + 16 +  48, FlxG.height + 16 + 48, 0x33000000);
 		_smokeRect.scrollFactor.x = _smokeRect.scrollFactor.y = 0;
+		
+		_calcTmr = .33;
 		
 		super.create();
 	}
@@ -195,9 +204,36 @@ class PlayState extends FlxState
 					
 					//add(m.mapPathing);
 					
-					var t:Tank = new Tank(_player.x + 128, _player.y + 128);
+					_tank = new Tank(_player.x + 128, _player.y + 128);
+					FlxG.watch.add(_tank, "x");
+					FlxG.watch.add(_tank, "y");
+					_grpTanks.add(_tank);
 					
-					_grpTanks.add(t);
+					
+					
+					distmap = new FlxTilemap();
+					distmap.scale.set(32, 32);
+					var tw:Int = m.mapPathing.widthInTiles;
+					var th:Int = m.mapPathing.heightInTiles;
+					var arr:Array<Int> = [];
+					var arr2:Array<Int> = [];
+					for (ww in 0...tw)
+					{
+						for (hh in 0...th)
+						{
+							arr.push(0);
+							arr2.push(0);
+						}
+					}
+					
+					distmap.widthInTiles = tw;
+					distmap.heightInTiles = th;
+					
+					distmap.loadMap(arr2, "images/heat.png", 1, 1);
+					//
+					
+					add(m.mapPathing);
+					add(distmap);
 					calculateDistances();
 					var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
@@ -208,8 +244,17 @@ class PlayState extends FlxState
 		else
 		{
 			
-			FlxG.collide(_player, grpDisplay, playerTouchCityTile);
+			FlxG.collide(_player, m.cityTiles, playerTouchCityTile);
 			playerMovement();
+			if (_calcTmr > 0)
+			{
+				_calcTmr -= FlxG.elapsed;
+			}
+			else
+			{
+				_calcTmr = .33;
+				calculateDistances();
+			}
 			enemyMovement();
 		}
 		
@@ -304,6 +349,7 @@ class PlayState extends FlxState
 			{
 				var tx:Int = Std.int((tank.x - tank.offset.x) / 32);
 				var ty:Int = Std.int((tank.y - tank.offset.y) / 32);
+				//trace(tx + ", " + ty);
 				var bestX:Int = 0;
 				var bestY:Int = 0;
 				var bestDist:Float = Math.POSITIVE_INFINITY;
@@ -316,22 +362,24 @@ class PlayState extends FlxState
 						var theY:Int = ty + yy;
 						
 						
-						if (theX >= 0 && theY < m.mapPathing.widthInTiles)
+						if (theX >= 0 && theY < distmap.widthInTiles)
 						{
-							if (theY >= 0 && theY < m.mapPathing.heightInTiles)
+							if (theY >= 0 && theY < distmap.heightInTiles)
 							{
 								if (xx == 0 || yy == 0)
 								{
-									//trace(_eDistances);
-									var distance:Float = _eDistances[theY * m.mapPathing.widthInTiles + theX];
-									neighbors[yy + 1][xx + 1] = distance;
-									if (distance > 0)
+									if (_eDistances != null)
 									{
-										if (distance < bestDist || (bestX == 0 && bestY == 0))
+										var distance:Float = _eDistances[theY * distmap.widthInTiles + theX];
+										neighbors[yy + 1][xx + 1] = distance;
+										if (distance > 0)
 										{
-											bestDist = distance;
-											bestX = xx;
-											bestY = yy;
+											if (distance < bestDist || (bestX == 0 && bestY == 0))
+											{
+												bestDist = distance;
+												bestX = xx;
+												bestY = yy;
+											}
 										}
 									}
 								}
@@ -351,7 +399,7 @@ class PlayState extends FlxState
 	
 	private function calculateDistances():Void
 	{
-		var pM:FlxPoint = _player.getMidpoint();
+		var pM:FlxPoint = FlxPoint.get(Math.floor(_player.x + (_player.width / 2)), Math.floor(_player.y + _player.height));
 		var startX:Int = Std.int(((pM.y/32) * m.mapPathing.widthInTiles) + (pM.x/32));
 		var endX:Int = 0;
 		if (startX == endX)
@@ -362,12 +410,27 @@ class PlayState extends FlxState
 			return;
 		else
 			_eDistances = tmpDistances;
+		var maxDistance:Int = 1;
+		for (dist in _eDistances) 
+		{
+			if (dist > maxDistance)
+				maxDistance = dist;
+		}
+
+		for (i in 0..._eDistances.length) 
+		{
+			var disti:Int = 0;
+			if (_eDistances[i] < 0) 
+				disti = 1000;
+			else
+				disti = Std.int(999 * (_eDistances[i] / maxDistance));
+
+			distmap.setTileByIndex(i, disti, true);
+		}
 	}
 	
 	private function playerMovement():Void
 	{
-		var startX:Float = _player.x;
-		var startY:Float = _player.y;
 		#if (!FLX_NO_KEYBOARD)
 		var _pressingUp:Bool = false;
 		var _pressingDown:Bool = false;
@@ -441,7 +504,6 @@ class PlayState extends FlxState
 			if (Math.abs(_player.velocity.x) > 1)
 				_player.velocity.x *= FRICTION;
 		#end
-		if (startX != _player.x || startY != _player.y)
-			calculateDistances();
+		
 	}
 }

@@ -197,7 +197,7 @@ class GameMap
 			}
 			else
 			{
-				_popMap[(_whichTileRow * _width * 2) +_whichTileCol] = 0;
+				//_popMap[(_whichTileRow * _width * 2) +_whichTileCol] = 0;
 			}
 			
 			_sinceRoadCol++;
