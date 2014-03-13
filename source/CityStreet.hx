@@ -15,7 +15,13 @@ class CityStreet extends DisplaySprite
 		collisionType = FlxCollisionType.NONE;
 		moves = false;
 		immovable = true;
+		calcOnScreen = false;
+		onScreen = true;
 		
+	}
+	override public function update():Void 
+	{
+		//(super.update();
 	}
 	
 }

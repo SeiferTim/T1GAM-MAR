@@ -1,4 +1,5 @@
 package ;
+import flixel.util.FlxAngle;
 import flixel.util.FlxColor;
 import flixel.util.FlxPoint;
 import flixel.util.FlxVector;
@@ -12,12 +13,16 @@ class Tank extends DisplaySprite
 	
 	private var _dest:FlxPoint;
 	private var _vec:FlxVector;
+	private var _turret:DisplaySprite;
+	private var _target:FlxPoint;
 	
 	public function new(X:Float=0, Y:Float=0) 
 	{
 		super(X, Y);
-		//makeGraphic(28, 28, FlxColor.FOREST_GREEN);
+		calcOnScreen = false;
 		loadGraphic("images/tank.png", false, false, 28, 28);
+		width = 24;
+		height = 24;
 		offset.x = 2;
 		offset.y = 2;
 		_dest = FlxPoint.get();
@@ -25,8 +30,12 @@ class Tank extends DisplaySprite
 		_dest.y = Y;
 		_vec = FlxVector.get();
 		setPosition(X, Y);
-		/*calcZ = false;
-		z = 80 * 64 * 2;*/
+		_turret = new DisplaySprite(0, 0);
+		_turret.loadGraphic("images/tank-turret.png", false, false, 48, 48);
+		_turret.relativeX = (width / 2) - (_turret.width/2);
+		_turret.relativeY = (height / 2) - (_turret.width/2);
+		add(_turret);
+		_target = FlxPoint.get();
 	}
 	
 	public function moveTo(X:Float, Y:Float, Speed:Float):Void
@@ -63,6 +72,9 @@ class Tank extends DisplaySprite
 		_vec.y = _dest.y - y;
 		if (signOf(oldx) != signOf(_vec.x) || signOf(oldy) != signOf(_vec.y))
 			finishMoveTo();
+		var a:Float = FlxAngle.getAngle(getMidpoint(), _target) - 90;
+		_turret.relativeAngle = a;
+		
 	}
 	
 	private function signOf(f:Float):Int
@@ -71,6 +83,12 @@ class Tank extends DisplaySprite
 			return -1;
 		else
 			return 1;
+	}
+	
+	public function setTarget(X:Float, Y:Float):Void
+	{
+		_target.x = X;
+		_target.y = Y;
 	}
 	
 }

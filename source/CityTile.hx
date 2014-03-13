@@ -39,13 +39,13 @@ class CityTile extends DisplaySprite
 	{
 		if (_hurtTimer > 0)
 			_hurtTimer -= FlxG.elapsed;
-		super.update();
+		//super.update();
 	}
 	
-	override public function draw():Void
+	/*override public function draw():Void
 	{
 		super.draw();
-	}
+	}*/
 	
 	override public function hurt(Damage:Float):Void 
 	{

@@ -21,6 +21,7 @@ import flixel.util.FlxAngle;
 import flixel.util.FlxColor;
 import flixel.util.FlxMath;
 import flixel.util.FlxPoint;
+import flixel.util.FlxRandom;
 import flixel.util.FlxRect;
 import flixel.util.FlxSort;
 import flixel.util.FlxSpriteUtil;
@@ -43,13 +44,16 @@ class PlayState extends FlxState
 	private var _startedTween:Bool = false;
 	public var grpDisplay:FlxGroup;
 	private var _grpSmokes:FlxGroup;
-	private var _smokeRect:FlxSprite;
+	private var _boundRect:FlxSprite;
 	
 	private var _grpHUD:FlxGroup;
 	private var _barEnergy:FlxBar;
 	
 	private var _grpTanks:FlxTypedGroup<Tank>;
 	private var _eDistances:Array<Int>;
+	private var _grpExplosions:FlxTypedGroup<Explosion>;
+	
+	private var _distMap:FlxTilemap;
 	
 	private var _calcTmr:Float;
 	
@@ -66,8 +70,9 @@ class PlayState extends FlxState
 		grpDisplay = new FlxGroup();
 		_grpSmokes = new FlxGroup();
 		_grpTanks = new FlxTypedGroup<Tank>();
+		_grpExplosions = new FlxTypedGroup<Explosion>();
 		
-		m = new GameMap(80, 80);
+		m = new GameMap(160, 160);
 		add(m.mapTerrain);
 		add(m.cityStreets);
 		add(grpDisplay);
@@ -79,6 +84,10 @@ class PlayState extends FlxState
 		_player = new Player();
 		
 		_barEnergy = new FlxBar(0, 0, FlxBar.FILL_LEFT_TO_RIGHT, 300, 16, _player, "energy", 0, 100, true);
+		_barEnergy.scrollFactor.x = _barEnergy.scrollFactor.y = 0;
+		FlxSpriteUtil.screenCenter(_barEnergy, true, false);
+		_barEnergy.y = 16;
+		_grpHUD.add(_barEnergy);
 		
 		FlxG.camera.follow(_player, FlxCamera.STYLE_TOPDOWN);
 		FlxG.camera.setBounds(FlxG.worldBounds.x, FlxG.worldBounds.y, FlxG.worldBounds.width, FlxG.worldBounds.height);
@@ -92,10 +101,13 @@ class PlayState extends FlxState
 		FlxSpriteUtil.screenCenter(_barLoad);
 		add(_barLoad);
 		
-		_smokeRect = new FlxSprite( -16, -16).makeGraphic(FlxG.width + 16 +  48, FlxG.height + 16 + 48, 0x33000000);
-		_smokeRect.scrollFactor.x = _smokeRect.scrollFactor.y = 0;
+		_boundRect = new FlxSprite( -64,-64).makeGraphic(FlxG.width + 128, FlxG.height + 128, 0x33000000);
+		_boundRect.scrollFactor.x = _boundRect.scrollFactor.y = 0;
 		
 		_calcTmr = .33;
+		
+		//tilemap.scale.set(16, 16);
+		
 		
 		super.create();
 	}
@@ -130,28 +142,42 @@ class PlayState extends FlxState
 			}
 		}
 		var smk:SmokeSpawner;
-		//var added:Bool = false;
 		for (s in _grpSmokes.members)
 		{
-			//added = false;
 			smk = cast(s, SmokeSpawner);				
 			if (smk.alive && smk.exists && smk.visible)
 			{
-				if (_smokeRect.overlaps(smk.parent,true))
+				if (_boundRect.overlaps(smk.parent,true))
 				{
-					//added = true;
 					grpDisplay.add(smk);
 				}
 			}
 		}
+		var tank:Tank;
 		for (t in _grpTanks.members)
 		{
-			if (t.alive && t.exists && t.visible)
+			tank = cast t;
+			if (tank.alive && tank.exists && tank.visible &&  _boundRect.overlaps(tank,true))
 			{
-				if (cast(t, Tank).isOnScreen())
-					grpDisplay.add(t);
+				tank.onScreen = true;
+				grpDisplay.add(tank);
 			}
+			else
+				tank.onScreen = false;
 		}
+		var exp:Explosion;
+		for (e in _grpExplosions.members)
+		{
+			exp = cast e;
+			if (exp.alive && exp.exists && exp.visible && _boundRect.overlaps(exp,true))
+			{
+				exp.onScreen = true;
+				grpDisplay.add(exp);
+			}
+			else
+				exp.onScreen = false;
+		}
+		
 		grpDisplay.sort(zSort, FlxSort.ASCENDING);
 	}
 	
@@ -208,7 +234,45 @@ class PlayState extends FlxState
 					_tank = new Tank(_player.x + 128, _player.y - 128);
 					_grpTanks.add(_tank);
 					
+					
+					
+					//FlxG.collide(_grpTanks, m.mapPathing);
+					
+					
+					
+					FlxG.sound.playMusic("game-music", 1, true);
+					
+					//add(m.mapPathing);
+					
+					_distMap = new FlxTilemap();
+					_distMap.scale.set(2, 2);
+
+					var tw:Int = Std.int(m.mapPathing.widthInTiles);
+					var th:Int = Std.int(m.mapPathing.heightInTiles);
+
+					var arr:Array<Int> = [];
+					//var arr2:Array<Int> = [];
+					for (ww in 0...tw)
+					{
+						for (hh in 0...th)
+						{
+							arr.push(0);
+							//arr2.push(0);
+						}
+					}
+
+					//tilemap.widthInTiles = tw;
+					//tilemap.heightInTiles = th;
+					_distMap.widthInTiles = tw;
+					_distMap.heightInTiles = th;
+
+					//tilemap.loadMap(arr, "assets/images/tileset.png", 1, 1);
+					_distMap.loadMap(arr, "images/heat-opaque.png", 1, 1);
+					_distMap.scrollFactor.x = _distMap.scrollFactor.y = 0;
+					//add(_distMap);
+					
 					calculateDistances();
+					
 					var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
 				_barLoad.alpha = _sprLoad.alpha;
@@ -239,7 +303,11 @@ class PlayState extends FlxState
 	private function playerTouchCityTile(p:Player, c:CityTile):Void
 	{
 		if(!c.isDead)
-			c.hurt(1);	
+			c.hurt(1);
+		if (c.isDead)
+		{
+			_player.energy += c.tier * 2;
+		}
 	}
 	
 	private function zSort(Order:Int, A:FlxBasic, B:FlxBasic):Int
@@ -256,6 +324,8 @@ class PlayState extends FlxState
 				zA = cast(A, ZEmitterExt).z;
 			case "SmokeSpawner":
 				zA = cast(A, SmokeSpawner).z;
+			case "Explosion":
+				zA = cast(A, Explosion).z;
 			default:
 				zA = cast(A, DisplaySprite).z;
 		}
@@ -265,6 +335,8 @@ class PlayState extends FlxState
 				zB = cast(B, ZEmitterExt).z;
 			case "SmokeSpawner":
 				zB = cast(B, SmokeSpawner).z;
+			case "Explosion":
+				zB = cast(B, Explosion).z;
 			default:
 				zB = cast(B, DisplaySprite).z;
 		}
@@ -287,7 +359,17 @@ class PlayState extends FlxState
 		m.mapPathing.setTile(Math.floor(X/32)-1, Math.floor(Y/32)-2, 0);
 		m.mapPathing.setTile(Math.floor(X/32), Math.floor(Y/32)-2, 0);
 		m.mapPathing.setTile(Math.floor(X/32)-1, Math.floor(Y/32)-1, 0);
-		m.mapPathing.setTile(Math.floor(X/32), Math.floor(Y/32)-1, 0);
+		m.mapPathing.setTile(Math.floor(X / 32), Math.floor(Y / 32) - 1, 0);
+		var e:Explosion;
+		for (i in 0...FlxRandom.intRanged(4, 8))
+		{
+			e = cast _grpExplosions.recycle(Explosion);
+			if (e != null)
+			{
+				e.reset(FlxRandom.floatRanged(X - 32 - 16, X + 32 - 16), FlxRandom.floatRanged(Y - 64 - 16, Y - 16));
+				//_grpExplosions.add(e);
+			}
+		}
 		
 		
 	}
@@ -301,11 +383,12 @@ class PlayState extends FlxState
 		for (basic in _grpTanks.members)
 		{
 			tank = cast basic;
+			tank.setTarget(pM.x, pM.y);
 			
 			if (!tank.moving)
 			{
 				//trace(Math.abs(FlxMath.getDistance(FlxPoint.get(tank.x + (tank.width/2), tank.y+(tank.height/2)), pM)));
-				if (Math.abs(FlxMath.getDistance(FlxPoint.get(tank.x + (tank.width/2), tank.y+(tank.height/2)), pM)) >= 128)
+				if (Math.abs(FlxMath.getDistance(FlxPoint.get(tank.x + (tank.width/2), tank.y+(tank.height/2)), pM)) >= 64)
 				{
 					var tx:Int = Std.int((tank.x - tank.offset.x) / 32);
 					var ty:Int = Std.int((tank.y - tank.offset.y) / 32);
@@ -373,16 +456,36 @@ class PlayState extends FlxState
 		pM.x /= 32;
 		pM.y /= 32;
 		var startX:Int = Std.int((pM.y * m.mapPathing.widthInTiles)+ pM.x);
-		var endX:Int = 0;
-		if (startX == endX)
-			endX = 1;
+		var endX:Int = startX+1;
+		//if (startX == endX)
+		//	endX = 1;
+		
 		//trace(startX + " " + (m.mapPathing.widthInTiles * m.mapPathing.heightInTiles));
-		var tmpDistances = m.mapPathing.computePathDistance(startX, endX, true, false);
+		var tmpDistances = m.mapPathing.computePathDistance(startX, startX, true, false);
 		if (tmpDistances == null)
-			return;
+		{
+			//return;
+		}
 		else
 			_eDistances = tmpDistances;
-			
+		
+		var maxDistance:Int = 1;
+		for (dist in _eDistances) 
+		{
+			if (dist > maxDistance)
+				maxDistance = dist;
+		}
+
+		for (i in 0..._eDistances.length) 
+		{
+			var disti:Int = 0;
+			if (_eDistances[i] < 0) 
+				disti = 1000;
+			else
+				disti = Std.int(999 * (_eDistances[i] / maxDistance));
+
+			_distMap.setTileByIndex(i, disti, true);
+		}
 		
 	}
 	

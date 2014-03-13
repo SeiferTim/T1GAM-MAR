@@ -22,8 +22,8 @@ class SmokeSpawner extends ZEmitterExt
 		setAlpha(0, 0, 0, 0);
 		particleDrag.x = 0;
 		particleDrag.y = 0;
-		makeParticles("images/smoke.png", 20, 0, true, FlxObject.NONE);
-		start(true,100,.1,20,100);		
+		makeParticles("images/smoke.png", 100, 0, true, FlxObject.NONE);
+		start(true,100,.1,30,100);		
 	}
 	
 	override public function update():Void
@@ -31,8 +31,9 @@ class SmokeSpawner extends ZEmitterExt
 		if (_explode && !bursted && !on)
 		{
 			bursted = true;
-			start(false, 10, .33);
-			_quantity = 10;
+//			_quantity = 10;
+			start(false, 100, .2,0);
+			
 			_t = FlxTimer.start(.66, reduceQuant, 0);
 		}
 		super.update();
@@ -42,13 +43,20 @@ class SmokeSpawner extends ZEmitterExt
 	{
 		if (bursted)
 		{
-			if (frequency < .8)
+			if (frequency < 1)
 			{
-				if (frequency < .8)
-					frequency += FlxG.elapsed * .2;
+				//if (frequency < .8)
+				frequency += FlxG.elapsed * .2;
 			}
 			else
+			{
+				
 				T.abort();
+				_quantity = 1;
+				_waitForKill = true;
+				//on = false;
+				//kill();
+			}
 		}
 	}
 	

@@ -6,6 +6,8 @@ class DisplaySprite extends FlxNestedSprite
 {
 
 	private var _z:Float = 0;
+	public var calcOnScreen:Bool;
+	public var onScreen:Bool;
 	
 	/**
 	 * If the system should calculate Z or not
@@ -36,8 +38,14 @@ class DisplaySprite extends FlxNestedSprite
 	
 	override public function update():Void 
 	{
-		if (!isOnScreen())
+		if (calcOnScreen)
+		{
+			onScreen = isOnScreen();
+		}
+		if (!onScreen)
+		{
 			return;
+		}
 		super.update();
 	}
 	

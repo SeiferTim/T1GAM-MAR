@@ -1,9 +1,12 @@
 package ;
+import flixel.FlxG;
 import flixel.FlxObject;
 
 class Player extends DisplaySprite
 {
 
+	private var _energy:Float;
+	
 	public function new(X:Float=0, Y:Float=0) 
 	{
 		super(X, Y);
@@ -17,37 +20,31 @@ class Player extends DisplaySprite
 		offset.x = 20;
 		offset.y = 28;
 		facing = FlxObject.RIGHT;
+		calcOnScreen = false;
+		onScreen = true;
+		energy = 100;
 		
 	}
 	
 	override public function update():Void 
 	{
-		
-		/*switch(facing)
-		{
-			case FlxObject.LEFT:
-				//width = 44;
-				//height = 24;
-				//offset.x = 4;
-				//offset.y = 7;
-			case FlxObject.RIGHT:
-				width = 44;
-				height = 24;
-				offset.x = 16;
-				offset.y = 7;
-			case FlxObject.DOWN:
-				width = 22;
-				height = 40;
-				offset.x = 18;
-				offset.y = 20;
-			case FlxObject.UP:
-				width = 22;
-				height = 40;
-				offset.x = 22;
-				offset.y = 4;
-		}*/
-		
+
+		energy -= FlxG.elapsed*4;
 		super.update();
 	}
+	
+	function get_energy():Float 
+	{
+		return _energy;
+	}
+	
+	function set_energy(value:Float):Float 
+	{
+		if (value > 100)
+			value = 100;
+		return _energy = value;
+	}
+	
+	public var energy(get_energy, set_energy):Float;
 	
 }

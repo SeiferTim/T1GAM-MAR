@@ -31,6 +31,8 @@ class GameMap
 	private var _width:Int;
 	private var _height:Int;
 	private var _popMap:Array<Int>;
+	private var _pathMap:Array<Int>;
+	private var _roadMap:Array<Int>;
 	private var _tileLoop:FlxAsyncLoop;
 	private var _whichTileRow:Int;
 	private var _whichTileCol:Int;
@@ -53,16 +55,17 @@ class GameMap
 		_width = Width;
 		_height = Height;
 		_terrainData = new BitmapData(_width, _height, true, 0x0);
-		_terrainData.perlinNoise(50, 50, 8, seed, false, false, 1, true);
-		_popData = new BitmapData(_width*2, _height*2, true, 0x0);
+		_terrainData.perlinNoise(_width, _height, 4, seed, false, false, 1, true);
+		_popData = new BitmapData(_width, _height, true, 0x0);
 		_popMap = new Array<Int>();
+		_pathMap = new Array<Int>();
 		_terrainMap = new Array<Int>();
-		_popData.perlinNoise(256, 256, 8, FlxRandom.int(), false, false, 1, true);
+		_popData.perlinNoise(_width, _height, 8, FlxRandom.int(), false, false, 1, true);
 		
 		for (i in 0...8)
 		{
 			b = new BitmapData(_width, _height, true, 0x0);
-			b.perlinNoise(50, 50,i*2, seed, false, false, 1, true);
+			b.perlinNoise(_width, _height,i*2, seed, false, false, 1, true);
 			
 			FlxBitmapUtil.merge(b, b.rect, _terrainData, new Point(), 100, 100, 100, 100);
 		}
@@ -75,39 +78,40 @@ class GameMap
 				if (cur < 35)
 				{
 					_terrainMap.push(1);
-					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), 0x0);
+					_popData.setPixel32(nX, nY, 0xff000000);
+					
 				}
 				else if (cur < 45)
 				{
 					_terrainMap.push(2);
-					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), 0x0);
+					_popData.setPixel32(nX, nY, 0xff110000);
 				}
 				else if (cur < 65)
 				{
 					_terrainMap.push(3);
-					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.brighten(_popData.getPixel32(nX*2, nY*2),FlxRandom.floatRanged(.6,1)));
+					_popData.setPixel32(nX, nY, FlxColorUtil.brighten(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.6,1)));
 				}
 				else if (cur < 150)
 				{
 					_terrainMap.push(4);
-					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.brighten(_popData.getPixel32(nX*2, nY*2),FlxRandom.floatRanged(.2,.4)));
+					_popData.setPixel32(nX, nY, FlxColorUtil.brighten(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.2,.4)));
 				}
 				else if (cur < 210)
 				{
 					_terrainMap.push(5);
 					if (FlxRandom.chanceRoll())
 					{
-						_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.brighten(_popData.getPixel32(nX*2, nY*2), FlxRandom.floatRanged(0, .1)));
+						_popData.setPixel32(nX, nY, FlxColorUtil.brighten(_popData.getPixel32(nX, nY), FlxRandom.floatRanged(0, .1)));
 					}
 					else
 					{
-						_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.darken(_popData.getPixel32(nX*2, nY*2), FlxRandom.floatRanged(0, .1)));
+						_popData.setPixel32(nX, nY, FlxColorUtil.darken(_popData.getPixel32(nX, nY), FlxRandom.floatRanged(0, .1)));
 					}
 				}
 				else
 				{
 					_terrainMap.push(6);
-					_popData.fillRect(new Rectangle(nX * 2, nY * 2, 2, 2), FlxColorUtil.darken(_popData.getPixel32(nX*2, nY*2),FlxRandom.floatRanged(.6,1)));
+					_popData.setPixel32(nX, nY, FlxColorUtil.darken(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.6,1)));
 				}
 			}
 		}
@@ -115,28 +119,40 @@ class GameMap
 		mapTerrain = new FlxTilemap();
 		mapTerrain.widthInTiles = _width;
 		mapTerrain.heightInTiles = _height;
-		mapTerrain.loadMap(_terrainMap, "images/terrain.png", 64, 64, FlxTilemap.OFF, 0, 1, 1);
+		mapTerrain.loadMap(_terrainMap, "images/terrain.png", 32, 32, FlxTilemap.OFF, 0, 1, 1);
 		
 		cityTiles = new FlxGroup(_width * _height);
 		cityStreets = new FlxGroup();
 		
 		_whichTileRow = 0;
 		_whichTileCol = 0;
-		loopMax = _popData.width * _popData.height;
-	
+		// _popData.width * _popData.height;
+		_roadMap = new Array<Int>();
 		var pP:Int;
 		for (nX in 0..._popData.width)
 		{
 			for (nY in 0..._popData.height)
 			{
 				pP = FlxColorUtil.getRed(_popData.getPixel32(nX, nY));
+				
 				_popMap.push(Std.int(pP / 32) - 1);
+				if (pP == 0)
+				{
+					_pathMap.push(1);
+				}
+				else
+				{
+					_pathMap.push(0);
+				}
+				_roadMap.push(0);
 			}
 		}
 		
 		mapPathing = new FlxTilemap();
-		mapPathing.widthInTiles = _width * 2;
-		mapPathing.heightInTiles = _width * 2;
+		mapPathing.widthInTiles = _width;
+		mapPathing.heightInTiles = _height;
+		loopMax = _popMap.length;
+		
 		
 		
 		
@@ -148,61 +164,100 @@ class GameMap
 	
 	public function addCityTiles():Void
 	{
-				
-		if ((_whichTileRow * _width * 2) +_whichTileCol <= _popMap.length)
+		var blockAvg:Float;
+		var waterCount:Int;
+		var touchedWater:Bool = false;
+		
+		
+		if ((_whichTileRow * _width) +_whichTileCol <= _popMap.length)
 		{
+			
 			if (_sinceRoadCol == 9 && _sinceRoadRow == 9)
 			{
-				if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+				if ((_pathMap[(_whichTileRow * _width) +_whichTileCol-1] == 0 || _pathMap[(_whichTileRow * _width) +_whichTileCol+1] == 0) && (_pathMap[((_whichTileRow+1) * _width) +_whichTileCol] ==0 || _pathMap[((_whichTileRow-1) * _width) + _whichTileCol] == 0)) 
 				{
 					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 2));
+					_pathMap[(_whichTileRow * _width) +_whichTileCol] = 0;
+					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 2;
 				}
-				_popMap[(_whichTileRow * _width * 2) +_whichTileCol] = 0;
+				else if (_pathMap[(_whichTileRow * _width) +_whichTileCol - 1] == 0 || _pathMap[(_whichTileRow * _width) +_whichTileCol + 1] == 0)
+				{
+					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 1));
+					_pathMap[(_whichTileRow * _width) +_whichTileCol] = 0;
+					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
+				}
+				else if (_pathMap[((_whichTileRow + 1) * _width) +_whichTileCol] == 0 || _pathMap[((_whichTileRow - 1) * _width) + _whichTileCol] == 0)
+				{
+					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 0));
+					_pathMap[(_whichTileRow * _width) +_whichTileCol] = 0;
+					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
+				}
+				else
+				{
+					//_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
+				}
+				//touchedWater = false;
+				
+				_popMap[(_whichTileRow * _width) +_whichTileCol] = 0;
 				_sinceRoadCol = 0;
 			}
 			else if (_sinceRoadCol == 9)
 			{
-				if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+				if (_whichTileRow == 0 || (_roadMap[((_whichTileRow - 1) * _width) + _whichTileCol] != 0 && (_pathMap[(_whichTileRow * _width) + _whichTileCol] == 0 || _roadMap[((_whichTileRow - 1) * _width) + _whichTileCol] == 1))) 
 				{
 					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 0));
+					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
+					_pathMap[(_whichTileRow * _width) + _whichTileCol] = 0;
 				}
-				_popMap[(_whichTileRow * _width * 2) +_whichTileCol] = 0;
+				_popMap[(_whichTileRow * _width) +_whichTileCol] = 0;
+			
 				_sinceRoadCol = 0;
 			}
 			else if (_sinceRoadRow == 9)
-			{
-				if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+			{				
+				if (_whichTileCol == 0 || (_roadMap[((_whichTileRow) * _width) + _whichTileCol-1] != 0 && (_pathMap[(_whichTileRow * _width) + _whichTileCol] == 0 || _roadMap[((_whichTileRow) * _width) + _whichTileCol-1] == 1))) 
 				{
 					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 1));
+					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
+					_pathMap[(_whichTileRow * _width) + _whichTileCol] = 0;
 				}
-				_popMap[(_whichTileRow * _width * 2) +_whichTileCol] = 0;
+				_popMap[(_whichTileRow * _width) +_whichTileCol] = 0;
 			}
 			else if (_sinceRoadCol % 2 == 1 && _sinceRoadRow % 2 == 1)
 			{
-				if (_popMap[(_whichTileRow * _width * 2) +_whichTileCol] > 0)
+				blockAvg = ( _popMap[(_whichTileRow * _width) +_whichTileCol] + _popMap[((_whichTileRow + 1) * _width) +_whichTileCol] + _popMap[(_whichTileRow * _width) +_whichTileCol +1] + _popMap[((_whichTileRow + 1) * _width) +_whichTileCol + 1]) / 4;
+				waterCount = _pathMap[(_whichTileRow * _width) +_whichTileCol] + _pathMap[((_whichTileRow + 1) * _width) +_whichTileCol] + _pathMap[(_whichTileRow * _width) +_whichTileCol +1] + _pathMap[((_whichTileRow + 1) * _width) +_whichTileCol + 1];
+				if (blockAvg > 0 && waterCount == 0)
 				{
-					cityTiles.add( new CityTile(_whichTileCol * 32, _whichTileRow * 32, _popMap[(_whichTileRow * _width * 2) +_whichTileCol]));
-					_popMap[(_whichTileRow * _width * 2) + _whichTileCol] = 1;
-					_popMap[((_whichTileRow + 1) * _width * 2) + _whichTileCol] = 1;
-					_popMap[(_whichTileRow * _width * 2) + _whichTileCol + 1] = 1;
-					_popMap[((_whichTileRow + 1) * _width * 2) + _whichTileCol + 1] = 1;
+					cityTiles.add( new CityTile(_whichTileCol * 32, _whichTileRow * 32, Math.ceil(blockAvg)));
+					_popMap[(_whichTileRow * _width) + _whichTileCol] = 1;
+					_popMap[((_whichTileRow + 1) * _width) + _whichTileCol] = 1;
+					_popMap[(_whichTileRow * _width) + _whichTileCol + 1] = 1;
+					_popMap[((_whichTileRow + 1) * _width) + _whichTileCol + 1] = 1;
+					_pathMap[(_whichTileRow * _width) + _whichTileCol] = 1;
+					_pathMap[((_whichTileRow + 1) * _width) + _whichTileCol] = 1;
+					_pathMap[(_whichTileRow * _width) + _whichTileCol + 1] = 1;
+					_pathMap[((_whichTileRow + 1) * _width) + _whichTileCol + 1] = 1;
 				}
 				else
 				{
-					_popMap[(_whichTileRow * _width * 2) + _whichTileCol] = 0;
-					_popMap[((_whichTileRow + 1) * _width * 2) + _whichTileCol] = 0;
-					_popMap[(_whichTileRow * _width * 2) + _whichTileCol + 1] = 0;
-					_popMap[((_whichTileRow + 1) * _width * 2) + _whichTileCol + 1] = 0;
+					_popMap[(_whichTileRow * _width) + _whichTileCol] = 0;
+					_popMap[((_whichTileRow + 1) * _width) + _whichTileCol] = 0;
+					_popMap[(_whichTileRow * _width) + _whichTileCol + 1] = 0;
+					_popMap[((_whichTileRow + 1) * _width) + _whichTileCol + 1] = 0;
 				}
+				
+				
 			}
 			else
 			{
-				//_popMap[(_whichTileRow * _width * 2) +_whichTileCol] = 0;
+				
+				//roads.push(0);
 			}
 			
 			_sinceRoadCol++;
 			_whichTileCol++;
-			if (_whichTileCol >= _width * 2)
+			if (_whichTileCol >= _width)
 			{
 				_whichTileCol = 0;
 				_whichTileRow++;
@@ -228,7 +283,7 @@ class GameMap
 			_tileLoop.update();
 			if (_tileLoop.finished)
 			{
-				mapPathing.loadMap(_popMap, "images/pathing.png", 32, 32, 0, 0, 1, 1);
+				mapPathing.loadMap(_pathMap, "images/pathing.png", 32, 32, 0, 0, 1, 1);
 				mapPathing.setTileProperties(0, FlxObject.NONE);
 				mapPathing.setTileProperties(1, FlxObject.ANY);
 				finished = true;
@@ -241,7 +296,7 @@ class GameMap
 	
 	function get_loopCounter():Int 
 	{
-		return (_whichTileRow * _width * 2) +_whichTileCol;
+		return (_whichTileRow * _width) +_whichTileCol;
 	}
 	
 	public var loopCounter(get_loopCounter, null):Int;

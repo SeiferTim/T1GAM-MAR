@@ -34,8 +34,13 @@
 	<assets path="assets/images" rename="images" include="*.png" />
 	<assets path="assets/fonts" rename="fonts" include="*.ttf" />
 	<assets path="assets/sounds" rename="sounds" include="*.wav" />
-	<assets path="assets/music" rename="music" include="*.mp3" if="flash" />
-	<assets path="assets/music" rename="music" include="*.ogg" unless="flash" />
+	
+	<assets path="assets/music" if="flash" >
+		<music path="Main Theme.mp3" id="game-music" />
+	</assets>
+	<assets path="assets/music" unless="flash" >
+		<music path="Dinosaur Ghost Rampage.ogg" id="game-music" />
+	</assets>
 	
 	
 	
