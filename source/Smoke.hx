@@ -3,18 +3,24 @@ import flixel.FlxObject;
 import flixel.system.FlxCollisionType;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxAngle;
+import flixel.util.FlxPoint;
 import flixel.util.FlxRandom;
 
 class Smoke extends ZParticle
 {
+	
+	private var _yMod:Float;
+	private var _xMod:Float;
+	
 	public function new() 
 	{
 		super();
 		collisionType = FlxCollisionType.NONE;
-		moves = false;
+		//moves = false;
 		immovable = true;
 		allowCollisions  = FlxObject.NONE;
-		
+		solid = false;
 		
 	}
 	
@@ -28,17 +34,23 @@ class Smoke extends ZParticle
 		super.onEmit();
 		lifespan = 100;
 		//super.reset(X+FlxRandom.floatRanged(-48,48), Y-FlxRandom.intRanged(0,64));
-		x += FlxRandom.floatRanged( -48, 48);
-		y -= FlxRandom.intRanged(0, 64);
+		//x += FlxRandom.floatRanged( -48, 48);
+		//y -= FlxRandom.intRanged(0, 64);
 		useColoring = false;
 		useScaling = false;
 		useFading = false;
 		alpha = 0;
 		animation.frameIndex = FlxRandom.intRanged(0, 3);
 		draw();
-		FlxTween.tween(this, {alpha: FlxRandom.floatRanged(.4, .9)}, FlxRandom.floatRanged(.4, .8), { type:FlxTween.ONESHOT, ease:FlxEase.sineIn, complete:doneFadeIn } );
-		FlxTween.tween(this, {y:y - (FlxRandom.intRanged(2,4)*8)},FlxRandom.floatRanged(2,4), { type:FlxTween.ONESHOT, ease:FlxEase.quadOut} );
-		FlxTween.tween(this, {x: x + (FlxRandom.intRanged(1,3) * 4 * FlxRandom.sign())}, FlxRandom.floatRanged(.6, 1.6), { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
+		velocity.x = 0;
+		velocity.y = 0;
+		_yMod = 0;
+		_xMod = 0;
+		floor = y + height;
+		FlxTween.tween(this, {alpha: FlxRandom.floatRanged(.4, .9)}, FlxRandom.floatRanged(.2, .6), { type:FlxTween.ONESHOT, ease:FlxEase.sineIn, complete:doneFadeIn } );
+		FlxTween.tween(this, {_yMod:FlxRandom.intRanged(2,4)},FlxRandom.floatRanged(2,4), { type:FlxTween.ONESHOT, ease:FlxEase.quadOut} );
+		FlxTween.tween(this, { _xMod: (FlxRandom.intRanged(1, 3)  * FlxRandom.sign())*.8 }, FlxRandom.floatRanged(.6, 1.6), { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
+		
 	}
 	
 	private function doneFadeIn(T:FlxTween):Void
@@ -60,7 +72,20 @@ class Smoke extends ZParticle
 	{
 		if (lifespan > 0)
 			lifespan = 100;
+		FlxAngle.rotatePoint(0, 20*Reg.playState.windSpeed*FlxRandom.floatRanged(.6,1.4), 0, 0, Reg.playState.windDir, _point);
+		velocity.x = _point.x;
+		velocity.y = _point.y;
+		y -= _yMod;
+		x += _xMod;
 		super.update();
+	}
+	
+	override public function kill():Void 
+	{
+		velocity.x = 0;
+		velocity.y = 0;
+		alpha = 0;
+		super.kill();
 	}
 	
 }

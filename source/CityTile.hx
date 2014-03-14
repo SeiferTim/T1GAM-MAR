@@ -69,7 +69,9 @@ class CityTile extends DisplaySprite
 		isDead = true;
 		animation.frameIndex = 0;
 		allowCollisions = FlxObject.NONE;
-		Reg.playState.createSmoke(x + (width / 2), y + height, this);
+		solid = false;
+		Reg.playState.createCitySmoke(x, y, this);
+		
 	}
 	
 	override private function get_z():Float

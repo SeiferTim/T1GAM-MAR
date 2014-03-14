@@ -33,7 +33,7 @@ class MenuState extends FlxState
 	private var _textMain:GameFont;
 	private var _textSub:GameFont;
 	
-	private var _btnPlay:FlxButton;
+	private var _btnPlay:GameButton;//FlxButton;
 	private var _shownText:Bool = false;
 	
 	
@@ -73,7 +73,7 @@ class MenuState extends FlxState
 		_textSub.alpha = 0;
 		add(_textSub);
 		
-		_btnPlay = new FlxButton(0, 0, "Play", goPlay);
+		_btnPlay = new GameButton(0, 0, "Play", goPlay, GameButton.STYLE_BLUE, true); //new FlxButton(0, 0, "Play", goPlay);
 		_btnPlay.y = FlxG.height - _btnPlay.height - 16;
 		FlxSpriteUtil.screenCenter(_btnPlay, true, false);
 		_btnPlay.alpha = 0;

@@ -24,6 +24,8 @@ class Player extends DisplaySprite
 		onScreen = true;
 		energy = 100;
 		
+		//immovable = true;
+		
 	}
 	
 	override public function update():Void 

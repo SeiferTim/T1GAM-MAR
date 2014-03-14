@@ -17,6 +17,7 @@ class CityStreet extends DisplaySprite
 		immovable = true;
 		calcOnScreen = false;
 		onScreen = true;
+		solid = false;
 		
 	}
 	override public function update():Void 

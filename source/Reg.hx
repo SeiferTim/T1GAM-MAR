@@ -6,6 +6,7 @@ import flixel.util.FlxSave;
 @:font("assets/fonts/gomarice_kaiju_monster.ttf") class FontKaiju extends Font { }
 @:font("assets/fonts/scary.TTF") class FontScary extends Font { }
 @:font("assets/fonts/04B_03__.TTF") class FontPixel extends Font { }
+@:font("assets/fonts/kenpixel_mini.ttf") class FontKPixelMini extends Font { }
 
 /**
  * Handy, pre-built Registry class that can be used to store 
@@ -14,6 +15,23 @@ import flixel.util.FlxSave;
  */
 class Reg
 {
+	
+	
+	/**
+	 * Assets
+	*/
+	
+	// Fonts
+	public static var FONT_BIG:String = "fonts/gomarice_kaiju_monster.ttf";
+	public static var FONT_SCARY:String = "fonts/scary.TTF";
+	public static var FONT_PIXEL:String = "fonts/04B_03__.TTF";
+	public static var FONT_KPIXELMINI:String = "fonts/kenpixel_mini.ttf";
+	
+	//Images
+	public static inline var TANK_GIBS:String = "images/tank-gibs.png";
+	
+	
+	
 	/**
 	 * Generic levels Array that can be used for cross-state stuff.
 	 * Example usage: Storing the levels of a platformer.
@@ -42,13 +60,15 @@ class Reg
 	
 	static public inline var FADE_DUR:Float = 0.3;
 	static public var playState:PlayState;
-	public static var FONT_BIG:String = "fonts/gomarice_kaiju_monster.ttf";
-	public static var FONT_SCARY:String = "fonts/scary.TTF";
-	public static var FONT_PIXEL:String = "fonts/04B_03__.TTF";
+	
+	
+	
 	static public var GameInitialized:Bool = false;
 	#if desktop
 	static public var IsFullscreen:Bool;
 	#end
+	
+	static public var EMITTER_EXPLOSION:Int = 0;
 	
 	public static function initGame():Void
 	{
@@ -58,6 +78,7 @@ class Reg
 		Font.registerFont(FontKaiju);
 		Font.registerFont(FontScary);
 		Font.registerFont(FontPixel);
+		Font.registerFont(FontKPixelMini);
 		
 		loadData();
 		
