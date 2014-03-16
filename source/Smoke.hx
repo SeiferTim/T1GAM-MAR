@@ -61,6 +61,7 @@ class Smoke extends ZParticle
 	private function doneFadeOut(T:FlxTween):Void
 	{
 		lifespan = 0;
+		kill();
 	}
 	
 	override private function get_z():Float 
@@ -70,12 +71,16 @@ class Smoke extends ZParticle
 	
 	override public function update():Void 
 	{
+		if (!alive || !exists)
+		{
+			return;
+		}
 		if (lifespan > 0)
 			lifespan = 100;
 		FlxAngle.rotatePoint(0, 20*Reg.playState.windSpeed*FlxRandom.floatRanged(.6,1.4), 0, 0, Reg.playState.windDir, _point);
 		velocity.x = _point.x;
 		velocity.y = _point.y;
-		y -= _yMod;
+		y -= _yMod/4;
 		x += _xMod;
 		super.update();
 	}

@@ -34,6 +34,7 @@ class Bullet extends DisplaySprite
 		{
 			kill();
 		}
+		
 		super.update();
 	}
 	

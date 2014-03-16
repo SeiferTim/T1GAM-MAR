@@ -101,10 +101,6 @@ class Tank extends DisplaySprite
 			_shootClock = 0;
 			shoot = true;
 		}
-		else if ((os < 3.5) && (_shootClock > = 3.5))
-		{
-			shoot = true;
-		}
 		else if ((os<3.0) && (_shootClock >= 3.0))
 		{
 			shoot = true;
@@ -172,7 +168,7 @@ class Tank extends DisplaySprite
 			p = cast i;
 			p.floor = FlxRandom.intRanged(Std.int(y -2), Std.int(y + height + 2));
 		}
-		_gibs.start(true, 1, 0, 10);
+		_gibs.start(true, 2, 0, 10,4);
 		_gibs.update();
 		
 		Reg.playState.createSmallSmoke(x - 2, y - 2, width + 4, height + 4);

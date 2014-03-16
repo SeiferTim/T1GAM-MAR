@@ -54,9 +54,7 @@ class PlayState extends FlxState
 	private var _grpTanks:FlxTypedGroup<Tank>;
 	private var _eDistances:Array<Int>;
 	private var _grpExplosions:FlxTypedGroup<Explosion>;
-	
-	private var _distMap:FlxTilemap;
-	
+
 	private var _calcTmr:Float;
 	
 	private var _grpBullets:FlxTypedGroup<Bullet>;
@@ -69,6 +67,10 @@ class PlayState extends FlxState
 	
 	public var windSpeed(default, null):Float;
 	public var windDir(default, null):Float;
+	public var _grpWorldWalls:FlxGroup;
+	
+	private var _txtScore:GameFont;
+	
 	
 	
 	override public function create():Void
@@ -77,20 +79,44 @@ class PlayState extends FlxState
 		
 		FlxG.fixedTimestep = false;
 		
-		//add(FlxGridOverlay.create(32, 32, -1, -1, false, true));
+		Reg.score = 0;
 		
 		grpDisplay = new FlxGroup();
 		_grpSmokes = new FlxGroup();
-		_grpTanks = new FlxTypedGroup<Tank>(10);
-		_grpExplosions = new FlxTypedGroup<Explosion>(100);
-		_grpBullets = new FlxTypedGroup<Bullet>(60);
+		_grpTanks = new FlxTypedGroup<Tank>(200);
+		_grpExplosions = new FlxTypedGroup<Explosion>(200);
+		_grpBullets = new FlxTypedGroup<Bullet>(200);
+		_grpWorldWalls = new FlxGroup(4);
 		
-		m = new GameMap(160, 160);
+		m = new GameMap(79, 80);
 		add(m.mapTerrain);
 		add(m.cityStreets);
 		add(grpDisplay);
+		
+		var wall:FlxSprite = new FlxSprite(0, 0);
+		wall.makeGraphic(48, Std.int(m.mapTerrain.height), FlxColor.BLACK);
+		wall.moves = false;
+		wall.immovable = true;
+		_grpWorldWalls.add(wall);
+		wall = new FlxSprite(0, 0);
+		wall.makeGraphic(Std.int(m.mapTerrain.width), 48, FlxColor.BLACK);
+		wall.moves = false;
+		wall.immovable = true;
+		_grpWorldWalls.add(wall);
+		wall = new FlxSprite(m.mapTerrain.width - 48, 0);
+		wall.makeGraphic(48,Std.int(m.mapTerrain.height), FlxColor.BLACK);
+		wall.moves = false;
+		wall.immovable = true;
+		_grpWorldWalls.add(wall);
+		wall = new FlxSprite(0, m.mapTerrain.height-48);
+		wall.makeGraphic(Std.int(m.mapTerrain.width), 48, FlxColor.BLACK);
+		wall.moves = false;
+		wall.immovable = true;
+		_grpWorldWalls.add(wall);
+
 		_grpHUD = new FlxGroup();
 		add(_grpHUD);
+		
 		
 		FlxG.worldBounds.set(0, 0, m.mapTerrain.width, m.mapTerrain.height);
 		
@@ -120,17 +146,13 @@ class PlayState extends FlxState
 		
 		_calcTmr = .33;
 		
+		_txtScore = new GameFont(16, 16, "0", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD);
+		_txtScore.scrollFactor.x = _txtScore.scrollFactor.y  = 0;
+		_grpHUD.add(_txtScore);
+		
 		
 		_spawnTimer = _spawnTimerSet = 10;
-		/*
-		_gibs = new FlxEmitterExt();
-		_gibs.setXSpeed( -200, 200);
-		_gibs.setYSpeed( -250, 50);
-		_gibs.gravity = 350;
-		_gibs.bounce = 0.35;
-		_gibs.makeParticles(Reg.GIBS, 50,
-		*/
-		
+
 		_gibs = new ZEmitterExt(0, 0, 50, Reg.EMITTER_EXPLOSION);
 		_gibs.particleClass = ZParticle;
 		_gibs.setXSpeed( -200, 200);
@@ -244,6 +266,7 @@ class PlayState extends FlxState
 				else
 				{
 					bul.onScreen = false;
+					bul.kill();
 				}
 			}
 		}
@@ -262,7 +285,6 @@ class PlayState extends FlxState
 			if (!m.finished)
 			{
 				m.update();
-				//_txtLoad.text = "Loading..." + Std.string(m.loopMax - m.loopCounter);
 			}
 			else
 			{
@@ -285,8 +307,7 @@ class PlayState extends FlxState
 					for (c in m.cityTiles.members)
 					{
 						if (sprTest.overlaps(c, true))
-						{
-							//c.destroy();							
+						{						
 							c.kill();
 						}
 					}
@@ -295,51 +316,7 @@ class PlayState extends FlxState
 					_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
 					sprTest.kill();
 					
-					/*var _tank:Tank = new Tank(_player.x + 128, _player.y + 128);
-					_grpTanks.add(_tank);
-					_tank = new Tank(_player.x - 128, _player.y - 128);
-					_grpTanks.add(_tank);
-					_tank = new Tank(_player.x - 128, _player.y + 128);
-					_grpTanks.add(_tank);
-					_tank = new Tank(_player.x + 128, _player.y - 128);
-					_grpTanks.add(_tank);
-					*/
-					
-					
-					//FlxG.collide(_grpTanks, m.mapPathing);
-					
-					
-					
 					FlxG.sound.playMusic("game-music", 1, true);
-					
-					//add(m.mapPathing);
-					
-					_distMap = new FlxTilemap();
-					_distMap.scale.set(2, 2);
-
-					var tw:Int = Std.int(m.mapPathing.widthInTiles);
-					var th:Int = Std.int(m.mapPathing.heightInTiles);
-
-					var arr:Array<Int> = [];
-					//var arr2:Array<Int> = [];
-					for (ww in 0...tw)
-					{
-						for (hh in 0...th)
-						{
-							arr.push(0);
-							//arr2.push(0);
-						}
-					}
-
-					//tilemap.widthInTiles = tw;
-					//tilemap.heightInTiles = th;
-					_distMap.widthInTiles = tw;
-					_distMap.heightInTiles = th;
-
-					//tilemap.loadMap(arr, "assets/images/tileset.png", 1, 1);
-					_distMap.loadMap(arr, "images/heat-opaque.png", 1, 1);
-					_distMap.scrollFactor.x = _distMap.scrollFactor.y = 0;
-					//add(_distMap);
 					
 					calculateDistances();
 					
@@ -358,6 +335,7 @@ class PlayState extends FlxState
 			FlxG.overlap(_grpBullets, m.cityTiles, bulletHitCityTile);
 			FlxG.overlap(_player, _grpBullets, bulletHitPlayer);
 			FlxG.overlap(_player, _grpTanks, playerHitTank);
+			FlxG.collide(_player, _grpWorldWalls);
 			playerMovement();
 			if (_calcTmr > 0)
 			{
@@ -397,6 +375,10 @@ class PlayState extends FlxState
 		if (T.alive && T.exists)
 		{
 			T.hurt(1);
+			if (!T.alive)
+			{
+				giveScore(5);
+			}
 		}
 	}
 	
@@ -407,33 +389,63 @@ class PlayState extends FlxState
 		var t:Tank;
 		var side:Int;
 		var xPos:Float=0;
-		var yPos:Float=0;
+		var yPos:Float = 0;
+		var locOk:Bool = false;
+		var rect:FlxRect;
 		
 		for (i in 0...eCount)
 		{
-			t = _grpTanks.recycle(Tank);
-			if (t != null)
+			if (_grpTanks.countLiving() < 20)
 			{
-				side = FlxRandom.intRanged(0, 3);
-				switch (side)
+				locOk = false;
+				while (!locOk)
 				{
-					case 0:
-						xPos = FlxRandom.intRanged(Std.int(_bounds.left + FlxG.camera.scroll.x),Std.int( _bounds.bottom + FlxG.camera.scroll.x));
-						yPos = _bounds.top + FlxG.camera.scroll.y;
-					case 1:
-						xPos = FlxRandom.intRanged(Std.int(_bounds.left + FlxG.camera.scroll.x), Std.int(_bounds.bottom + FlxG.camera.scroll.x));
-						yPos = _bounds.bottom + FlxG.camera.scroll.y;
-					case 2:
-						xPos = _bounds.left + FlxG.camera.scroll.x;
-						yPos = FlxRandom.intRanged(Std.int(_bounds.top + FlxG.camera.scroll.y), Std.int(_bounds.bottom + FlxG.camera.scroll.y));
-					case 3:
-						xPos = _bounds.right + FlxG.camera.scroll.x;
-						yPos = FlxRandom.intRanged(Std.int(_bounds.top + FlxG.camera.scroll.y), Std.int(_bounds.bottom + FlxG.camera.scroll.y));
+					side = FlxRandom.intRanged(0, 3);
+					switch (side)
+					{
+						case 0:
+							xPos = FlxRandom.intRanged(Std.int(_bounds.left + FlxG.camera.scroll.x),Std.int( _bounds.bottom + FlxG.camera.scroll.x));
+							yPos = _bounds.top + FlxG.camera.scroll.y;
+						case 1:
+							xPos = FlxRandom.intRanged(Std.int(_bounds.left + FlxG.camera.scroll.x), Std.int(_bounds.bottom + FlxG.camera.scroll.x));
+							yPos = _bounds.bottom + FlxG.camera.scroll.y;
+						case 2:
+							xPos = _bounds.left + FlxG.camera.scroll.x;
+							yPos = FlxRandom.intRanged(Std.int(_bounds.top + FlxG.camera.scroll.y), Std.int(_bounds.bottom + FlxG.camera.scroll.y));
+						case 3:
+							xPos = _bounds.right + FlxG.camera.scroll.x;
+							yPos = FlxRandom.intRanged(Std.int(_bounds.top + FlxG.camera.scroll.y), Std.int(_bounds.bottom + FlxG.camera.scroll.y));
+					}
+					if (xPos < m.mapPathing.x - 28 || xPos > m.mapPathing.x  +m.mapPathing.height || yPos < m.mapPathing.y - 28 || yPos > m.mapPathing.y  +m.mapPathing.width)
+						locOk = true;
+					else
+					{
+						rect = FlxRect.get(xPos, yPos, 28, 28);
+						rect.left -= (rect.left % 32);
+						rect.left /= 32;
+						rect.top -= (rect.top % 32);
+						rect.top /= 32;
+						rect.right -= (rect.right % 32);
+						rect.right /= 32;
+						rect.bottom -= (rect.bottom % 32);
+						rect.bottom /= 32;
+						if (m.mapPathing.getTile(Std.int(rect.left), Std.int(rect.top)) + m.mapPathing.getTile(Std.int(rect.left), Std.int(rect.bottom)) + m.mapPathing.getTile(Std.int(rect.right), Std.int(rect.top)) + m.mapPathing.getTile(Std.int(rect.right), Std.int(rect.bottom)) == 0)
+						{
+							locOk = true;
+						}
+						rect.put();
+					}
 				}
 				
-				t.init(xPos, yPos, _grpBullets, _gibs);
+				
+				t = _grpTanks.recycle(Tank);
+				if (t != null)
+				{
+					
+					
+					t.init(xPos, yPos, _grpBullets, _gibs);
+				}
 			}
-			
 		}
 	}
 	
@@ -464,7 +476,14 @@ class PlayState extends FlxState
 		if (c.isDead)
 		{
 			_player.energy += c.tier * 2;
+			giveScore(c.tier * 10);
 		}
+	}
+	
+	private function giveScore(Value:Int):Void
+	{
+		Reg.score += Value;
+		_txtScore.text = Std.string(Reg.score);
 	}
 	
 	private function zSort(Order:Int, A:FlxBasic, B:FlxBasic):Int
@@ -641,23 +660,6 @@ class PlayState extends FlxState
 		else
 			_eDistances = tmpDistances;
 		
-		var maxDistance:Int = 1;
-		for (dist in _eDistances) 
-		{
-			if (dist > maxDistance)
-				maxDistance = dist;
-		}
-
-		for (i in 0..._eDistances.length) 
-		{
-			var disti:Int = 0;
-			if (_eDistances[i] < 0) 
-				disti = 1000;
-			else
-				disti = Std.int(999 * (_eDistances[i] / maxDistance));
-
-			_distMap.setTileByIndex(i, disti, true);
-		}
 		
 	}
 	

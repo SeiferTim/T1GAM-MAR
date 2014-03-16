@@ -74,7 +74,7 @@ class Reg
 	{
 		if (GameInitialized)
 			return;
-		
+		FlxG.debugger.drawDebug = false;
 		Font.registerFont(FontKaiju);
 		Font.registerFont(FontScary);
 		Font.registerFont(FontPixel);
