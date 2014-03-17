@@ -63,7 +63,7 @@ class PlayState extends FlxState
 	private var _spawnTimerSet:Float;
 	private var _bounds:FlxRect;
 	
-	private var _gibs:ZEmitterExt;
+	//private var _gibs:ZEmitterExt;
 	
 	public var windSpeed(default, null):Float;
 	public var windDir(default, null):Float;
@@ -152,14 +152,14 @@ class PlayState extends FlxState
 		
 		
 		_spawnTimer = _spawnTimerSet = 10;
-
+/*
 		_gibs = new ZEmitterExt(0, 0, 50, Reg.EMITTER_EXPLOSION);
 		_gibs.particleClass = ZParticle;
 		_gibs.setXSpeed( -200, 200);
 		_gibs.setYSpeed( -150, 50);
 		_gibs.gravity = 350;
 		_gibs.bounce = 0.1;
-		_gibs.makeParticles(Reg.TANK_GIBS, 200, 20, true, 0.5);
+		_gibs.makeParticles(Reg.TANK_GIBS, 200, 20, true, 0.5);*/
 		
 		windDir = FlxRandom.floatRanged(1, 360);
 		windSpeed = FlxRandom.floatRanged(0, 1);
@@ -193,7 +193,7 @@ class PlayState extends FlxState
 	{
 		
 		super.destroy();
-		_gibs = null;
+		//_gibs = null;
 	}
 
 	override public function draw():Void 
@@ -256,7 +256,7 @@ class PlayState extends FlxState
 		for (b in _grpBullets.members)
 		{
 			bul = cast b;
-			if (bul.alive && bul.exists && bul.visible)
+			if (bul.exists && bul.visible)
 			{
 				if (_boundRect.overlaps(bul, true))
 				{
@@ -270,7 +270,7 @@ class PlayState extends FlxState
 				}
 			}
 		}
-		grpDisplay.add(_gibs);
+		//grpDisplay.add(_gibs);
 		grpDisplay.sort(zSort, FlxSort.ASCENDING);
 	}
 	
@@ -443,7 +443,7 @@ class PlayState extends FlxState
 				{
 					
 					
-					t.init(xPos, yPos, _grpBullets, _gibs);
+					t.init(xPos, yPos, _grpBullets);
 				}
 			}
 		}
@@ -531,12 +531,12 @@ class PlayState extends FlxState
 	
 	public function createCitySmoke(X:Float, Y:Float, C:CityTile):Void
 	{
-		_grpSmokes.add(new SmokeSpawner(X, Y, 64, 64));
+		//_grpSmokes.add(new SmokeSpawner(X, Y, 64, 64));
 		m.mapPathing.setTile(Math.floor(X/32)-1, Math.floor(Y/32)-2, 0);
 		m.mapPathing.setTile(Math.floor(X/32), Math.floor(Y/32)-2, 0);
 		m.mapPathing.setTile(Math.floor(X/32)-1, Math.floor(Y/32)-1, 0);
 		m.mapPathing.setTile(Math.floor(X / 32), Math.floor(Y / 32) - 1, 0);
-		spawnExplosion(X , X + 64, Y , Y + 64);
+		//spawnExplosion(X , X + 64, Y , Y + 64);
 	}
 	
 	public function spawnExplosion(Xmin:Float, Xmax:Float, Ymin:Float, Ymax:Float ):Void
@@ -560,8 +560,8 @@ class PlayState extends FlxState
 	
 	public function createSmallSmoke(X:Float, Y:Float, Width:Float, Height:Float):Void
 	{
-		_grpSmokes.add(new SmokeSpawner(X, Y, Width, Height));
-		spawnExplosion(X - 2, X + Width + 2, Y - 2, Y + Height + 2);
+		//_grpSmokes.add(new SmokeSpawner(X, Y, Width, Height));
+		//spawnExplosion(X - 2, X + Width + 2, Y - 2, Y + Height + 2);
 	}
 	
 	private function enemyMovement():Void
@@ -570,6 +570,7 @@ class PlayState extends FlxState
 		//FlxG.collide(m.mapPathing, _grpTanks);
 		var pM:FlxPoint = FlxPoint.get(_player.x + (_player.width / 2), _player.y + _player.height);
 		var tank:Tank;
+		var tankPos:FlxPoint;
 		for (basic in _grpTanks.members)
 		{
 			tank = cast basic;
@@ -578,7 +579,7 @@ class PlayState extends FlxState
 			if (!tank.moving)
 			{
 				
-				var tankPos:FlxPoint = FlxPoint.get(tank.x + (tank.width / 2), tank.y + (tank.height / 2));
+				tankPos = FlxPoint.get(tank.x + (tank.width / 2), tank.y + (tank.height / 2));
 				if (Math.abs(FlxMath.getDistance(tankPos, pM)) >= 64)
 				{
 					var tx:Int = Std.int((tank.x - tank.offset.x) / 32);
@@ -634,6 +635,7 @@ class PlayState extends FlxState
 				{
 					tank.stopMoving();
 				}
+				tankPos.put();
 			}
 			
 		}
@@ -729,6 +731,7 @@ class PlayState extends FlxState
 				_player.facing = FlxObject.UP;
 				_player.animation.play("u");
 			}
+			v.put();
 		}
 		
 		if (!_pressingDown && !_pressingUp)

@@ -10,6 +10,7 @@ import flash.text.Font;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
+import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxGradient;
 import flixel.util.FlxSpriteUtil;
 
@@ -71,8 +72,6 @@ class GameFont extends FlxSprite
 	
 	private function drawText():Void
 	{
-		
-		
 		
 		var size:Int = 8;
 		var colors:Array <Int> = [];
@@ -228,8 +227,9 @@ class GameFont extends FlxSprite
 		dirty = true;
 		updateFrameData();
 		
-		
-		
+		b1 = FlxDestroyUtil.dispose(b1);
+		b2 = FlxDestroyUtil.dispose(b1);
+		spr = FlxDestroyUtil.destroy(spr);
 	}
 	
 	function get_text():String 

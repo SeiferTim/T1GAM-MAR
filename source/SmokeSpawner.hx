@@ -3,7 +3,6 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
-import flixel.util.FlxRect;
 import flixel.util.FlxTimer;
 
 class SmokeSpawner extends ZEmitterExt

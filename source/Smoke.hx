@@ -4,7 +4,7 @@ import flixel.system.FlxCollisionType;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxAngle;
-import flixel.util.FlxPoint;
+
 import flixel.util.FlxRandom;
 
 class Smoke extends ZParticle

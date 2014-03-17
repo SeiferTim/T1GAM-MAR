@@ -22,7 +22,7 @@ class Tank extends DisplaySprite
 	private var _target:FlxPoint;
 	private var _shootClock:Float;
 	private var _bullets:FlxTypedGroup<Bullet>;
-	private var _gibs:ZEmitterExt;
+	//private var _gibs:ZEmitterExt;
 	
 	public function new(X:Float=0, Y:Float=0) 
 	{
@@ -47,11 +47,11 @@ class Tank extends DisplaySprite
 		_target = FlxPoint.get();
 	}
 	
-	public function init(xPos:Float, yPos:Float, Bullets:FlxTypedGroup<Bullet>, Gibs:ZEmitterExt):Void
+	public function init(xPos:Float, yPos:Float, Bullets:FlxTypedGroup<Bullet>):Void
 	{
 		
 		_bullets = Bullets;
-		_gibs = Gibs;
+		//_gibs = Gibs;
 		
 		reset(xPos - width / 2, yPos - height / 2);
 		_dest.x = x;
@@ -144,7 +144,7 @@ class Tank extends DisplaySprite
 		_vec.put();
 		
 		_bullets = null;
-		_gibs = null;
+		//_gibs = null;
 		
 		_dest = null;
 		_target = null;
@@ -160,8 +160,9 @@ class Tank extends DisplaySprite
 		
 		super.kill();
 		
-		_gibs.at(this);
-		_gibs.z = z;
+		//_gibs.at(this);
+		//_gibs.z = z;
+		/*
 		var p:ZParticle;
 		for (i in _gibs.members)
 		{
@@ -170,7 +171,7 @@ class Tank extends DisplaySprite
 		}
 		_gibs.start(true, 2, 0, 10,4);
 		_gibs.update();
-		
+		*/
 		Reg.playState.createSmallSmoke(x - 2, y - 2, width + 4, height + 4);
 		
 	}

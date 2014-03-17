@@ -1,7 +1,6 @@
 package ;
 import flixel.util.FlxAngle;
 import flixel.util.FlxColor;
-import flixel.util.FlxPoint;
 
 class Bullet extends DisplaySprite
 {
