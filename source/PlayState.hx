@@ -28,6 +28,8 @@ import flixel.util.FlxRandom;
 import flixel.util.FlxRect;
 import flixel.util.FlxSort;
 import flixel.util.FlxSpriteUtil;
+import lime.Constants.Window;
+import openfl.events.JoystickEvent;
 
 /**
  * A FlxState which can be used for the actual gameplay.
@@ -53,6 +55,7 @@ class PlayState extends FlxState
 	private var _barEnergy:FlxBar;
 	
 	private var _grpTanks:FlxTypedGroup<Tank>;
+	private var _grpCopters:FlxTypedGroup<Copter>;
 	private var _eDistances:Array<Int>;
 	private var _grpExplosions:FlxTypedGroup<Explosion>;
 
@@ -73,6 +76,8 @@ class PlayState extends FlxState
 	private var _txtScore:GameFont;
 	private var _allowDraw:Bool = false;
 	
+	private var _cTarget:FlxSprite;
+	
 	
 	
 	override public function create():Void
@@ -86,6 +91,7 @@ class PlayState extends FlxState
 		grpDisplay = new FlxGroup();
 		_grpSmokes = new FlxGroup();
 		_grpTanks = new FlxTypedGroup<Tank>();
+		_grpCopters = new FlxTypedGroup<Copter>();
 		_grpExplosions = new FlxTypedGroup<Explosion>();
 		_grpBullets = new FlxTypedGroup<Bullet>();
 		_grpWorldWalls = new FlxGroup(4);
@@ -179,6 +185,11 @@ class PlayState extends FlxState
 		
 		windDir = FlxRandom.floatRanged(1, 360);
 		windSpeed = FlxRandom.floatRanged(0, 1);
+		
+		
+		_cTarget = new FlxSprite();
+		_cTarget.makeGraphic(2, 2, FlxColor.WHITE);
+		add(_cTarget);
 		
 		super.create();
 	}
@@ -275,6 +286,18 @@ class PlayState extends FlxState
 			else
 				tank.onScreen = false;
 		}
+		var copter:Copter;
+		for (c in _grpCopters.members)
+		{
+			copter = cast c;
+			if (copter.alive && copter.exists && copter.visible && _boundRect.overlaps(copter,true))
+			{
+				copter.onScreen = true;
+				grpDisplay.add(copter);
+			}
+			else
+				copter.onScreen = false;
+		}
 		var exp:Explosion;
 		for (e in _grpExplosions.members)
 		{
@@ -361,6 +384,9 @@ class PlayState extends FlxState
 					
 					calculateDistances();
 					_allowDraw = true;
+					
+					_grpCopters.add(new Copter(_player.x - 128, _player.y - 128));
+					
 					var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
 				_barLoad.alpha = _sprLoad.alpha;
@@ -428,11 +454,18 @@ class PlayState extends FlxState
 						bulletHitPlayer(cast A, cast B);
 					case "Tank":
 						playerHitTank(cast A, cast B);
+					case "Copter":
+						playerHitCopter(cast A, cast B);
 				}
 			case "Tank":
 				if (bName == "Player")
 				{
 					playerHitTank(cast B, cast A);
+				}
+			case "Copter":
+				if (bName == "Player")
+				{
+					playerHitCopter(cast B, cast A);
 				}
 		}
 	}
@@ -453,6 +486,18 @@ class PlayState extends FlxState
 		{
 			P.energy -= 5;
 			B.kill();
+		}
+	}
+	
+	private function playerHitCopter(P:Player, C:Copter):Void
+	{
+		if (C.alive && C.exists && !C.isDead)
+		{
+			C.hurt(1);
+			if (C.isDead)
+			{
+				giveScore(10);
+			}
 		}
 	}
 	
@@ -651,20 +696,25 @@ class PlayState extends FlxState
 	private function enemyMovement():Void
 	{
 		
-		//FlxG.collide(m.mapPathing, _grpTanks);
-		var pM:FlxPoint = FlxPoint.get(_player.x + (_player.width / 2), _player.y + _player.height);
+		var pM:FlxPoint = FlxPoint.get(_player.x + (_player.width / 2), _player.y + (_player.height/2));
 		var tank:Tank;
-		var tankPos:FlxPoint;
+		var ePos:FlxPoint;
 		for (basic in _grpTanks.members)
 		{
 			tank = cast basic;
+			
+			if (tank.alive && tank.exists && tank.visible && tank.onScreen)
+			{
+				
+			
+			
 			tank.setTarget(pM.x, pM.y);
 			
 			if (!tank.moving)
 			{
 				
-				tankPos = FlxPoint.get(tank.x + (tank.width / 2), tank.y + (tank.height / 2));
-				if (Math.abs(FlxMath.getDistance(tankPos, pM)) >= 64)
+				ePos = FlxPoint.get(tank.x + (tank.width / 2), tank.y + (tank.height / 2));
+				if (Math.abs(FlxMath.getDistance(ePos, pM)) >= 64)
 				{
 					var tx:Int = Std.int((tank.x - tank.offset.x) / 32);
 					var ty:Int = Std.int((tank.y - tank.offset.y) / 32);
@@ -719,12 +769,41 @@ class PlayState extends FlxState
 				{
 					tank.stopMoving();
 				}
-				tankPos = FlxDestroyUtil.put(tankPos);
+				ePos = FlxDestroyUtil.put(ePos);
+			}
 			}
 			
 		}
-		//pM.put();
 		
+		var copter:Copter;
+		var cTarget:FlxPoint;
+		
+		for (basic in _grpCopters.members)
+		{
+			copter = cast basic;
+			
+			if (copter.onScreen && copter.alive && copter.exists && copter.visible && !copter.isDead)
+			{
+				copter.setTarget(pM.x, pM.y-16);
+				/*cTarget = FlxPoint.get(pM.x, pM.y);
+				//cTarget = FlxAngle.rotatePoint( cTarget.x, cTarget.y,0, 10, FlxRandom.floatRanged(0, 360));
+				
+				copter.setTarget(pM.x, pM.y);
+				_cTarget.x = cTarget.x -1;
+				_cTarget.y = cTarget.y -1;
+				
+				
+				if (!copter.moving)
+				{
+					
+					//ePos = FlxPoint.get(copter.x + (copter.width / 2), copter.y + (copter.height / 2));
+					copter.moveTo(cTarget.x, cTarget.y, Copter.SPEED);	
+					
+					//ePos = FlxDestroyUtil.put(ePos);
+				}
+				cTarget = FlxDestroyUtil.put(cTarget);*/
+			}
+		}
 		
 		pM = FlxDestroyUtil.put(pM);
 		

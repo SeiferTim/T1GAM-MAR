@@ -29,6 +29,8 @@ class Explosion extends DisplaySprite
 	{
 		if (animation.finished)
 			kill();
+		if (!onScreen || !alive || !exists || !visible)
+			return;
 		super.update();
 	}
 	
