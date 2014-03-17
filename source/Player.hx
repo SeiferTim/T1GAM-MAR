@@ -30,8 +30,7 @@ class Player extends DisplaySprite
 	
 	override public function update():Void 
 	{
-
-		energy -= FlxG.elapsed*4;
+		
 		super.update();
 	}
 	

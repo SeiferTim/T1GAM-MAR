@@ -10,9 +10,10 @@ class CityTile extends DisplaySprite
 {
 
 	public var tier(default, null):Int;
-	private var _onScreen:Bool;
+	//public var onScreen:Bool;
 	private var _hurtTimer:Float = 0;
 	public var isDead(default, null):Bool;
+	
 	//private var _grpSmoke:FlxGroup;
 	//private var _tmrSmoke:FlxTimer;
 	
@@ -21,7 +22,7 @@ class CityTile extends DisplaySprite
 		super(X, Y);
 		tier = Tier;
 		health = tier;
-		loadGraphic("images/city-tiles.png", true, false, 64, 128);
+		loadGraphic("images/city-tiles.png", true, false, 64, 128,false,"city");
 		width = 66;
 		height = 66;
 		offset.y = 63;
@@ -30,22 +31,25 @@ class CityTile extends DisplaySprite
 		moves = false;
 		immovable = true;
 		allowCollisions = FlxObject.ANY;
-		//_grpSmoke = new FlxGroup(20);
-		
+		calcOnScreen = false;
+		onScreen = true;
 		
 	}
 	
 	override public function update():Void 
 	{
+		if (isDead)
+			return;
 		if (_hurtTimer > 0)
 			_hurtTimer -= FlxG.elapsed;
-		//super.update();
 	}
 	
-	/*override public function draw():Void
+	override public function draw():Void
 	{
+		if (!exists || !onScreen || !alive)
+			return;
 		super.draw();
-	}*/
+	}
 	
 	override public function hurt(Damage:Float):Void 
 	{

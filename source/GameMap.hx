@@ -8,6 +8,7 @@ import flixel.addons.util.FlxAsyncLoop;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.group.FlxGroup;
+import flixel.system.FlxCollisionType;
 import flixel.tile.FlxTile;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxBitmapUtil;
@@ -23,7 +24,7 @@ class GameMap
 
 	public var mapTerrain:FlxTilemap;
 	public var cityTiles:FlxGroup;
-	public var cityStreets:FlxGroup;
+	//public var cityStreets:FlxGroup;
 	public var finished(default, null):Bool = false;
 	public var loopMax(default, null):Int;
 	public var mapPathing:FlxTilemap;
@@ -122,7 +123,7 @@ class GameMap
 		mapTerrain.loadMap(_terrainMap, "images/terrain.png", 32, 32, FlxTilemap.OFF, 0, 1, 1);
 		
 		cityTiles = new FlxGroup(_width * _height);
-		cityStreets = new FlxGroup();
+		//cityStreets = new FlxGroup();
 		
 		_whichTileRow = 0;
 		_whichTileCol = 0;
@@ -155,6 +156,12 @@ class GameMap
 		
 		
 		
+		mapTerrain.allowCollisions = FlxObject.NONE;
+		//mapTerrain.collisionType = FlxCollisionType.NONE;
+		mapTerrain.immovable = true;
+		mapTerrain.moves = false;
+		mapTerrain.solid = false;
+		
 		
 		_tileLoop = new FlxAsyncLoop(loopMax, addCityTiles, 100);
 	}
@@ -176,19 +183,22 @@ class GameMap
 			{
 				if ((_pathMap[(_whichTileRow * _width) +_whichTileCol-1] == 0 || _pathMap[(_whichTileRow * _width) +_whichTileCol+1] == 0) && (_pathMap[((_whichTileRow+1) * _width) +_whichTileCol] ==0 || _pathMap[((_whichTileRow-1) * _width) + _whichTileCol] == 0)) 
 				{
-					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 2));
+					//cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 2));
+					mapTerrain.setTile(_whichTileCol, _whichTileRow, 9);
 					_pathMap[(_whichTileRow * _width) +_whichTileCol] = 0;
 					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 2;
 				}
 				else if (_pathMap[(_whichTileRow * _width) +_whichTileCol - 1] == 0 || _pathMap[(_whichTileRow * _width) +_whichTileCol + 1] == 0)
 				{
-					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 1));
+					//cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 1));
+					mapTerrain.setTile(_whichTileCol, _whichTileRow, 8);
 					_pathMap[(_whichTileRow * _width) +_whichTileCol] = 0;
 					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
 				}
 				else if (_pathMap[((_whichTileRow + 1) * _width) +_whichTileCol] == 0 || _pathMap[((_whichTileRow - 1) * _width) + _whichTileCol] == 0)
 				{
-					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 0));
+					//cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 0));
+					mapTerrain.setTile(_whichTileCol, _whichTileRow, 7);
 					_pathMap[(_whichTileRow * _width) +_whichTileCol] = 0;
 					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
 				}
@@ -205,7 +215,8 @@ class GameMap
 			{
 				if (_whichTileRow == 0 || (_roadMap[((_whichTileRow - 1) * _width) + _whichTileCol] != 0 && (_pathMap[(_whichTileRow * _width) + _whichTileCol] == 0 || _roadMap[((_whichTileRow - 1) * _width) + _whichTileCol] == 1))) 
 				{
-					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 0));
+					//cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 0));
+					mapTerrain.setTile(_whichTileCol, _whichTileRow, 7);
 					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
 					_pathMap[(_whichTileRow * _width) + _whichTileCol] = 0;
 				}
@@ -217,7 +228,8 @@ class GameMap
 			{				
 				if (_whichTileCol == 0 || (_roadMap[((_whichTileRow) * _width) + _whichTileCol-1] != 0 && (_pathMap[(_whichTileRow * _width) + _whichTileCol] == 0 || _roadMap[((_whichTileRow) * _width) + _whichTileCol-1] == 1))) 
 				{
-					cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 1));
+					//cityStreets.add(new CityStreet(_whichTileCol * 32, _whichTileRow * 32, 1));
+					mapTerrain.setTile(_whichTileCol, _whichTileRow, 8);
 					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
 					_pathMap[(_whichTileRow * _width) + _whichTileCol] = 0;
 				}

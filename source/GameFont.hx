@@ -104,7 +104,7 @@ class GameFont extends FlxSprite
 				font = Reg.FONT_KPIXELMINI;
 				_hasShadow = false;
 			case STYLE_SMSIMPLE:
-				size = 24;
+				size = 32;
 				font = Reg.FONT_KPIXELMINI;
 				_hasShadow = true;
 		}
@@ -147,8 +147,9 @@ class GameFont extends FlxSprite
 		
 		var tmpText:FlxText = new FlxText(0, 0, FlxG.width, _text);
 		tmpText.setFormat(font, size, 0x000000, "left");
-		tmpText.update();
-		tmpText.draw();
+		//tmpText.update();
+		tmpText.drawFrame();
+		//tmpText.draw();
 		
 		var r:Rectangle = tmpText.pixels.getColorBoundsRect(0xff000000, 0x00000000, false);
 		var b1:BitmapData = new BitmapData(Std.int(r.width), Std.int(r.height), true, 0x0);

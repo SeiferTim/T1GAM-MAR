@@ -5,6 +5,7 @@ import flixel.FlxG;
 import flixel.group.FlxTypedGroup.FlxTypedGroup;
 import flixel.util.FlxAngle;
 import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxPoint;
 import flixel.util.FlxRandom;
 import flixel.util.FlxVector;
@@ -21,7 +22,7 @@ class Tank extends DisplaySprite
 	private var _turret:DisplaySprite;
 	private var _target:FlxPoint;
 	private var _shootClock:Float;
-	private var _bullets:FlxTypedGroup<Bullet>;
+	//private var _bullets:FlxTypedGroup<Bullet>;
 	//private var _gibs:ZEmitterExt;
 	
 	public function new(X:Float=0, Y:Float=0) 
@@ -47,10 +48,10 @@ class Tank extends DisplaySprite
 		_target = FlxPoint.get();
 	}
 	
-	public function init(xPos:Float, yPos:Float, Bullets:FlxTypedGroup<Bullet>):Void
+	public function init(xPos:Float, yPos:Float):Void
 	{
 		
-		_bullets = Bullets;
+		//_bullets = Bullets;
 		//_gibs = Gibs;
 		
 		reset(xPos - width / 2, yPos - height / 2);
@@ -64,7 +65,6 @@ class Tank extends DisplaySprite
 	
 	public function moveTo(X:Float, Y:Float, Speed:Float):Void
 	{
-		//trace("moveto: " + X + ", " + Y);
 		moving = true;
 		_dest.set(X, Y);
 		_vec.x = _dest.x - x;
@@ -89,7 +89,8 @@ class Tank extends DisplaySprite
 	
 	override public function update():Void 
 	{
-		
+		if (!alive || !exists || !visible)
+			return;
 		var a:Float = FlxAngle.getAngle(getMidpoint(_point), _target);
 		_turret.relativeAngle = a;
 		
@@ -108,8 +109,9 @@ class Tank extends DisplaySprite
 		
 		if (shoot)
 		{
-			var b:Bullet = _bullets.recycle(Bullet);
-			b.launch(getMidpoint(_point), a);
+			if(isOnScreen())
+				Reg.playState.shootBullet(getMidpoint(_point), a);
+			
 		}
 		
 		var oldx:Float = _vec.x;
@@ -138,19 +140,10 @@ class Tank extends DisplaySprite
 	override public function destroy():Void 
 	{
 		super.destroy();
-		
-		_dest.put();
-		_target.put();
-		_vec.put();
-		
-		_bullets = null;
-		//_gibs = null;
-		
-		_dest = null;
-		_target = null;
-		_vec = null;
-		
-		
+		_dest = FlxDestroyUtil.put(_dest);
+		_target = FlxDestroyUtil.put(_target);
+		_vec = FlxDestroyUtil.put(_vec);
+		//_bullets = null;		
 	}
 	
 	override public function kill():Void 
@@ -178,8 +171,6 @@ class Tank extends DisplaySprite
 	
 	override public function hurt(Damage:Float):Void 
 	{
-		
-		
 		super.hurt(Damage);
 	}
 	

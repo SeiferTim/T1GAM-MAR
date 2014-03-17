@@ -1,6 +1,7 @@
 package ;
 import flixel.util.FlxAngle;
 import flixel.util.FlxColor;
+import flixel.util.FlxPoint;
 
 class Bullet extends DisplaySprite
 {
@@ -11,6 +12,7 @@ class Bullet extends DisplaySprite
 	{
 		super();
 		makeGraphic(8, 8, FlxColor.CRIMSON);
+		calcOnScreen = false;
 		
 	}
 	
@@ -25,7 +27,12 @@ class Bullet extends DisplaySprite
 	
 	override public function update():Void 
 	{
-		if (!alive)
+		if (!onScreen)
+		{
+			exists = false;
+			alive = false;
+		}
+		else if (!alive)
 		{
 			exists = false;
 		}
@@ -34,6 +41,8 @@ class Bullet extends DisplaySprite
 			kill();
 		}
 		
+		if (!exists || !visible)
+			return;
 		super.update();
 	}
 	
@@ -49,5 +58,13 @@ class Bullet extends DisplaySprite
 		solid = false;
 		//super.kill();
 	}
-	
+	override private function get_z():Float 
+	{
+		if (calcZ)
+			return y + height + 16;
+		else
+			return _z;
+		
+		
+	}
 }

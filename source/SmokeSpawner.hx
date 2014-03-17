@@ -15,7 +15,7 @@ class SmokeSpawner extends ZEmitterExt
 	
 	public function new(X:Float = 0, Y:Float = 0, Width:Float = 1, Height:Float = 1) 
 	{
-		super(X, Y, 100, ZEmitterExt.STYLE_CLOUD);
+		super(X, Y, 0, ZEmitterExt.STYLE_CLOUD);
 		//parent = Parent;
 		bounds = new FlxSprite(X, Y);
 		bounds.makeGraphic(Std.int(Width), Std.int(Height),FlxColor.WHITE);
@@ -29,7 +29,7 @@ class SmokeSpawner extends ZEmitterExt
 		particleDrag.x = 0;
 		particleDrag.y = 0;
 		
-		makeParticles("images/smoke.png", 100, 0, true, FlxObject.NONE);
+		//makeParticles("images/smoke.png", 100, 0, true, FlxObject.NONE);
 		
 		
 		start(true, 100, .1, Std.int((Width / 4) + (Height / 4)), 100);
@@ -37,6 +37,7 @@ class SmokeSpawner extends ZEmitterExt
 	
 	override public function update():Void
 	{
+		
 		if (_explode && !bursted && !on)
 		{
 			bursted = true;

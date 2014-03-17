@@ -14,6 +14,7 @@ class Explosion extends DisplaySprite
 		immovable = true;
 		allowCollisions  = FlxObject.NONE;
 		solid = false;
+		calcOnScreen = false;
 		
 	}
 	
@@ -21,7 +22,7 @@ class Explosion extends DisplaySprite
 	{
 		super.reset(X-(width/2), Y-(height/2));
 		animation.play("explode", true);
-		calcOnScreen = false;
+		
 	}
 	
 	override public function update():Void 
