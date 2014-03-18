@@ -36,10 +36,10 @@
 	<assets path="assets/sounds" rename="sounds" include="*.wav" />
 	
 	<assets path="assets/music" if="flash" >
-		<music path="Main Theme.mp3" id="game-music" />
+		<music path="game-music.mp3" id="game-music" />
 	</assets>
 	<assets path="assets/music" unless="flash" >
-		<music path="Dinosaur Ghost Rampage.ogg" id="game-music" />
+		<music path="game-music.ogg" id="game-music" />
 	</assets>
 	
 	

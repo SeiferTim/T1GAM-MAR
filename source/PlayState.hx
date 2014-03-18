@@ -2,6 +2,8 @@ package;
 
 import flash.Lib;
 import flixel.addons.display.FlxGridOverlay;
+import flixel.addons.effects.FlxTrail;
+import flixel.addons.effects.FlxTrailArea;
 import flixel.addons.util.FlxAsyncLoop;
 import flixel.effects.particles.FlxEmitter;
 import flixel.effects.particles.FlxEmitterExt;
@@ -77,6 +79,8 @@ class PlayState extends FlxState
 	private var _txtScore:GameFont;
 	private var _allowDraw:Bool = false;
 	
+	private var _trailArea:FlxTrailArea;
+	
 	
 	private var _copterCount:Int = 0;
 	
@@ -84,9 +88,7 @@ class PlayState extends FlxState
 	{
 		Reg.playState = this;
 		
-		
-		
-		FlxG.fixedTimestep = false;
+		//FlxG.fixedTimestep = false;
 		
 		Reg.score = 0;
 		
@@ -97,13 +99,18 @@ class PlayState extends FlxState
 		_grpExplosions = new FlxTypedGroup<Explosion>();
 		_grpBullets = new FlxTypedGroup<Bullet>();
 		_grpWorldWalls = new FlxGroup(4);
+		m = new GameMap(79, 80);
+		_trailArea = new FlxTrailArea(0, 0, Std.int(m.mapTerrain.width), Std.int(m.mapTerrain.height), .6, 1, true);
+		
 		
 		for (i in 0...20)
 		{
 			_grpTanks.add(new Tank(0, 0));
 			_grpTanks.members[_grpTanks.members.length - 1].kill();
 			_grpBullets.add(new Bullet());
+			//_trailArea.add(_grpBullets.members[_grpBullets.members.length - 1]);
 			_grpBullets.members[_grpBullets.members.length - 1].kill();
+			
 		}
 		
 		for (i in 0...100)
@@ -112,10 +119,12 @@ class PlayState extends FlxState
 			_grpExplosions.members[_grpExplosions.members.length - 1].kill();
 		}
 		
-		m = new GameMap(79, 80);
+		
 		add(m.mapTerrain);
 		//add(m.cityStreets);
 		add(grpDisplay);
+		
+		add(_trailArea);
 		
 		var wall:FlxSprite = new FlxSprite(0, 0);
 		wall.makeGraphic(48, Std.int(m.mapTerrain.height), FlxColor.BLACK);
@@ -152,9 +161,7 @@ class PlayState extends FlxState
 		_barEnergy.y = 16;
 		_grpHUD.add(_barEnergy);
 		
-		FlxG.camera.follow(_player, FlxCamera.STYLE_TOPDOWN_TIGHT, null, 4);
-		FlxG.camera.followLead.x = 2;
-		FlxG.camera.followLead.y = 2;
+		
 		
 		FlxG.camera.setBounds(0, 0, m.mapTerrain.width, m.mapTerrain.height);
 		
@@ -200,6 +207,7 @@ class PlayState extends FlxState
 	{
 		var b:Bullet = _grpBullets.recycle(Bullet);
 		b.launch(Origin, Angle, Style);
+		_trailArea.add(b);
 	}
 	
 	private function changeWind():Void
@@ -380,6 +388,11 @@ class PlayState extends FlxState
 					_player.x = sprTest.x + (sprTest.width / 2) - (_player.width / 2) - FlxG.camera.scroll.x;
 					_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
 					sprTest.kill();
+					FlxG.camera.focusOn(_player.getMidpoint());
+					
+					FlxG.camera.follow(_player, FlxCamera.STYLE_TOPDOWN_TIGHT, null, 4);
+					FlxG.camera.followLead.x = 2;
+					FlxG.camera.followLead.y = 2;
 					
 					FlxG.sound.playMusic("game-music", 1, true);
 					

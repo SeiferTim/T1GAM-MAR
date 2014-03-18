@@ -109,11 +109,11 @@ class Bullet extends DisplaySprite
 		{
 			if (style == MISSLE)
 			{
-				return y + height + 16 + 130;
+				return y + (height/2) + 16 + 130;
 			}
 			else
 			{
-				return y + height + 16;
+				return super.get_z();
 			}
 		}
 		else

@@ -13,7 +13,7 @@ class Copter extends DisplaySprite
 {
 
 	public static inline var SPEED:Int = 150;
-	public static inline var DIST:Int = 160;
+	public static inline var DIST:Int = 120;
 	private var _shootClock:Float;
 	private var _prop:DisplaySprite;
 	public var isDead(default, null):Bool = false;
