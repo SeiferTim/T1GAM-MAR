@@ -34,5 +34,10 @@ class Explosion extends DisplaySprite
 		super.update();
 	}
 	
+	override private function get_z():Float 
+	{
+		return y + (height/2) + 64;
+	}
+	
 	
 }

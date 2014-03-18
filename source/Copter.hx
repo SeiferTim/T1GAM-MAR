@@ -12,7 +12,8 @@ import flixel.util.FlxVelocity;
 class Copter extends DisplaySprite
 {
 
-	public static inline var SPEED:Int = 100;
+	public static inline var SPEED:Int = 150;
+	public static inline var DIST:Int = 160;
 	private var _shootClock:Float;
 	private var _prop:DisplaySprite;
 	public var isDead(default, null):Bool = false;
@@ -24,23 +25,18 @@ class Copter extends DisplaySprite
 		super(X, Y);
 		calcOnScreen = false;
 		loadGraphic("images/copter.png", false, false, 32, 32, false, "copter");
-		
 		setPosition(X, Y);
 		_prop = new DisplaySprite(0, 0);
-		_prop.loadGraphic("images/propellor.png", true, false, 32, 32, false, "prop");
-		//setOriginToCenter();
-		//origin.y -= 8;
-		
-		//_prop.setOriginToCenter();
+		_prop.loadGraphic("images/propellor.png", true, false, 32, 32, false, "prop");		
 		_prop.animation.add("spin", [0, 1], 30);
 		_prop.animation.play("spin");
 		_prop.relativeAngle = 0;
-		//relativeX += 8;
 		_prop.relativeX = (width / 2 )- (_prop.width / 2);
 		_prop.relativeY = (height / 2 )- (_prop.height / 2)-8;
 		add(_prop);
 		calcZ = false;
 		_target = FlxPoint.get();
+		
 	}
 	
 	public function setTarget(X:Float, Y:Float):Void
@@ -73,36 +69,55 @@ class Copter extends DisplaySprite
 		
 		if (!isDead)
 		{
-			a = FlxAngle.getAngle(getMidpoint(_point), _target);
+			var m:FlxPoint = getMidpoint();
+			a = FlxAngle.getAngle(m, _target);
 			angle = a;
 		
+			// if we are closer than DIST pixels from the target, back up,
+			var d:Float = FlxMath.getDistance(m, _target);
+			if (d < DIST)
+			{
+				// back up!
+				FlxAngle.rotatePoint(SPEED / 2, 0, 0, 0, -a, _point);
+				velocity.x = _point.x;
+				velocity.y = _point.y;
+				
+			}
+			else if (d >= DIST)
+			{
+				// get closer
+				FlxAngle.rotatePoint(SPEED, 0, 0, 0, a, _point);
+				velocity.x = _point.x;
+				velocity.y = _point.y;
+			}
+
+			
+			
 			var shoot:Bool = false;
 			var os:Float = _shootClock;
 			_shootClock += FlxG.elapsed;
-			if ((os<4.5) && (_shootClock >=4.5))
+			if ((os<2) && (_shootClock >=2))
 			{
 				_shootClock = 0;
 				shoot = true;
 			}
-			else if ((os<4.25) && (_shootClock >= 4.25))
-			{
-				shoot = true;
-			}
-			else if ((os<4.0) && (_shootClock >= 4.0))
-			{
-				shoot = true;
-			}
+			
 			
 			if (shoot)
 			{
-				if(isOnScreen())
-					Reg.playState.shootBullet(getMidpoint(_point), a);
+				if (onScreen)
+				{
+					Reg.playState.shootBullet(m, a, Bullet.MISSLE);
+					
+				}
 			}
+			m = FlxDestroyUtil.put(m);
+			
+			
 
 		}
 		else
 		{
-			//x += FlxRandom.intRanged(4, 8) * FlxRandom.sign();
 			angle += 10;
 			if (y + (height/2) >= _floor)
 			{
@@ -114,9 +129,6 @@ class Copter extends DisplaySprite
 			
 		}
 		super.update();
-		
-		
-		
 	}
 	
 	
@@ -145,7 +157,7 @@ class Copter extends DisplaySprite
 	{
 		if (!isDead)
 		{
-			return y + (height / 2) + 64;
+			return y + (height / 2) + 130;
 			
 		}
 		else

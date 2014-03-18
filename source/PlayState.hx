@@ -1,5 +1,6 @@
 package;
 
+import flash.Lib;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.util.FlxAsyncLoop;
 import flixel.effects.particles.FlxEmitter;
@@ -40,7 +41,7 @@ class PlayState extends FlxState
 	private static inline var SPEED:Int = 200;
 	private static inline var FRICTION:Float = .8;
 	
-	private var m:GameMap;
+	public var m:GameMap;
 	private var _player:Player;
 	private var _finished:Bool = false;
 	private var _sprLoad:FlxSprite;
@@ -76,13 +77,14 @@ class PlayState extends FlxState
 	private var _txtScore:GameFont;
 	private var _allowDraw:Bool = false;
 	
-	private var _cTarget:FlxSprite;
 	
-	
+	private var _copterCount:Int = 0;
 	
 	override public function create():Void
 	{
 		Reg.playState = this;
+		
+		
 		
 		FlxG.fixedTimestep = false;
 		
@@ -150,7 +152,10 @@ class PlayState extends FlxState
 		_barEnergy.y = 16;
 		_grpHUD.add(_barEnergy);
 		
-		FlxG.camera.follow(_player, FlxCamera.STYLE_TOPDOWN);
+		FlxG.camera.follow(_player, FlxCamera.STYLE_TOPDOWN_TIGHT, null, 4);
+		FlxG.camera.followLead.x = 2;
+		FlxG.camera.followLead.y = 2;
+		
 		FlxG.camera.setBounds(0, 0, m.mapTerrain.width, m.mapTerrain.height);
 		
 		_sprLoad = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -173,7 +178,7 @@ class PlayState extends FlxState
 		_grpHUD.add(_txtScore);
 		
 		
-		_spawnTimer = _spawnTimerSet = 10;
+		_spawnTimer = _spawnTimerSet = 12;
 /*
 		_gibs = new ZEmitterExt(0, 0, 50, Reg.EMITTER_EXPLOSION);
 		_gibs.particleClass = ZParticle;
@@ -185,20 +190,16 @@ class PlayState extends FlxState
 		
 		windDir = FlxRandom.floatRanged(1, 360);
 		windSpeed = FlxRandom.floatRanged(0, 1);
-		
-		
-		_cTarget = new FlxSprite();
-		_cTarget.makeGraphic(2, 2, FlxColor.WHITE);
-		add(_cTarget);
+		_spawnTimer = 2;
 		
 		super.create();
 	}
 	
 	
-	public function shootBullet(Origin:FlxPoint, Angle:Float):Void
+	public function shootBullet(Origin:FlxPoint, Angle:Float, Style:Int = 0):Void
 	{
 		var b:Bullet = _grpBullets.recycle(Bullet);
-		b.launch(Origin, Angle);
+		b.launch(Origin, Angle, Style);
 	}
 	
 	private function changeWind():Void
@@ -385,7 +386,7 @@ class PlayState extends FlxState
 					calculateDistances();
 					_allowDraw = true;
 					
-					_grpCopters.add(new Copter(_player.x - 128, _player.y - 128));
+					
 					
 					var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
@@ -438,14 +439,20 @@ class PlayState extends FlxState
 				switch(bName)
 				{
 					case "CityTile":
-						bulletHitCityTile(cast A, cast B);
+						if (cast(A, Bullet).style == Bullet.STANDARD)
+						{
+							bulletHitCityTile(cast A, cast B);
+						}
 					case "Player":
 						bulletHitPlayer(cast B, cast A);
 				}
 			case "CityTile":
 				if (bName == "Bullet")
 				{
-					bulletHitCityTile(cast B, cast A);
+					if (cast(B, Bullet).style == Bullet.STANDARD)
+					{
+						bulletHitCityTile(cast B, cast A);
+					}
 				}
 			case "Player":
 				switch(bName)
@@ -484,7 +491,7 @@ class PlayState extends FlxState
 	{
 		if (B.alive && B.exists)
 		{
-			P.energy -= 5;
+			P.energy -= 5 * (B.style+1);
 			B.kill();
 		}
 	}
@@ -518,6 +525,7 @@ class PlayState extends FlxState
 		var eCount:Int =  Std.int((12 - Math.floor(_spawnTimerSet)) * 2);
 		
 		var t:Tank;
+		var c:Copter;
 		var side:Int;
 		var xPos:Float=0;
 		var yPos:Float = 0;
@@ -526,7 +534,7 @@ class PlayState extends FlxState
 		
 		for (i in 0...eCount)
 		{
-			if (_grpTanks.countLiving() < 20)
+			if (_grpTanks.countLiving() + _grpCopters.countLiving() < 40)
 			{
 				locOk = false;
 				while (!locOk)
@@ -568,12 +576,21 @@ class PlayState extends FlxState
 					}
 				}
 				
-				
-				t = _grpTanks.recycle(Tank);
-				if (t != null)
+				if (i >= _copterCount)
 				{
-					t.init(xPos, yPos);
+					t = _grpTanks.recycle(Tank);
+					if (t != null)
+					{
+						t.init(xPos, yPos);
+					}
 				}
+				else
+				{
+					c = _grpCopters.recycle(Copter);
+					if (c != null)
+						c.init(xPos, yPos);
+				}
+				_copterCount += FlxRandom.intRanged(0, 1);
 			}
 		}
 	}
@@ -674,9 +691,14 @@ class PlayState extends FlxState
 		
 		var xRange:Float = (Xmax - Xmin)/16;
 		var yRange:Float = (Ymax - Ymin)/16;
+		var minCount:Int = Std.int(xRange * yRange / 4);
+		var maxCount:Int = Std.int(xRange * yRange / 2);
+		if (minCount < 1)
+			minCount = 1;
+		if (maxCount < 2)
+			maxCount = 2;
 		
-		
-		for (i in 0...FlxRandom.intRanged(Std.int(xRange*yRange/4), Std.int(xRange*yRange/2)))
+		for (i in 0...FlxRandom.intRanged(minCount,maxCount ))
 		{
 			e = cast _grpExplosions.recycle(Explosion);
 			if (e != null)
@@ -705,49 +727,48 @@ class PlayState extends FlxState
 			
 			if (tank.alive && tank.exists && tank.visible && tank.onScreen)
 			{
+
+				tank.setTarget(pM.x, pM.y);
 				
-			
-			
-			tank.setTarget(pM.x, pM.y);
-			
-			if (!tank.moving)
-			{
-				
-				ePos = FlxPoint.get(tank.x + (tank.width / 2), tank.y + (tank.height / 2));
-				if (Math.abs(FlxMath.getDistance(ePos, pM)) >= 64)
+				if (!tank.moving)
 				{
-					var tx:Int = Std.int((tank.x - tank.offset.x) / 32);
-					var ty:Int = Std.int((tank.y - tank.offset.y) / 32);
 					
-					var bestX:Int = 0;
-					var bestY:Int = 0;
-					var bestDist:Float = Math.POSITIVE_INFINITY;
-					var neighbors:Array<Array<Float>> = [[999, 999, 999], [999, 999, 999], [999, 999, 999]];
-					for (yy in -1...2)
+					ePos = FlxPoint.get(tank.x + (tank.width / 2), tank.y + (tank.height / 2));
+					if (Math.abs(FlxMath.getDistance(ePos, pM)) >= 64)
 					{
-						for (xx in -1...2)
+						var tx:Int = Std.int((tank.x - tank.offset.x) / 32);
+						var ty:Int = Std.int((tank.y - tank.offset.y) / 32);
+						
+						var bestX:Int = 0;
+						var bestY:Int = 0;
+						var bestDist:Float = Math.POSITIVE_INFINITY;
+						var neighbors:Array<Array<Float>> = [[999, 999, 999], [999, 999, 999], [999, 999, 999]];
+						for (yy in -1...2)
 						{
-							var theX:Int = tx + xx;
-							var theY:Int = ty + yy;
-							
-							
-							if (theX >= 0 && theY <	m.mapPathing.widthInTiles)
+							for (xx in -1...2)
 							{
-								if (theY >= 0 && theY < m.mapPathing.heightInTiles)
+								var theX:Int = tx + xx;
+								var theY:Int = ty + yy;
+								
+								
+								if (theX >= 0 && theY <	m.mapPathing.widthInTiles)
 								{
-									if (xx == 0 || yy == 0)
+									if (theY >= 0 && theY < m.mapPathing.heightInTiles)
 									{
-										if (_eDistances != null)
+										if (xx == 0 || yy == 0)
 										{
-											var distance:Float = _eDistances[theY * m.mapPathing.widthInTiles + theX];
-											neighbors[yy + 1][xx + 1] = distance;
-											if (distance > 0)
+											if (_eDistances != null)
 											{
-												if (distance < bestDist || (bestX == 0 && bestY == 0))
+												var distance:Float = _eDistances[theY * m.mapPathing.widthInTiles + theX];
+												neighbors[yy + 1][xx + 1] = distance;
+												if (distance > 0)
 												{
-													bestDist = distance;
-													bestX = xx;
-													bestY = yy;
+													if (distance < bestDist || (bestX == 0 && bestY == 0))
+													{
+														bestDist = distance;
+														bestX = xx;
+														bestY = yy;
+													}
 												}
 											}
 										}
@@ -755,29 +776,26 @@ class PlayState extends FlxState
 								}
 							}
 						}
+						
+						if (!(bestX == 0 && bestY == 0))
+						{
+							
+								tank.moveTo((tx * 32) + (bestX * 32) + tank.offset.x, (ty * 32) + (bestY * 32) + tank.offset.y, Tank.SPEED);
+							
+							
+						}
 					}
-					
-					if (!(bestX == 0 && bestY == 0))
+					else
 					{
-						
-							tank.moveTo((tx * 32) + (bestX * 32) + tank.offset.x, (ty * 32) + (bestY * 32) + tank.offset.y, Tank.SPEED);
-						
-						
+						tank.stopMoving();
 					}
+					ePos = FlxDestroyUtil.put(ePos);
 				}
-				else
-				{
-					tank.stopMoving();
-				}
-				ePos = FlxDestroyUtil.put(ePos);
-			}
 			}
 			
 		}
 		
 		var copter:Copter;
-		var cTarget:FlxPoint;
-		
 		for (basic in _grpCopters.members)
 		{
 			copter = cast basic;
@@ -785,23 +803,6 @@ class PlayState extends FlxState
 			if (copter.onScreen && copter.alive && copter.exists && copter.visible && !copter.isDead)
 			{
 				copter.setTarget(pM.x, pM.y-16);
-				/*cTarget = FlxPoint.get(pM.x, pM.y);
-				//cTarget = FlxAngle.rotatePoint( cTarget.x, cTarget.y,0, 10, FlxRandom.floatRanged(0, 360));
-				
-				copter.setTarget(pM.x, pM.y);
-				_cTarget.x = cTarget.x -1;
-				_cTarget.y = cTarget.y -1;
-				
-				
-				if (!copter.moving)
-				{
-					
-					//ePos = FlxPoint.get(copter.x + (copter.width / 2), copter.y + (copter.height / 2));
-					copter.moveTo(cTarget.x, cTarget.y, Copter.SPEED);	
-					
-					//ePos = FlxDestroyUtil.put(ePos);
-				}
-				cTarget = FlxDestroyUtil.put(cTarget);*/
 			}
 		}
 		

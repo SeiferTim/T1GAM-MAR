@@ -109,8 +109,15 @@ class Tank extends DisplaySprite
 		
 		if (shoot)
 		{
-			if(isOnScreen())
-				Reg.playState.shootBullet(getMidpoint(_point), a);
+			//if(isOnScreen())
+			//	Reg.playState.shootBullet(getMidpoint(_point), a);
+			if (onScreen)
+				{
+					if (Reg.playState.m.mapPathing.ray(getMidpoint(_point), _target))
+					{					
+						Reg.playState.shootBullet(getMidpoint(_point), a);
+					}
+				}
 			
 		}
 		
