@@ -68,6 +68,10 @@ class PlayState extends FlxState
 	
 	private var _spawnTimer:Float;
 	private var _spawnTimerSet:Float;
+	
+	private var _tankCount:Float;
+	private var _copterCount:Float;
+	
 	private var _bounds:FlxRect;
 	
 	//private var _gibs:ZEmitterExt;
@@ -80,9 +84,6 @@ class PlayState extends FlxState
 	private var _allowDraw:Bool = false;
 	
 	private var _trailArea:FlxTrailArea;
-	
-	
-	private var _copterCount:Int = 0;
 	
 	override public function create():Void
 	{
@@ -186,18 +187,13 @@ class PlayState extends FlxState
 		
 		
 		_spawnTimer = _spawnTimerSet = 12;
-/*
-		_gibs = new ZEmitterExt(0, 0, 50, Reg.EMITTER_EXPLOSION);
-		_gibs.particleClass = ZParticle;
-		_gibs.setXSpeed( -200, 200);
-		_gibs.setYSpeed( -150, 50);
-		_gibs.gravity = 350;
-		_gibs.bounce = 0.1;
-		_gibs.makeParticles(Reg.TANK_GIBS, 200, 20, true, 0.5);*/
+		_spawnTimer = 1;
+		_tankCount = 2;
+		_copterCount = 0;
 		
 		windDir = FlxRandom.floatRanged(1, 360);
 		windSpeed = FlxRandom.floatRanged(0, 1);
-		_spawnTimer = 2;
+		
 		
 		super.create();
 	}
@@ -400,6 +396,7 @@ class PlayState extends FlxState
 					_allowDraw = true;
 					
 					
+					//add(m.mapWater);
 					
 					var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
@@ -535,7 +532,7 @@ class PlayState extends FlxState
 	
 	private function spawnEnemies():Void
 	{
-		var eCount:Int =  Std.int((12 - Math.floor(_spawnTimerSet)) * 2);
+		//var eCount:Int =  Std.int((12 - Math.floor(_spawnTimerSet)) * 2);
 		
 		var t:Tank;
 		var c:Copter;
@@ -544,8 +541,13 @@ class PlayState extends FlxState
 		var yPos:Float = 0;
 		var locOk:Bool = false;
 		var rect:FlxRect;
+		var _coptersSpawned:Int = 0;
+		var _tanksSpawned:Int = 0;
 		
-		for (i in 0...eCount)
+		var pM:FlxPoint = FlxPoint.get(_player.x + (_player.width / 2), _player.y + (_player.height/2));
+		
+		
+		for (i in 0...Std.int((_copterCount+_tankCount)))
 		{
 			if (_grpTanks.countLiving() + _grpCopters.countLiving() < 40)
 			{
@@ -556,56 +558,75 @@ class PlayState extends FlxState
 					switch (side)
 					{
 						case 0:
-							xPos = FlxRandom.intRanged(Std.int(_bounds.left + FlxG.camera.scroll.x),Std.int( _bounds.bottom + FlxG.camera.scroll.x));
-							yPos = _bounds.top + FlxG.camera.scroll.y;
+							xPos = FlxRandom.intRanged(Std.int(_bounds.left + FlxG.camera.scroll.x+16),Std.int( _bounds.bottom + FlxG.camera.scroll.x-16));
+							yPos = _bounds.top + FlxG.camera.scroll.y + 16;
 						case 1:
-							xPos = FlxRandom.intRanged(Std.int(_bounds.left + FlxG.camera.scroll.x), Std.int(_bounds.bottom + FlxG.camera.scroll.x));
-							yPos = _bounds.bottom + FlxG.camera.scroll.y;
+							xPos = FlxRandom.intRanged(Std.int(_bounds.left + FlxG.camera.scroll.x+16), Std.int(_bounds.bottom + FlxG.camera.scroll.x-16));
+							yPos = _bounds.bottom + FlxG.camera.scroll.y-16;
 						case 2:
-							xPos = _bounds.left + FlxG.camera.scroll.x;
-							yPos = FlxRandom.intRanged(Std.int(_bounds.top + FlxG.camera.scroll.y), Std.int(_bounds.bottom + FlxG.camera.scroll.y));
+							xPos = _bounds.left + FlxG.camera.scroll.x+16;
+							yPos = FlxRandom.intRanged(Std.int(_bounds.top + FlxG.camera.scroll.y)+16, Std.int(_bounds.bottom + FlxG.camera.scroll.y-16));
 						case 3:
-							xPos = _bounds.right + FlxG.camera.scroll.x;
-							yPos = FlxRandom.intRanged(Std.int(_bounds.top + FlxG.camera.scroll.y), Std.int(_bounds.bottom + FlxG.camera.scroll.y));
+							xPos = _bounds.right + FlxG.camera.scroll.x-16;
+							yPos = FlxRandom.intRanged(Std.int(_bounds.top + FlxG.camera.scroll.y+16), Std.int(_bounds.bottom + FlxG.camera.scroll.y-16));
 					}
-					if (xPos < m.mapPathing.x - 28 || xPos > m.mapPathing.x  +m.mapPathing.height || yPos < m.mapPathing.y - 28 || yPos > m.mapPathing.y  +m.mapPathing.width)
+					
+					if (_coptersSpawned < _copterCount)
+					{
 						locOk = true;
+					}
 					else
 					{
-						rect = FlxRect.get(xPos, yPos, 28, 28);
-						rect.left -= (rect.left % 32);
-						rect.left /= 32;
-						rect.top -= (rect.top % 32);
-						rect.top /= 32;
-						rect.right -= (rect.right % 32);
-						rect.right /= 32;
-						rect.bottom -= (rect.bottom % 32);
-						rect.bottom /= 32;
-						if (m.mapPathing.getTile(Std.int(rect.left), Std.int(rect.top)) + m.mapPathing.getTile(Std.int(rect.left), Std.int(rect.bottom)) + m.mapPathing.getTile(Std.int(rect.right), Std.int(rect.top)) + m.mapPathing.getTile(Std.int(rect.right), Std.int(rect.bottom)) == 0)
-						{
+					
+						if (xPos < m.mapPathing.x - 28 || xPos > m.mapPathing.x  +m.mapPathing.height || yPos < m.mapPathing.y - 28 || yPos > m.mapPathing.y  +m.mapPathing.width)
 							locOk = true;
+						else
+						{
+							rect = FlxRect.get(xPos, yPos, 28, 28);
+							rect.left -= (rect.left % 32);
+							rect.left /= 32;
+							rect.top -= (rect.top % 32);
+							rect.top /= 32;
+							rect.right -= (rect.right % 32);
+							rect.right /= 32;
+							rect.bottom -= (rect.bottom % 32);
+							rect.bottom /= 32;
+							if (m.mapPathing.getTile(Std.int(rect.left), Std.int(rect.top)) + m.mapPathing.getTile(Std.int(rect.left), Std.int(rect.bottom)) + m.mapPathing.getTile(Std.int(rect.right), Std.int(rect.top)) + m.mapPathing.getTile(Std.int(rect.right), Std.int(rect.bottom)) == 0)
+							{
+								locOk = true;
+							}
+							rect = FlxDestroyUtil.put(rect);
 						}
-						rect = FlxDestroyUtil.put(rect);
 					}
 				}
 				
-				if (i >= _copterCount)
+				
+				if (_coptersSpawned < _copterCount)
 				{
+					c = _grpCopters.recycle(Copter);
+					if (c != null)
+					{
+						c.init(xPos, yPos, pM.x, pM.y - 16);
+						_coptersSpawned++;
+					}
+					
+				}
+				else if (_tanksSpawned < _tankCount)
+				{
+				
 					t = _grpTanks.recycle(Tank);
 					if (t != null)
 					{
 						t.init(xPos, yPos);
+						_tanksSpawned++;
 					}
+					
 				}
-				else
-				{
-					c = _grpCopters.recycle(Copter);
-					if (c != null)
-						c.init(xPos, yPos);
-				}
-				_copterCount += FlxRandom.intRanged(0, 1);
+			
+				
 			}
 		}
+		pM = FlxDestroyUtil.put(pM);
 	}
 	
 	private function checkEnemySpawn():Void
@@ -624,6 +645,8 @@ class PlayState extends FlxState
 				_spawnTimerSet = 0;
 			
 			_spawnTimer = _spawnTimerSet;
+			_tankCount += 2.02;
+			_copterCount += .02;
 			
 		}
 	}
@@ -888,8 +911,17 @@ class PlayState extends FlxState
 			mA = 0;
 		if (mA != -400)
 		{
-			
-			var v:FlxPoint = FlxAngle.rotatePoint(SPEED, 0, 0, 0, mA);
+			var v:FlxPoint;
+			if (_player.overlaps(m.mapWater))
+			{
+				
+				v = FlxAngle.rotatePoint(SPEED*.4, 0, 0, 0, mA);
+			}
+			else
+			{
+				v = FlxAngle.rotatePoint(SPEED, 0, 0, 0, mA);
+			}
+				
 			_player.velocity.x = v.x;
 			_player.velocity.y = v.y;
 			

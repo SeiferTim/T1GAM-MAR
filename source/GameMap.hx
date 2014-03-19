@@ -28,7 +28,9 @@ class GameMap
 	public var finished(default, null):Bool = false;
 	public var loopMax(default, null):Int;
 	public var mapPathing:FlxTilemap;
+	public var mapWater:FlxTilemap;
 	
+	private var _waterMap:Array<Int>;
 	private var _width:Int;
 	private var _height:Int;
 	private var _popMap:Array<Int>;
@@ -61,6 +63,7 @@ class GameMap
 		_popMap = new Array<Int>();
 		_pathMap = new Array<Int>();
 		_terrainMap = new Array<Int>();
+		_waterMap = new Array<Int>();
 		_popData.perlinNoise(_width, _height, 8, FlxRandom.int(), false, false, 1, true);
 		
 		for (i in 0...8)
@@ -122,6 +125,18 @@ class GameMap
 		mapTerrain.heightInTiles = _height;
 		mapTerrain.loadMap(_terrainMap, "images/terrain.png", 32, 32, FlxTilemap.OFF, 0, 1, 1);
 		
+		for (i in 0..._terrainMap.length)
+		{
+			if (_terrainMap[i] <= 2)
+			{
+				_waterMap.push(1);
+			}
+			else
+			{
+				_waterMap.push(0);
+			}
+		}
+		
 		cityTiles = new FlxGroup(_width * _height);
 		//cityStreets = new FlxGroup();
 		
@@ -146,12 +161,18 @@ class GameMap
 					_pathMap.push(0);
 				}
 				_roadMap.push(0);
+				
 			}
 		}
 		
 		mapPathing = new FlxTilemap();
 		mapPathing.widthInTiles = _width;
 		mapPathing.heightInTiles = _height;
+		
+		mapWater = new FlxTilemap();
+		mapWater.widthInTiles = _width;
+		mapWater.heightInTiles = _height;
+		
 		loopMax = _popMap.length;
 		
 		
@@ -187,6 +208,7 @@ class GameMap
 					mapTerrain.setTile(_whichTileCol, _whichTileRow, 9);
 					_pathMap[(_whichTileRow * _width) +_whichTileCol] = 0;
 					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 2;
+					_waterMap[(_whichTileRow * _width) + _whichTileCol] = 0;
 				}
 				else if (_pathMap[(_whichTileRow * _width) +_whichTileCol - 1] == 0 || _pathMap[(_whichTileRow * _width) +_whichTileCol + 1] == 0)
 				{
@@ -194,6 +216,7 @@ class GameMap
 					mapTerrain.setTile(_whichTileCol, _whichTileRow, 8);
 					_pathMap[(_whichTileRow * _width) +_whichTileCol] = 0;
 					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
+					_waterMap[(_whichTileRow * _width) + _whichTileCol] = 0;
 				}
 				else if (_pathMap[((_whichTileRow + 1) * _width) +_whichTileCol] == 0 || _pathMap[((_whichTileRow - 1) * _width) + _whichTileCol] == 0)
 				{
@@ -201,6 +224,7 @@ class GameMap
 					mapTerrain.setTile(_whichTileCol, _whichTileRow, 7);
 					_pathMap[(_whichTileRow * _width) +_whichTileCol] = 0;
 					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
+					_waterMap[(_whichTileRow * _width) + _whichTileCol] = 0;
 				}
 				else
 				{
@@ -219,6 +243,7 @@ class GameMap
 					mapTerrain.setTile(_whichTileCol, _whichTileRow, 7);
 					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
 					_pathMap[(_whichTileRow * _width) + _whichTileCol] = 0;
+					_waterMap[(_whichTileRow * _width) + _whichTileCol] = 0;
 				}
 				_popMap[(_whichTileRow * _width) +_whichTileCol] = 0;
 			
@@ -232,6 +257,7 @@ class GameMap
 					mapTerrain.setTile(_whichTileCol, _whichTileRow, 8);
 					_roadMap[(_whichTileRow * _width) +_whichTileCol] = 1;
 					_pathMap[(_whichTileRow * _width) + _whichTileCol] = 0;
+					_waterMap[(_whichTileRow * _width) + _whichTileCol] = 0;
 				}
 				_popMap[(_whichTileRow * _width) +_whichTileCol] = 0;
 			}
@@ -250,6 +276,12 @@ class GameMap
 					_pathMap[((_whichTileRow + 1) * _width) + _whichTileCol] = 1;
 					_pathMap[(_whichTileRow * _width) + _whichTileCol + 1] = 1;
 					_pathMap[((_whichTileRow + 1) * _width) + _whichTileCol + 1] = 1;
+					
+					_waterMap[(_whichTileRow * _width) + _whichTileCol] = 0;
+					_waterMap[((_whichTileRow + 1) * _width) + _whichTileCol] = 0;
+					_waterMap[(_whichTileRow * _width) + _whichTileCol + 1] = 0;
+					_waterMap[((_whichTileRow + 1) * _width) + _whichTileCol + 1] = 0;
+					
 				}
 				else
 				{
@@ -295,9 +327,16 @@ class GameMap
 			_tileLoop.update();
 			if (_tileLoop.finished)
 			{
+				
 				mapPathing.loadMap(_pathMap, "images/pathing.png", 32, 32, 0, 0, 1, 1);
 				mapPathing.setTileProperties(0, FlxObject.NONE);
 				mapPathing.setTileProperties(1, FlxObject.ANY);
+				
+				
+				mapWater.loadMap(_waterMap, "images/pathing.png", 32, 32, 0, 0, 1, 1);
+				mapWater.setTileProperties(0, FlxObject.NONE);
+				mapWater.setTileProperties(1, FlxObject.ANY);
+				
 				finished = true;
 				_tileLoop.kill();
 				_tileLoop.destroy();
