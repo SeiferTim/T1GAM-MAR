@@ -87,6 +87,14 @@ class Tank extends DisplaySprite
 		moving = false;
 	}
 	
+	override public function draw():Void 
+	{
+		_turret.x = x + (width / 2) - (_turret.width / 2);
+		_turret.y = y + (height / 2) - (_turret.height / 2);
+		super.draw();
+	}
+	
+	
 	override public function update():Void 
 	{
 		if (!alive || !exists || !visible)

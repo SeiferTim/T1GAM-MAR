@@ -33,25 +33,18 @@ class Copter extends DisplaySprite
 		setPosition(X, Y);
 		_prop = new DisplaySprite(0, 0);
 		_prop.loadGraphic("images/propellor.png", true, false, 32, 32, false, "prop");		
-		_prop.animation.add("spin", [0, 1], 30);
-		_prop.animation.play("spin");
+		_prop.animation.add("spin", [0, 1], 12);
 		_prop.relativeAngle = 0;
 		_prop.relativeX = 0;
-		_prop.relativeY = 0;// -8;
+		_prop.relativeY = 0;
 		_body.relativeX = (width/2) - (_body.width/2);
 		_body.relativeY = (height/2) - (_body.height/2);
 		_body.relativeAngularAcceleration = 0;
 		_prop.relativeAngularAcceleration = 0;
-		
 		_body.relativeAngularVelocity = 0;
 		_prop.relativeAngularVelocity = 0;
 		_body.moves = false;
 		_prop.moves = false;
-		
-		//_body.origin.x = width / 2;
-		//_body.origin.y = (height / 2) - 8;
-		//_body.add(_prop);
-		//_body.origin.y = 8;
 		add(_prop);
 		calcZ = false;
 		_target = FlxPoint.get();
@@ -59,8 +52,6 @@ class Copter extends DisplaySprite
 		angularDrag = 200;
 		drag.x = 60;
 		_thrust = 0;
-		
-		
 	}
 	
 	public function setTarget(X:Float, Y:Float):Void
@@ -81,6 +72,7 @@ class Copter extends DisplaySprite
 		setTarget(TarX, TarY);
 		
 		angle = angleTowardPlayer();
+		_prop.animation.play("spin");
 		
 	}
 	
@@ -130,13 +122,9 @@ class Copter extends DisplaySprite
 			}
 			else
 			{
-				//_thrust = FlxVelocity.computeVelocity(_thrust, 0, drag.x, SPEED/4);
-				//FlxAngle.rotatePoint(0, _thrust, 0, 0, angle, velocity);
 				acceleration.x = 0;
 				acceleration.y = 0;
 			}
-			
-			
 			
 			var shoot:Bool = false;
 			var os:Float = _shootClock;
@@ -160,7 +148,7 @@ class Copter extends DisplaySprite
 		}
 		else
 		{
-			angle += 30;
+			
 			if (y + (height/2) >= _floor)
 			{
 				velocity.set();
@@ -170,22 +158,31 @@ class Copter extends DisplaySprite
 			}
 			
 		}
-		/*_body.relativeAngularAcceleration = -angularAcceleration;
-		_body.relativeAngularVelocity = -angularVelocity;
-		_prop.relativeAngularAcceleration = -_body.angularAcceleration;
-		_prop.relativeAngularVelocity = -_body.angularVelocity;*/
+
 		super.update();
 	}
 	
 	override public function draw():Void 
 	{
+		if (!isDead)
+		{
+			_body.relativeAngle = -angle+angleTowardPlayer();
+			_prop.relativeAngle = -angle;
+			_prop.angle = 0;
+			_body.angle = angleTowardPlayer();
+		}
+		else
+		{
+			angle += 30;
+		}
 		
-		_body.relativeAngle = -angle+angleTowardPlayer();
-		_prop.relativeAngle = -angle;
 		_prop.relativeX = 0;
 		_prop.relativeY = 0;// -8;
-		_body.relativeX = (width/2) - (_body.width/2);
-		_body.relativeY = (height/2) - (_body.height/2);
+		_body.x = x + (width / 2) - (_body.width / 2);
+		_body.y = y + (height / 2) - (_body.height / 2);
+		_prop.x = x + (width / 2) - (_prop.width / 2);
+		_prop.y = y + (height / 2) - (_prop.height / 2);
+		
 		super.draw();
 	}
 	
@@ -207,7 +204,6 @@ class Copter extends DisplaySprite
 		
 		_floor = 64 + y + (height / 2);
 		
-		
 	}
 	
 	override private function get_z():Float 
@@ -215,7 +211,6 @@ class Copter extends DisplaySprite
 		if (!isDead)
 		{
 			return y + (height / 2) + 130;
-			
 		}
 		else
 		{

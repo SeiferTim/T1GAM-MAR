@@ -333,14 +333,8 @@ class PlayState extends FlxState
 				}
 			}
 		}
-		//grpDisplay.add(_gibs);
-		
 		grpDisplay.sort(zSort, FlxSort.ASCENDING);
-		
-		
-		
-		
-		
+
 	}
 	
 	/**
@@ -395,9 +389,6 @@ class PlayState extends FlxState
 					calculateDistances();
 					_allowDraw = true;
 					
-					
-					//add(m.mapWater);
-					
 					var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
 				}
 				_barLoad.alpha = _sprLoad.alpha;
@@ -406,20 +397,11 @@ class PlayState extends FlxState
 		}
 		else
 		{
-			_player.energy -= FlxG.elapsed*4;
+			_player.energy -= FlxG.elapsed*6;
 			changeWind();
 			checkEnemySpawn();
 			FlxG.collide(_player, _grpWorldWalls);
 			FlxG.collide(_player, m.cityTiles, playerTouchCityTile);
-			
-			
-			
-			//FlxG.collide(_grpTanks, _grpTanks);
-			
-			//FlxG.overlap(_grpBullets, m.cityTiles, bulletHitCityTile);
-			//FlxG.overlap(_player, _grpBullets, bulletHitPlayer);
-			//FlxG.overlap(_player, _grpTanks, playerHitTank);
-			
 			FlxG.overlap(grpDisplay, grpDisplay, checkOverlap);
 			
 			playerMovement();
@@ -659,6 +641,10 @@ class PlayState extends FlxState
 		{
 			_player.energy += c.tier * 2;
 			giveScore(c.tier * 10);
+			if (FlxRandom.chanceRoll(2 * c.tier))
+			{
+				
+			}
 		}
 	}
 	
