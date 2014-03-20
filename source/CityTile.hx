@@ -10,12 +10,8 @@ class CityTile extends DisplaySprite
 {
 
 	public var tier(default, null):Int;
-	//public var onScreen:Bool;
 	private var _hurtTimer:Float = 0;
 	public var isDead(default, null):Bool;
-	
-	//private var _grpSmoke:FlxGroup;
-	//private var _tmrSmoke:FlxTimer;
 	
 	public function new(X:Float=0, Y:Float=0, Tier:Int = 1) 
 	{

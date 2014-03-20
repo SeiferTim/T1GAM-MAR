@@ -40,6 +40,8 @@ import openfl.events.JoystickEvent;
 class PlayState extends FlxState
 {
 
+	private static inline var ROAR_RECHARGE:Int = 30;
+	
 	private static inline var SPEED:Int = 200;
 	private static inline var FRICTION:Float = .8;
 	
@@ -74,8 +76,6 @@ class PlayState extends FlxState
 	
 	private var _bounds:FlxRect;
 	
-	//private var _gibs:ZEmitterExt;
-	
 	public var windSpeed(default, null):Float;
 	public var windDir(default, null):Float;
 	public var _grpWorldWalls:FlxGroup;
@@ -84,6 +84,15 @@ class PlayState extends FlxState
 	private var _allowDraw:Bool = false;
 	
 	private var _trailArea:FlxTrailArea;
+	
+	private var _grpPowerups:FlxTypedGroup<PowerUp>;
+	
+	private var _roarTimer:Float = 0;
+	private var _roarMarkers:Array<RoarMarker>;
+	private var _roarsAvailable:Int = 3;
+	private var _lastRoar:Float = 1;
+	
+	private var _leaving:Bool = false;
 	
 	override public function create():Void
 	{
@@ -100,9 +109,17 @@ class PlayState extends FlxState
 		_grpExplosions = new FlxTypedGroup<Explosion>();
 		_grpBullets = new FlxTypedGroup<Bullet>();
 		_grpWorldWalls = new FlxGroup(4);
+		_grpPowerups = new FlxTypedGroup<PowerUp>();
+		
 		m = new GameMap(79, 80);
 		_trailArea = new FlxTrailArea(0, 0, Std.int(m.mapTerrain.width), Std.int(m.mapTerrain.height), .6, 1, true);
 		
+		
+		for (i in 0...10)
+		{
+			_grpPowerups.add(new PowerUp());
+			_grpPowerups.members[_grpPowerups.members.length -1].kill();
+		}
 		
 		for (i in 0...20)
 		{
@@ -162,6 +179,15 @@ class PlayState extends FlxState
 		_barEnergy.y = 16;
 		_grpHUD.add(_barEnergy);
 		
+		_roarMarkers = new Array<RoarMarker>();
+		var r:RoarMarker;
+		for (i in 0...3)
+		{
+			r = new RoarMarker(_barEnergy.x + _barEnergy.width + 32 + (24 * i), _barEnergy.height);
+			_roarMarkers.push(r);
+			_grpHUD.add(r);
+		}
+		_lastRoar = 1;
 		
 		
 		FlxG.camera.setBounds(0, 0, m.mapTerrain.width, m.mapTerrain.height);
@@ -181,7 +207,8 @@ class PlayState extends FlxState
 		
 		_calcTmr = .33;
 		
-		_txtScore = new GameFont(16, 16, "0", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD);
+		_txtScore = new GameFont(0, 16, "000000000", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right");
+		_txtScore.x = FlxG.width - _txtScore.width - 16;
 		_txtScore.scrollFactor.x = _txtScore.scrollFactor.y  = 0;
 		_grpHUD.add(_txtScore);
 		
@@ -193,6 +220,10 @@ class PlayState extends FlxState
 		
 		windDir = FlxRandom.floatRanged(1, 360);
 		windSpeed = FlxRandom.floatRanged(0, 1);
+		
+		
+		Reg.score = 0;
+		Reg.scores = [0, 0, 0];
 		
 		
 		super.create();
@@ -229,6 +260,16 @@ class PlayState extends FlxState
 	 */
 	override public function destroy():Void
 	{
+		
+		_grpSmokes = FlxDestroyUtil.destroy(_grpSmokes);
+		_grpTanks = FlxDestroyUtil.destroy(_grpTanks);
+		_grpCopters = FlxDestroyUtil.destroy(_grpCopters);
+		_grpExplosions = FlxDestroyUtil.destroy(_grpExplosions);
+		_grpBullets = FlxDestroyUtil.destroy(_grpBullets);
+		_grpWorldWalls = FlxDestroyUtil.destroy(_grpWorldWalls);
+		_grpPowerups = FlxDestroyUtil.destroy(_grpPowerups);
+		m.destroy();
+		m = null;
 		
 		super.destroy();
 		//_gibs = null;
@@ -289,7 +330,10 @@ class PlayState extends FlxState
 				grpDisplay.add(tank);
 			}
 			else
+			{
 				tank.onScreen = false;
+				tank.kill();
+			}
 		}
 		var copter:Copter;
 		for (c in _grpCopters.members)
@@ -301,7 +345,10 @@ class PlayState extends FlxState
 				grpDisplay.add(copter);
 			}
 			else
+			{
 				copter.onScreen = false;
+				copter.kill();
+			}
 		}
 		var exp:Explosion;
 		for (e in _grpExplosions.members)
@@ -333,8 +380,31 @@ class PlayState extends FlxState
 				}
 			}
 		}
+		var pow:PowerUp;
+		for (p in _grpPowerups.members)
+		{
+			pow = cast p;
+			if (pow.exists && pow.visible && pow.alive)
+			{
+				if (_boundRect.overlaps(pow, true))
+				{
+					pow.onScreen = true;
+					grpDisplay.add(pow);
+				}
+				else
+				{
+					pow.onScreen = false;
+				}
+			}
+		}
+		
 		grpDisplay.sort(zSort, FlxSort.ASCENDING);
 
+	}
+	
+	private function goScoreState():Void
+	{
+		FlxG.switchState(new ScoreState());
 	}
 	
 	/**
@@ -345,79 +415,118 @@ class PlayState extends FlxState
 		
 		if (!_finished)
 		{
-			if (!m.finished)
-			{
-				m.update();
-			}
-			else
-			{
-				if (!_startedTween)
-				{
-					_startedTween = true;
-					grpDisplay.sort(zSort, FlxSort.ASCENDING);
-					
-					var sprTest:FlxSprite = new FlxSprite().makeGraphic(96, 96, FlxColor.BLACK);
-					
-					sprTest.moves = false;
-					sprTest.immovable = true;
-					sprTest.scrollFactor.x = sprTest.scrollFactor.y = 0;
-					sprTest.x = (m.mapTerrain.width / 2) - (sprTest.width / 2);
-					sprTest.y = (m.mapTerrain.height / 2) - (sprTest.height / 2);
-					add(sprTest);
-					sprTest.draw();
-					sprTest.update();
-					
-					for (c in m.cityTiles.members)
-					{
-						if (sprTest.overlaps(c, true))
-						{						
-							c.kill();
-						}
-					}
-					
-					_player.x = sprTest.x + (sprTest.width / 2) - (_player.width / 2) - FlxG.camera.scroll.x;
-					_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
-					sprTest.kill();
-					FlxG.camera.focusOn(_player.getMidpoint());
-					
-					FlxG.camera.follow(_player, FlxCamera.STYLE_TOPDOWN_TIGHT, null, 4);
-					FlxG.camera.followLead.x = 2;
-					FlxG.camera.followLead.y = 2;
-					
-					FlxG.sound.playMusic("game-music", 1, true);
-					
-					calculateDistances();
-					_allowDraw = true;
-					
-					var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
-				}
-				_barLoad.alpha = _sprLoad.alpha;
-			}
+			preGameSetup();
 			
 		}
-		else
+		else if (!_leaving)
 		{
-			_player.energy -= FlxG.elapsed*6;
-			changeWind();
-			checkEnemySpawn();
-			FlxG.collide(_player, _grpWorldWalls);
-			FlxG.collide(_player, m.cityTiles, playerTouchCityTile);
-			FlxG.overlap(grpDisplay, grpDisplay, checkOverlap);
-			
-			playerMovement();
-			if (_calcTmr > 0)
+			_player.energy -= FlxG.elapsed * 6;
+			if (_player.energy <= 0 )
 			{
-				_calcTmr -= FlxG.elapsed;
+				_leaving = true;
+				FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, goScoreState);
+				FlxG.sound.music.fadeOut(Reg.FADE_DUR);
 			}
 			else
 			{
-				_calcTmr = .33;
-				calculateDistances();
+				changeWind();
+				checkEnemySpawn();
+				FlxG.collide(_player, _grpWorldWalls);
+				FlxG.collide(_player, m.cityTiles, playerTouchCityTile);
+				FlxG.overlap(grpDisplay, grpDisplay, checkOverlap);
+				
+				
+				if (_roarsAvailable < 3)
+				{
+					if (_roarTimer < ROAR_RECHARGE)
+					{
+						_roarTimer += FlxG.elapsed;
+					}
+					else
+					{
+						_roarsAvailable++;
+						_roarTimer = 0;
+					}
+				}
+				if (_lastRoar > 0)
+					_lastRoar -= FlxG.elapsed;
+				
+				for (i in 0..._roarsAvailable)
+				{
+					_roarMarkers[i].available = true;
+				}
+				for (i in _roarsAvailable...3)
+				{
+					_roarMarkers[i].available = false;
+				}
+				
+				playerMovement();
+				if (_calcTmr > 0)
+				{
+					_calcTmr -= FlxG.elapsed;
+				}
+				else
+				{
+					_calcTmr = .33;
+					calculateDistances();
+				}
+				enemyMovement();
 			}
-			enemyMovement();
 		}
 		
 		super.update();
+	}
+	
+	private function preGameSetup():Void
+	{
+		if (!m.finished)
+		{
+			m.update();
+		}
+		else
+		{
+			if (!_startedTween)
+			{
+				_startedTween = true;
+				grpDisplay.sort(zSort, FlxSort.ASCENDING);
+				
+				var sprTest:FlxSprite = new FlxSprite().makeGraphic(96, 96, FlxColor.BLACK);
+				
+				sprTest.moves = false;
+				sprTest.immovable = true;
+				sprTest.scrollFactor.x = sprTest.scrollFactor.y = 0;
+				sprTest.x = (m.mapTerrain.width / 2) - (sprTest.width / 2);
+				sprTest.y = (m.mapTerrain.height / 2) - (sprTest.height / 2);
+				add(sprTest);
+				sprTest.draw();
+				sprTest.update();
+				
+				for (c in m.cityTiles.members)
+				{
+					if (sprTest.overlaps(c, true))
+					{						
+						c.kill();
+					}
+				}
+				
+				_player.x = sprTest.x + (sprTest.width / 2) - (_player.width / 2) - FlxG.camera.scroll.x;
+				_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
+				sprTest.kill();
+				FlxG.camera.focusOn(_player.getMidpoint());
+				
+				FlxG.camera.follow(_player, FlxCamera.STYLE_TOPDOWN_TIGHT, null, 4);
+				FlxG.camera.followLead.x = 2;
+				FlxG.camera.followLead.y = 2;
+				
+				FlxG.sound.playMusic("game-music", 1, true);
+				
+				calculateDistances();
+				_allowDraw = true;
+				
+				var _t:FlxTween = FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneLoad } );
+			}
+			_barLoad.alpha = _sprLoad.alpha;
+		}
 	}
 	
 	private function checkOverlap(A:FlxBasic, B:FlxBasic):Void
@@ -455,6 +564,8 @@ class PlayState extends FlxState
 						playerHitTank(cast A, cast B);
 					case "Copter":
 						playerHitCopter(cast A, cast B);
+					case "PowerUp":
+						playerGetPowerup(cast A, cast B);
 				}
 			case "Tank":
 				if (bName == "Player")
@@ -466,6 +577,20 @@ class PlayState extends FlxState
 				{
 					playerHitCopter(cast B, cast A);
 				}
+			case "PowerUp":
+				if (bName == "Player")
+				{
+					playerGetPowerup(cast B, cast A);
+				}
+		}
+	}
+	
+	private function playerGetPowerup(P:Player, O:PowerUp):Void
+	{
+		if (O.alive && O.exists)
+		{
+			O.kill();
+			_player.energy += 25;
 		}
 	}
 	
@@ -496,6 +621,7 @@ class PlayState extends FlxState
 			if (C.isDead)
 			{
 				giveScore(10);
+				Reg.scores[Reg.SCORE_COPTERS]++;
 			}
 		}
 	}
@@ -508,6 +634,7 @@ class PlayState extends FlxState
 			if (!T.alive)
 			{
 				giveScore(5);
+				Reg.scores[Reg.SCORE_TANKS]++;
 			}
 		}
 	}
@@ -623,8 +750,8 @@ class PlayState extends FlxState
 			{
 				_spawnTimerSet -= FlxG.elapsed;
 			}
-			else if (_spawnTimerSet < 0)
-				_spawnTimerSet = 0;
+			else if (_spawnTimerSet < 1)
+				_spawnTimerSet = 1;
 			
 			_spawnTimer = _spawnTimerSet;
 			_tankCount += 2.02;
@@ -641,9 +768,14 @@ class PlayState extends FlxState
 		{
 			_player.energy += c.tier * 2;
 			giveScore(c.tier * 10);
+			Reg.scores[Reg.SCORE_BUILDINGS]++;
 			if (FlxRandom.chanceRoll(2 * c.tier))
 			{
-				
+				var p:PowerUp = _grpPowerups.recycle(PowerUp);
+				if (p != null)
+				{
+					p.reset(c.x + (c.width / 2) - (p.width / 2), c.y + (c.height / 2) - (p.height / 2));
+				}
 			}
 		}
 	}
@@ -651,7 +783,7 @@ class PlayState extends FlxState
 	private function giveScore(Value:Int):Void
 	{
 		Reg.score += Value;
-		_txtScore.text = Std.string(Reg.score);
+		_txtScore.text = StringTools.lpad( Std.string(Reg.score),"0",9);
 	}
 	
 	private function zSort(Order:Int, A:FlxBasic, B:FlxBasic):Int
@@ -691,6 +823,8 @@ class PlayState extends FlxState
 	private function doneLoad(T:FlxTween):Void
 	{
 		_finished = true;
+		remove(_barLoad);
+		remove(_sprLoad);
 		_barLoad = FlxDestroyUtil.destroy(_barLoad);
 		_sprLoad = FlxDestroyUtil.destroy(_sprLoad);
 		
@@ -863,6 +997,7 @@ class PlayState extends FlxState
 		var _pressingDown:Bool = false;
 		var _pressingLeft:Bool = false;
 		var _pressingRight:Bool = false;
+		var _pressingShoot:Bool = false;
 		_pressingUp = FlxG.keys.anyPressed(["W", "UP"]);
 		_pressingDown = FlxG.keys.anyPressed(["S", "DOWN"]);
 		_pressingLeft = FlxG.keys.anyPressed(["A", "LEFT"]);
@@ -872,6 +1007,9 @@ class PlayState extends FlxState
 		if (_pressingLeft && _pressingRight)
 			_pressingLeft = _pressingRight = false;
 			
+		_pressingShoot = FlxG.keys.anyPressed(["SPACE", "X"]);
+		#end
+		
 		var mA:Float = -400;
 		if (_pressingUp)
 		{
@@ -941,7 +1079,50 @@ class PlayState extends FlxState
 		if (!_pressingLeft && !_pressingRight)
 			if (Math.abs(_player.velocity.x) > 1)
 				_player.velocity.x *= FRICTION;
-		#end
 		
+		if (_pressingShoot)
+		{
+			if (_roarsAvailable > 0)
+			{
+				if (_lastRoar <= 0)
+				{
+					_roarsAvailable--;
+					_lastRoar = 4;
+					FlxG.sound.play("sounds/roar.wav", .9);
+					FlxG.camera.shake(.005, 2);
+					var c:Copter;
+					for (cop in _grpCopters.members)
+					{
+						c = cast cop;
+						if (c.onScreen && c.alive && c.exists && !c.isDead)
+						{
+							giveScore(10);
+							Reg.scores[Reg.SCORE_COPTERS]++;
+							c.kill();
+						}
+					}
+					var t:Tank;
+					for (tan in _grpTanks.members)
+					{
+						t = cast tan;
+						if (t.onScreen && t.alive && t.exists)
+						{
+							giveScore(5);
+							Reg.scores[Reg.SCORE_TANKS]++;
+							t.kill();
+						}
+					}
+					var b:Bullet;
+					for (bul in _grpBullets.members)
+					{
+						b = cast bul;
+						if (b.onScreen && b.alive && b.exists)
+						{
+							b.kill();
+						}
+					}
+				}
+			}
+		}
 	}
 }

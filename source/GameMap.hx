@@ -13,6 +13,7 @@ import flixel.tile.FlxTile;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxBitmapUtil;
 import flixel.util.FlxColorUtil;
+import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxGradient;
 import flixel.util.FlxRandom;
 import flixel.util.FlxSort;
@@ -186,10 +187,7 @@ class GameMap
 		
 		_tileLoop = new FlxAsyncLoop(loopMax, addCityTiles, 100);
 	}
-	
 
-	
-	
 	public function addCityTiles():Void
 	{
 		var blockAvg:Float;
@@ -343,6 +341,14 @@ class GameMap
 			}
 		}
 		
+	}
+	
+	public function destroy():Void
+	{
+		mapTerrain = FlxDestroyUtil.destroy(mapTerrain);
+		cityTiles = FlxDestroyUtil.destroy(cityTiles);
+		mapPathing = FlxDestroyUtil.destroy(mapPathing);
+		mapWater = FlxDestroyUtil.destroy(mapWater);
 	}
 	
 	function get_loopCounter():Int 

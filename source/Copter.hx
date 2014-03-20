@@ -197,12 +197,17 @@ class Copter extends DisplaySprite
 	{
 		if (!alive)
 			return;
-		isDead = true;
-		
-		velocity.x = 0;
-		velocity.y = SPEED*.75;
-		
-		_floor = 64 + y + (height / 2);
+		if (onScreen)
+		{
+			isDead = true;
+			
+			velocity.x = 0;
+			velocity.y = SPEED*.75;
+			
+			_floor = 64 + y + (height / 2);
+		}
+		else
+			super.kill();
 		
 	}
 	

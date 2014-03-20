@@ -8,6 +8,7 @@ class PowerUp extends DisplaySprite
 	{
 		super(X, Y);
 		makeGraphic(32, 32, FlxColor.AQUAMARINE);
+		calcOnScreen = false;
 	}
 	
 }

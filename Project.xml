@@ -37,9 +37,15 @@
 	
 	<assets path="assets/music" if="flash" >
 		<music path="game-music.mp3" id="game-music" />
+		<music path="title-a.mp3" id="title-a" />
+		<music path="title-b.mp3" id="title-b" />
+		<music path="Score Screen.mp3" id="score" />
 	</assets>
 	<assets path="assets/music" unless="flash" >
 		<music path="game-music.ogg" id="game-music" />
+		<music path="title-a.ogg" id="title-a" />
+		<music path="title-b.ogg" id="title-b" />
+		<music path="Score Screen.ogg" id="score" />
 	</assets>
 	
 	

@@ -1,6 +1,10 @@
 package;
 
+import flash.display.BlendMode;
+import flash.filters.BlurFilter;
+import flash.filters.GlowFilter;
 import flixel.addons.display.FlxGridOverlay;
+import flixel.effects.FlxSpriteFilter;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -32,19 +36,52 @@ class MenuState extends FlxState
 	
 	private var _textMain:GameFont;
 	private var _textSub:GameFont;
+	private var _textMainWave:WaveSprite;
+	private var _text1Glow:GlowFilter;
+	private var _text2Glow:GlowFilter;
+	private var _text1Filter:FlxSpriteFilter;
+	private var _text2Filter:FlxSpriteFilter;
 	
 	private var _btnPlay:GameButton;//FlxButton;
 	private var _shownText:Bool = false;
-	
+	private var _leaving:Bool = false;
+	private var _loading:Bool = true;
 	
 	/**
 	 * Function that is called up when to state is created to set it up. 
 	 */
 	override public function create():Void
 	{
-		add(FlxGridOverlay.create(32, 32, -1, -1, false, true, 0xff111111, 0xff333333));
+		//add(FlxGridOverlay.create(32, 32, -1, -1, false, true, 0xff111111, 0xff333333));
+		add( new FlxSprite(0, 0, "images/title-back.png"));
+		
 		add(FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0x0, 0x0, 0xff000000], 1, 90));
 		
+		
+		_textMain = new GameFont(0, 24, "Dinosaur-Ghost", GameFont.STYLE_HUGE_TITLE, GameFont.COLOR_CYAN, "center");
+		_text1Glow = new GlowFilter(0xff66ffff, .9, 60, 60, 1, 1);
+		FlxTween.tween(_text1Glow, {alpha:.6 }, 2, { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut,  loopDelay:.6 } );
+		
+		_text1Filter = new FlxSpriteFilter(_textMain, 60, 60);
+		_text1Filter.addFilter(_text1Glow);
+		FlxSpriteUtil.screenCenter(_textMain, true, false);
+		_textMainWave = new WaveSprite(_textMain);
+		_textMainWave.alpha = 0;
+		_textMainWave.blend = BlendMode.SCREEN;
+		add(_textMainWave);
+		
+		_textSub = new GameFont(0, _textMainWave.y+_textMainWave.height-58,  "RAMPAGE", GameFont.STYLE_BIG_TITLE, GameFont.COLOR_RED, "center");
+		FlxSpriteUtil.screenCenter(_textSub, true, false);
+		_textSub.alpha = 0;
+		_textSub.angle = -3;
+		_textSub.blend  = BlendMode.HARDLIGHT;
+		add(_textSub);
+
+		_text2Glow = new GlowFilter(0xffff0000, .8, 50, 50, 1.5, 1);
+		FlxTween.tween(_text2Glow, { blurX:10, blurY:10 }, 2, { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut,  loopDelay:.6 } );
+		
+		_text2Filter = new FlxSpriteFilter(_textSub, 50, 50);
+		_text2Filter.addFilter(_text2Glow);
 		
 		_sprBones = new FlxSprite(0, 0, "images/title-bones.png");
 		add(_sprBones);
@@ -52,6 +89,7 @@ class MenuState extends FlxState
 		_sprBonesLight = new FlxSprite(0, 0, "images/title-bones-lightning.png");
 		_sprBonesLight.alpha = 0;
 		add(_sprBonesLight);
+		
 		
 		_sprGhost01 = new FlxSprite(0, 0, "images/title-ghost-01.png");
 		_sprGhost01.alpha = 0;
@@ -63,15 +101,7 @@ class MenuState extends FlxState
 		_sprGhost03.alpha = 0;
 		add(_sprGhost03);
 		
-		_textMain = new GameFont(0, 16, "Dinosaur-Ghost", GameFont.STYLE_HUGE_TITLE, GameFont.COLOR_CYAN);
-		FlxSpriteUtil.screenCenter(_textMain, true, false);
-		_textMain.alpha = 0;
-		add(_textMain);
 		
-		_textSub = new GameFont(0, _textMain.y+_textMain.height-16,  "RAMPAGE", GameFont.STYLE_BIG_TITLE, GameFont.COLOR_RED);
-		FlxSpriteUtil.screenCenter(_textSub, true, false);
-		_textSub.alpha = 0;
-		add(_textSub);
 		
 		_btnPlay = new GameButton(0, 0, "Play", goPlay, GameButton.STYLE_BLUE, true); //new FlxButton(0, 0, "Play", goPlay);
 		_btnPlay.y = FlxG.height - _btnPlay.height - 16;
@@ -79,10 +109,18 @@ class MenuState extends FlxState
 		_btnPlay.alpha = 0;
 		add(_btnPlay);
 		
+		FlxG.sound.playMusic("title-a", 1, false);
+		FlxG.sound.music.onComplete = musicFirstDone;
 		
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*2, true, doneFadeIn);
-		
+		_loading = false;
 		super.create();
+	}
+	
+	private function musicFirstDone():Void
+	{
+		if(!_leaving)
+			FlxG.sound.playMusic("title-b", 1, true);
 	}
 	
 	private function doneFadeIn():Void
@@ -97,8 +135,17 @@ class MenuState extends FlxState
 	
 	private function goPlay():Void
 	{
+		if (_btnPlay.alpha >= 1 && !_leaving && !_loading)
+		{
+			_leaving = true;
+			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, doneGoPlay);
+			FlxG.sound.music.fadeOut(Reg.FADE_DUR);
+		}
+	}
+	
+	private function doneGoPlay():Void
+	{
 		FlxG.switchState(new PlayState());
-		
 	}
 	
 	private function doneLightOne(T:FlxTween):Void
@@ -110,7 +157,8 @@ class MenuState extends FlxState
 	
 	private function doneLightTwo(T:FlxTween):Void
 	{
-		FlxG.sound.play("sounds/thunder.wav");
+		if (_shownText)
+			FlxG.sound.play("sounds/thunder.wav",.66);
 		var _lTween:FlxTween = FlxTween.tween(_sprBonesLight, {alpha:1}, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneLightThree } );
 	}
 	
@@ -143,7 +191,7 @@ class MenuState extends FlxState
 		if (!_shownText)
 		{
 			_shownText = true;
-			var tTween:FlxTween = FlxTween.tween(_textMain, {alpha:1}, 1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+			var tTween:FlxTween = FlxTween.tween(_textMainWave, {alpha:.9}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 			FlxTimer.start(.33, startSubTextIn);
 			FlxTimer.start(.66, startButtonIn);
 		}
@@ -159,18 +207,25 @@ class MenuState extends FlxState
 	
 	private function startSubTextIn(T:FlxTimer):Void
 	{
-		var tTween:FlxTween = FlxTween.tween(_textSub, {alpha:1}, 1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		var tTween:FlxTween = FlxTween.tween(_textSub, {alpha:.98}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 	}
 	private function startButtonIn(T:FlxTimer):Void
 	{
-		var tTween:FlxTween = FlxTween.tween(_btnPlay, {alpha:1}, 1, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		var tTween:FlxTween = FlxTween.tween(_btnPlay, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 	}
 	
 	
 	private function doneGhostThreeIn(T:FlxTween):Void
 	{
-		FlxG.sound.play("sounds/roar.wav", 1, false, true, doneRoar);
-		FlxG.camera.shake(0.025, 2,null,true,FlxCamera.SHAKE_VERTICAL_ONLY);
+		if (_shownText)
+		{
+			FlxG.sound.play("sounds/roar.wav", .66, false, true, doneRoar);
+			FlxG.camera.shake(0.005, 2,null,true,FlxCamera.SHAKE_VERTICAL_ONLY);
+		}
+		else
+		{
+			FlxG.camera.shake(0.02, 2,null,true,FlxCamera.SHAKE_VERTICAL_ONLY);
+		}
 		FlxTimer.start(1.3, doneGhostFinalIn);
 		
 		
@@ -189,7 +244,7 @@ class MenuState extends FlxState
 	
 	private function doneGhostOut(T:FlxTween):Void
 	{
-		FlxTimer.start(4, doneStartWait);
+		FlxTimer.start(6, doneStartWait);
 	}
 	/**
 	 * Function that is called when this state is destroyed - you might want to 
@@ -206,5 +261,7 @@ class MenuState extends FlxState
 	override public function update():Void
 	{
 		super.update();
+		_text1Filter.applyFilters();
+		_text2Filter.applyFilters();
 	}	
 }

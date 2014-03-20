@@ -51,6 +51,10 @@ class GameFont extends FlxSprite
 	private static var COLORS_SIMPLEGREEN:Array<Int> = [0xff98f870,0xff98f870, 0xff60d850, 0xff00a840, 0xff00a840, 0xff006018,0xff007818,0xff2b4006];
 	private static var COLORS_SIMPLEYELLOW:Array<Int> = [0xfff8f858, 0xfff8f858, 0xfff8c800, 0xfff08808, 0xfff08808, 0xffc83800, 0xffd05000, 0xff7d7c0b];
 	
+	private static var ALIGN_LEFT:String = "left";
+	private static var ALIGN_RIGHT:String = "right";
+	private static var ALIGN_CENTER:String = "center";
+	
 	
 	private var _text:String = "";
 	private var _style:Int = 0;
@@ -58,14 +62,18 @@ class GameFont extends FlxSprite
 	private var _hasShadow:Bool = false;
 	private var _hasInnerGlow:Bool = false;
 	private var _hasOutline:Bool = false;
+	public var align:String;
+	private var _size:Int;
 	
 	
-	public function new(X:Float=0, Y:Float=0, Text:String = "", Style:Int = 0, Color:Int = 0) 
+	public function new(X:Float=0, Y:Float=0, Text:String = "", Style:Int = 0, Color:Int = 0, Alignment:String = "left", Size:Int = -1) 
 	{
 		super(X, Y);
 		_style = Style;
 		_text = Text;
 		_textColor = Color;
+		_size = Size;
+		align = Alignment;
 		drawText();
 		
 	}
@@ -80,13 +88,13 @@ class GameFont extends FlxSprite
 		switch(_style)
 		{
 			case STYLE_HUGE_TITLE:
-				size = 96;
+				size = 130;
 				font = Reg.FONT_BIG;
 				_hasShadow = true;
 				_hasInnerGlow = true;
 				_hasOutline = true;
 			case STYLE_BIG_TITLE:
-				size = 64;
+				size = 96;
 				font = Reg.FONT_SCARY;
 				_hasShadow = true;
 				_hasInnerGlow = true;
@@ -104,11 +112,12 @@ class GameFont extends FlxSprite
 				font = Reg.FONT_KPIXELMINI;
 				_hasShadow = false;
 			case STYLE_SMSIMPLE:
-				size = 32;
+				size = 24;
 				font = Reg.FONT_KPIXELMINI;
 				_hasShadow = true;
 		}
-		
+		if (_size != -1)
+			size = _size;
 		switch (_textColor)
 		{
 			case COLOR_RED:
@@ -146,7 +155,7 @@ class GameFont extends FlxSprite
 		}
 		
 		var tmpText:FlxText = new FlxText(0, 0, FlxG.width, _text);
-		tmpText.setFormat(font, size, 0x000000, "left");
+		tmpText.setFormat(font, size, 0x000000, align);
 		//tmpText.update();
 		tmpText.drawFrame();
 		//tmpText.draw();

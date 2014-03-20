@@ -99,9 +99,12 @@ class Tank extends DisplaySprite
 	{
 		if (!alive || !exists || !visible)
 			return;
-		var a:Float = FlxAngle.getAngle(getMidpoint(_point), _target);
+		var t:FlxPoint = FlxPoint.get();
+		t.copyFrom(_target);
+		t.y -= 8;
+		var a:Float = FlxAngle.getAngle(getMidpoint(_point), t);
 		_turret.relativeAngle = a;
-		
+		t.put();
 		var shoot:Bool = false;
 		var os:Float = _shootClock;
 		_shootClock += FlxG.elapsed;
@@ -165,23 +168,10 @@ class Tank extends DisplaySprite
 	{
 		if (!alive)
 			return;
-		
+			
+		if (onScreen)
+			Reg.playState.createSmallSmoke(x - 2, y - 2, width + 4, height + 4);
 		super.kill();
-		
-		//_gibs.at(this);
-		//_gibs.z = z;
-		/*
-		var p:ZParticle;
-		for (i in _gibs.members)
-		{
-			p = cast i;
-			p.floor = FlxRandom.intRanged(Std.int(y -2), Std.int(y + height + 2));
-		}
-		_gibs.start(true, 2, 0, 10,4);
-		_gibs.update();
-		*/
-		Reg.playState.createSmallSmoke(x - 2, y - 2, width + 4, height + 4);
-		
 	}
 	
 	override public function hurt(Damage:Float):Void 
