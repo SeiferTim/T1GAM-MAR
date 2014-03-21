@@ -28,11 +28,11 @@ class Copter extends DisplaySprite
 		calcOnScreen = false;
 		makeGraphic(50, 50, 0x0);
 		_body = new DisplaySprite();
-		_body.loadGraphic("images/copter.png", false, false, 50, 50, false, "copter");
+		_body.loadGraphic("images/copter.png", false, false, 50, 50);
 		add(_body);
 		setPosition(X, Y);
 		_prop = new DisplaySprite(0, 0);
-		_prop.loadGraphic("images/propellor.png", true, false, 32, 32, false, "prop");		
+		_prop.loadGraphic("images/propellor.png", true, false, 32, 32);		
 		_prop.animation.add("spin", [0, 1], 12);
 		_prop.relativeAngle = 0;
 		_prop.relativeX = 0;

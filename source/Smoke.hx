@@ -21,7 +21,7 @@ class Smoke extends ZParticle
 		immovable = true;
 		allowCollisions  = FlxObject.NONE;
 		solid = false;
-		loadGraphic("images/smoke.png", true, false, 32, 32, false, "smoke");
+		loadGraphic("images/smoke.png", true, false, 32, 32);
 		
 	}
 	
@@ -40,7 +40,7 @@ class Smoke extends ZParticle
 		useColoring = false;
 		useScaling = false;
 		useFading = false;
-		alpha = 0;
+		alpha = 0; // change back!
 		animation.frameIndex = FlxRandom.intRanged(0, 3);
 		draw();
 		velocity.x = 0;

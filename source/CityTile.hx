@@ -18,7 +18,7 @@ class CityTile extends DisplaySprite
 		super(X, Y);
 		tier = Tier;
 		health = tier;
-		loadGraphic("images/city-tiles.png", true, false, 64, 128,false,"city");
+		loadGraphic("images/city-tiles.png", true, false, 64, 128);
 		width = 66;
 		height = 66;
 		offset.y = 63;
@@ -31,6 +31,7 @@ class CityTile extends DisplaySprite
 		onScreen = true;
 		
 		
+		
 	}
 	
 	override public function update():Void 
@@ -39,6 +40,7 @@ class CityTile extends DisplaySprite
 			return;
 		if (_hurtTimer > 0)
 			_hurtTimer -= FlxG.elapsed;
+		//super.update();
 	}
 	
 	override public function draw():Void
@@ -67,6 +69,8 @@ class CityTile extends DisplaySprite
 	
 	override public function kill():Void
 	{
+		if (isDead || !alive || !exists)
+			return;
 		isDead = true;
 		animation.frameIndex = 0;
 		allowCollisions = FlxObject.NONE;

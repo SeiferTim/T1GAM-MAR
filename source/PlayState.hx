@@ -53,7 +53,7 @@ class PlayState extends FlxState
 	private var _barLoad:FlxBar;
 	private var _startedTween:Bool = false;
 	public var grpDisplay:FlxGroup;
-	private var _grpSmokes:FlxGroup;
+	private var _grpSmokes:FlxTypedGroup<SmokeSpawner>;
 	private var _boundRect:FlxSprite;
 	
 	private var _grpHUD:FlxGroup;
@@ -103,7 +103,7 @@ class PlayState extends FlxState
 		Reg.score = 0;
 		
 		grpDisplay = new FlxGroup();
-		_grpSmokes = new FlxGroup();
+		_grpSmokes = new FlxTypedGroup<SmokeSpawner>();
 		_grpTanks = new FlxTypedGroup<Tank>();
 		_grpCopters = new FlxTypedGroup<Copter>();
 		_grpExplosions = new FlxTypedGroup<Explosion>();
@@ -111,7 +111,7 @@ class PlayState extends FlxState
 		_grpWorldWalls = new FlxGroup(4);
 		_grpPowerups = new FlxTypedGroup<PowerUp>();
 		
-		m = new GameMap(40, 40);
+		m = new GameMap(60, 60);
 		_trailArea = new FlxTrailArea(0, 0, Std.int(m.mapTerrain.width), Std.int(m.mapTerrain.height), .6, 1, true);
 		
 		
@@ -293,9 +293,14 @@ class PlayState extends FlxState
 		//trace("Cities: " + m.cityTiles.members.length + " Tanks: " + _grpTanks.members.length + " Bullets: " + _grpBullets.members.length);
 		grpDisplay.clear();
 		grpDisplay.add(_player);
+		
+		var on:Int = 0;
+		var off:Int = 0;
+
 		var c:CityTile;
 		for (o in m.cityTiles.members)
 		{
+			
 			c = cast(o, CityTile);
 			c.onScreen = false;
 			if (c.alive && c.exists && c.visible)
@@ -304,6 +309,7 @@ class PlayState extends FlxState
 				{
 					c.onScreen = true;
 					grpDisplay.add(c);
+					on++;
 				}
 			}
 		}
@@ -320,6 +326,7 @@ class PlayState extends FlxState
 				}
 			}
 		}
+		
 		var tank:Tank;
 		for (t in _grpTanks.members)
 		{
@@ -831,9 +838,20 @@ class PlayState extends FlxState
 		
 	}
 	
+	private function addSmoke(X:Float, Y:Float, Width:Float, Height:Float):Void
+	{
+		var s:SmokeSpawner = _grpSmokes.recycle(SmokeSpawner);
+		if (s != null)
+		{
+			s.init(X, Y, Width, Height);
+		}
+		
+		//_grpSmokes.add(new SmokeSpawner(X,Y, Width, Height));
+	}
+	
 	public function createCitySmoke(X:Float, Y:Float, C:CityTile):Void
 	{
-		_grpSmokes.add(new SmokeSpawner(X, Y, 64, 64));
+		addSmoke(X, Y, 64, 64);
 		m.mapPathing.setTile(Math.floor(X/32)-1, Math.floor(Y/32)-2, 0);
 		m.mapPathing.setTile(Math.floor(X/32), Math.floor(Y/32)-2, 0);
 		m.mapPathing.setTile(Math.floor(X/32)-1, Math.floor(Y/32)-1, 0);
@@ -867,7 +885,7 @@ class PlayState extends FlxState
 	
 	public function createSmallSmoke(X:Float, Y:Float, Width:Float, Height:Float):Void
 	{
-		_grpSmokes.add(new SmokeSpawner(X, Y, Width, Height));
+		addSmoke(X, Y, Width, Height);
 		spawnExplosion(X - 2, X + Width + 2, Y - 2, Y + Height + 2);
 	}
 	

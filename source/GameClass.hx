@@ -24,6 +24,7 @@ class GameClass extends FlxGame
 		//Lib.current.stage.quality = StageQuality.LOW;
 		Reg.initGame();
 		FlxG.fixedTimestep = false;
+		FlxG.debugger.drawDebug = false;
 		
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;

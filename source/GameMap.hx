@@ -42,6 +42,19 @@ class GameMap
 	private var _whichTileCol:Int;
 	private var _sinceRoadCol:Int = 7;
 	private var _sinceRoadRow:Int = 7;
+	private var _terrainMap:Array<Int>;
+	
+	
+	private static inline var DEEP:Int = 1;
+	private static inline var SHALLOW:Int = 2;
+	private static inline var BEACH:Int = 3;
+	private static inline var GRASS:Int = 4;
+	private static inline var MTN:Int = 5;
+	private static inline var PEAK:Int = 6;
+	private static inline var STREETV:Int = 7;
+	private static inline var STREETH:Int = 8;
+	private static inline var STREETI:Int = 9;
+	
 	
 
 	public function new(Width:Int, Height:Int ) 
@@ -54,7 +67,7 @@ class GameMap
 		var bP:Int;
 		var _terrainData:BitmapData;
 		var _popData:BitmapData;
-		var _terrainMap:Array<Int>;
+		
 		
 		_width = Width;
 		_height = Height;
@@ -120,10 +133,44 @@ class GameMap
 				}
 			}
 		}
+		
+		var centers:Array<Int> = [];
+		centers.push( Math.floor(((_height / 2) * _width) + (_width / 2)));
+		centers.push( Math.floor((((_height / 2)+1) * _width) + (_width / 2)));
+		centers.push( Math.floor(((_height / 2) * _width) + (_width / 2)+1));
+		centers.push( Math.floor((((_height / 2) + 1) * _width) + (_width / 2) + 1));
+		
+		centers.push( Math.floor((((_height / 2)-2) * _width) + (_width / 2)));
+		centers.push( Math.floor((((_height / 2)-1) * _width) + (_width / 2)));
+		centers.push( Math.floor((((_height / 2)-2) * _width) + (_width / 2)+1));
+		centers.push( Math.floor((((_height / 2) - 1) * _width) + (_width / 2) + 1));
+		
+		centers.push( Math.floor((((_height / 2)-2) * _width) + (_width / 2)-2));
+		centers.push( Math.floor((((_height / 2)-1) * _width) + (_width / 2)-2));
+		centers.push( Math.floor((((_height / 2)-2) * _width) + (_width / 2)-1));
+		centers.push( Math.floor((((_height / 2) - 1) * _width) + (_width / 2) - 1));
+		
+		centers.push( Math.floor((((_height / 2)) * _width) + (_width / 2)-2));
+		centers.push( Math.floor((((_height / 2)+1) * _width) + (_width / 2)-2));
+		centers.push( Math.floor((((_height / 2)) * _width) + (_width / 2)-1));
+		centers.push( Math.floor((((_height / 2)+1) * _width) + (_width / 2)-1));
+		
+		for (i in 0...centers.length)
+		{
+			if (_terrainMap[centers[i]] < 3)
+				_terrainMap[centers[i]] = 3;
+			else if (_terrainMap[centers[i]] > 4)
+				_terrainMap[centers[i]] = 4;
+		}
+		
+		
 
 		mapTerrain = new FlxTilemap();
 		mapTerrain.widthInTiles = _width;
 		mapTerrain.heightInTiles = _height;
+		
+		
+		
 		mapTerrain.loadMap(_terrainMap, "images/terrain.png", 32, 32, FlxTilemap.OFF, 0, 1, 1);
 		
 		for (i in 0..._terrainMap.length)
@@ -177,12 +224,6 @@ class GameMap
 		loopMax = _popMap.length;
 		
 		
-		
-		mapTerrain.allowCollisions = FlxObject.NONE;
-		//mapTerrain.collisionType = FlxCollisionType.NONE;
-		mapTerrain.immovable = true;
-		mapTerrain.moves = false;
-		mapTerrain.solid = false;
 		
 		
 		_tileLoop = new FlxAsyncLoop(loopMax, addCityTiles, 100);
@@ -335,6 +376,14 @@ class GameMap
 				mapWater.setTileProperties(0, FlxObject.NONE);
 				mapWater.setTileProperties(1, FlxObject.ANY);
 				
+				
+				//buildTerrain();
+				
+				mapTerrain.allowCollisions = FlxObject.NONE;
+				mapTerrain.immovable = true;
+				mapTerrain.moves = false;
+				mapTerrain.solid = false;
+				
 				finished = true;
 				_tileLoop.kill();
 				_tileLoop.destroy();
@@ -357,5 +406,58 @@ class GameMap
 	}
 	
 	public var loopCounter(get_loopCounter, null):Int;
+	
+	/*private function buildTerrain():Void
+	{
+		var _newMap:Array<Int> = [];
+		
+		var nThis:Int = 0;
+		var nLeft:Int = 0;
+		var nUp:Int = 0;
+		var nRight:Int = 0;
+		var nDown:Int = 0;
+		var tmp:Int;
+		
+		for (tX in 0..._width)
+		{
+			for (tY in 0..._height)
+			{
+				nThis = _terrainMap[(tY * _width) + tX];
+				
+				if (tX ==0)
+					nLeft = -1;
+				else
+					nLeft = _terrainMap[(tY * _width) + tX - 1];
+				
+				if (tX == _width - 1)
+					nRight = -1
+				else
+					nRight = _terrainMap[(tY * _width) + tX + 1];
+				
+				if (tY == 0)
+					nUp = -1;
+				else
+					nUp = _terrainMap[((tY - 1) * _width) + tX];
+				
+				if (tY == _height - 1)
+					nDown = -1;
+				else
+					nDown = _terrainMap[((tY + 1) * _width) + tX];
+				
+				switch(nThis)
+				{
+					case DEEP,SHALLOW:
+						switch(nUp)
+						{
+							case -1, DEEP, SHALLOW:
+								switch(
+						}
+						
+				}
+			}
+		}
+		
+		
+	}*/
 	
 }
