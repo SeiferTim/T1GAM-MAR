@@ -111,7 +111,7 @@ class PlayState extends FlxState
 		_grpWorldWalls = new FlxGroup(4);
 		_grpPowerups = new FlxTypedGroup<PowerUp>();
 		
-		m = new GameMap(79, 80);
+		m = new GameMap(40, 40);
 		_trailArea = new FlxTrailArea(0, 0, Std.int(m.mapTerrain.width), Std.int(m.mapTerrain.height), .6, 1, true);
 		
 		

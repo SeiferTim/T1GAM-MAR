@@ -30,6 +30,7 @@ class CityTile extends DisplaySprite
 		calcOnScreen = false;
 		onScreen = true;
 		
+		
 	}
 	
 	override public function update():Void 

@@ -20,10 +20,8 @@ class WaveSprite extends FlxSprite
 	{
 		_target = Target;
 		super(_target.x - 20, _target.y);
-		makeGraphic(Std.int(_target.width + 40), Std.int(_target.height), 0x0, true, "main-text");
-		//pixels = new BitmapData(Std.int(_target.width + 40), Std.int(_target.height), true, 0x0);
+		makeGraphic(Std.int(_target.width + 40), Std.int(_target.height), 0x0, true);
 		pixels.copyPixels(_target.pixels, _target.pixels.rect, new Point(20, 0));
-		FlxG.watch.add(this, "_time");
 		dirty = true;
 		
 	}
@@ -35,8 +33,6 @@ class WaveSprite extends FlxSprite
 		var off:Float = 0;
 		for (y in 0...Std.int(_target.height))
 		{
-			
-			
 			if (y < _startY)
 			{
 				pixels.copyPixels(_target.pixels, new Rectangle(0, y, _target.width, 1), new Point(20, y));
