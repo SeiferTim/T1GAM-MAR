@@ -29,9 +29,6 @@ class CityTile extends DisplaySprite
 		allowCollisions = FlxObject.ANY;
 		calcOnScreen = false;
 		onScreen = true;
-		
-		
-		
 	}
 	
 	override public function update():Void 
