@@ -1,23 +1,15 @@
 package ;
 import flash.display.BitmapData;
-import flash.display.InterpolationMethod;
-import flash.filters.BlurFilter;
 import flash.geom.Point;
-import flash.geom.Rectangle;
 import flixel.addons.util.FlxAsyncLoop;
-import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.group.FlxGroup;
-import flixel.system.FlxCollisionType;
-import flixel.tile.FlxTile;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxBitmapUtil;
 import flixel.util.FlxColorUtil;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxGradient;
 import flixel.util.FlxRandom;
-import flixel.util.FlxSort;
-import flixel.util.FlxSpriteUtil;
 
 
 class GameMap
@@ -88,11 +80,46 @@ class GameMap
 			FlxBitmapUtil.merge(b, b.rect, _terrainData, new Point(), 100, 100, 100, 100);
 		}
 		
+		var centers:Array<Int> = [];
+		
+		var startX:Int = Std.int(Width / 2)-6;
+		var startY:Int = Std.int(Height / 2)-6;
+		for (cX in 0...12)
+		{
+			for (cY in 0...12)
+			{
+				centers.push( Math.floor((((startY)+cY) * _width) + (startX)+cX));
+				centers.push( Math.floor((((startY)+cY+1) * _width) + (startX)+cX));
+				centers.push( Math.floor((((startY)+cY) * _width) + (startX)+1+cX));
+				centers.push( Math.floor((((startY)+cY+1) * _width) + (startX)+1+cX));
+			}
+		}
+		
+		var center:Bool = false;
 		for (nX in 0..._terrainData.width)
 		{
 			for (nY in 0..._terrainData.height)
 			{
 				cur = FlxColorUtil.getRed(_terrainData.getPixel32(nX, nY));
+				
+				if (cur < 65)
+				{
+					center = false;
+					for (i in 0...centers.length)
+					{
+						if (centers[i] == (nY * Width) + nX)
+						{
+							center = true;
+							break;
+						}
+					}
+					
+					if (center)
+					{
+						cur = 65;
+					}
+				}
+				
 				if (cur < 35)
 				{
 					_terrainMap.push(1);
@@ -131,39 +158,10 @@ class GameMap
 					_terrainMap.push(6);
 					_popData.setPixel32(nX, nY, FlxColorUtil.darken(_popData.getPixel32(nX, nY),FlxRandom.floatRanged(.6,1)));
 				}
+				
+				
 			}
 		}
-		
-		var centers:Array<Int> = [];
-		centers.push( Math.floor(((_height / 2) * _width) + (_width / 2)));
-		centers.push( Math.floor((((_height / 2)+1) * _width) + (_width / 2)));
-		centers.push( Math.floor(((_height / 2) * _width) + (_width / 2)+1));
-		centers.push( Math.floor((((_height / 2) + 1) * _width) + (_width / 2) + 1));
-		
-		centers.push( Math.floor((((_height / 2)-2) * _width) + (_width / 2)));
-		centers.push( Math.floor((((_height / 2)-1) * _width) + (_width / 2)));
-		centers.push( Math.floor((((_height / 2)-2) * _width) + (_width / 2)+1));
-		centers.push( Math.floor((((_height / 2) - 1) * _width) + (_width / 2) + 1));
-		
-		centers.push( Math.floor((((_height / 2)-2) * _width) + (_width / 2)-2));
-		centers.push( Math.floor((((_height / 2)-1) * _width) + (_width / 2)-2));
-		centers.push( Math.floor((((_height / 2)-2) * _width) + (_width / 2)-1));
-		centers.push( Math.floor((((_height / 2) - 1) * _width) + (_width / 2) - 1));
-		
-		centers.push( Math.floor((((_height / 2)) * _width) + (_width / 2)-2));
-		centers.push( Math.floor((((_height / 2)+1) * _width) + (_width / 2)-2));
-		centers.push( Math.floor((((_height / 2)) * _width) + (_width / 2)-1));
-		centers.push( Math.floor((((_height / 2)+1) * _width) + (_width / 2)-1));
-		
-		for (i in 0...centers.length)
-		{
-			if (_terrainMap[centers[i]] < 3)
-				_terrainMap[centers[i]] = 3;
-			else if (_terrainMap[centers[i]] > 4)
-				_terrainMap[centers[i]] = 4;
-		}
-		
-		
 
 		mapTerrain = new FlxTilemap();
 		mapTerrain.widthInTiles = _width;
@@ -352,6 +350,7 @@ class GameMap
 				_sinceRoadRow++;
 			}
 		}
+		Reg.playState.barLoadLeft.animation.frameIndex = 1;
 		
 	}
 	
@@ -387,6 +386,7 @@ class GameMap
 				finished = true;
 				_tileLoop.kill();
 				_tileLoop.destroy();
+				Reg.playState.barLoadRight.animation.frameIndex = 1;
 			}
 		}
 		

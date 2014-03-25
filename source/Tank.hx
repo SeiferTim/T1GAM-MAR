@@ -1,10 +1,6 @@
 package ;
-import flixel.effects.particles.FlxEmitter;
-import flixel.effects.particles.FlxEmitterExt;
 import flixel.FlxG;
-import flixel.group.FlxTypedGroup.FlxTypedGroup;
 import flixel.util.FlxAngle;
-import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxPoint;
 import flixel.util.FlxRandom;
@@ -59,7 +55,8 @@ class Tank extends DisplaySprite
 		_dest.y = y;
 		_vec.set();
 		health = 1;
-		_shootClock = 0;
+		_shootClock = FlxRandom.floatRanged(0,2.9);
+		moving = false;
 		
 	}
 	
@@ -127,6 +124,7 @@ class Tank extends DisplaySprite
 					if (Reg.playState.m.mapPathing.ray(getMidpoint(_point), _target))
 					{					
 						Reg.playState.shootBullet(getMidpoint(_point), a);
+						FlxG.sound.play("sounds/Shoot-Standard.wav",.8);
 					}
 				}
 			
@@ -170,7 +168,10 @@ class Tank extends DisplaySprite
 			return;
 			
 		if (onScreen)
+		{
 			Reg.playState.createSmallSmoke(x - 2, y - 2, width + 4, height + 4);
+			FlxG.sound.play("sounds/Smash.wav",.8);
+		}
 		super.kill();
 	}
 	

@@ -5,7 +5,6 @@ import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxMath;
 import flixel.util.FlxPoint;
 import flixel.util.FlxRandom;
-import flixel.util.FlxVector;
 import flixel.util.FlxVelocity;
 
 
@@ -66,7 +65,7 @@ class Copter extends DisplaySprite
 		reset(xPos - width / 2, yPos -height / 2);
 		health = 1;
 
-		_shootClock = 0;
+		_shootClock = FlxRandom.floatRanged(0,1.9);
 		isDead = false;
 		
 		setTarget(TarX, TarY);
@@ -141,7 +140,7 @@ class Copter extends DisplaySprite
 				if (onScreen)
 				{
 					Reg.playState.shootBullet(m, _body.angle, Bullet.MISSLE);
-					
+					FlxG.sound.play("sounds/Shoot-Missle.wav",.8);
 				}
 			}
 			m = FlxDestroyUtil.put(m);
@@ -205,6 +204,7 @@ class Copter extends DisplaySprite
 			velocity.y = SPEED*.75;
 			
 			_floor = 64 + y + (height / 2);
+			FlxG.sound.play("sounds/Smash.wav",.8);
 		}
 		else
 			super.kill();

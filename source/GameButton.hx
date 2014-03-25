@@ -2,6 +2,8 @@ package ;
 
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUITypedButton;
+import flixel.FlxG;
+import flixel.system.FlxSound;
 import flixel.ui.FlxButton;
 
 class GameButton extends FlxUITypedButton<GameFont>
@@ -11,6 +13,8 @@ class GameButton extends FlxUITypedButton<GameFont>
 	public static inline var STYLE_BLUE:Int = 1;
 	public static inline var STYLE_YELLOW:Int = 3;
 	public static inline var STYLE_RED:Int = 4;
+	
+	private var _sound:FlxSound;
 
 	private static var  _slices:Array<Array<Int>> = [[7, 7, 41, 38], [7, 7, 41, 38], [7, 7, 41, 38]];
 	
@@ -68,6 +72,9 @@ class GameButton extends FlxUITypedButton<GameFont>
 		autoCenterLabel();
 		
 		broadcastToFlxUI = false;
+		_sound = FlxG.sound.load("sounds/Button.wav");
+		onUp.sound = _sound;
+		
 	}
 	
 	override public function update():Void 

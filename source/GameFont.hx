@@ -1,12 +1,10 @@
 package ;
 
-import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.filters.DropShadowFilter;
 import flash.filters.GlowFilter;
 import flash.geom.Point;
 import flash.geom.Rectangle;
-import flash.text.Font;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
@@ -121,22 +119,22 @@ class GameFont extends FlxSprite
 		switch (_textColor)
 		{
 			case COLOR_RED:
-				colors = COLORS_RED;
+				colors = COLORS_RED.copy();
 			
 			case COLOR_CYAN:
-				colors = COLORS_CYAN;
+				colors = COLORS_CYAN.copy();
 				
 			case COLOR_YELLOW:
-				colors = COLORS_YELLOW;
+				colors = COLORS_YELLOW.copy();
 				
 			case COLOR_GREEN:
-				colors = COLORS_GREEN;
+				colors = COLORS_GREEN.copy();
 				
 			case COLOR_BLUE:
-				colors = COLORS_BLUE;
+				colors = COLORS_BLUE.copy();
 				
 			case COLOR_WHITE:
-				colors = COLORS_WHITE;
+				colors = COLORS_WHITE.copy();
 				
 			case COLOR_SIMPLEGOLD:
 				colors = COLORS_SIMPLEGOLD.copy();

@@ -28,6 +28,7 @@ class Bullet extends DisplaySprite
 	{
 		super.reset(Location.x - width / 2, Location.y - height / 2);
 		FlxAngle.rotatePoint(0, SPEED, 0, 0, Angle, _point);
+		angle = Angle;
 		style = Style;
 		_time = 0;
 		switch(style)

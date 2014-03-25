@@ -1,33 +1,25 @@
 package;
 
 import flash.display.BlendMode;
-import flash.filters.BlurFilter;
 import flash.filters.GlowFilter;
-import flixel.addons.display.FlxGridOverlay;
+import flixel.addons.effects.FlxWaveSprite;
 import flixel.effects.FlxSpriteFilter;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxGradient;
-import flixel.util.FlxMath;
 import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
-import lime.Constants.Window;
-import openfl.events.JoystickEvent;
 
 /**
  * A FlxState which can be used for the game's menu.
  */
 class MenuState extends FlxState
 {
-	
-	
 	private var _sprBones:FlxSprite;
 	private var _sprBonesLight:FlxSprite;
 	private var _sprGhost01:FlxSprite;
@@ -36,13 +28,14 @@ class MenuState extends FlxState
 	
 	private var _textMain:GameFont;
 	private var _textSub:GameFont;
-	private var _textMainWave:WaveSprite;
+	private var _textMainWave:FlxWaveSprite;
 	private var _text1Glow:GlowFilter;
 	private var _text2Glow:GlowFilter;
 	private var _text1Filter:FlxSpriteFilter;
 	private var _text2Filter:FlxSpriteFilter;
 	
-	private var _btnPlay:GameButton;//FlxButton;
+	private var _btnPlay:GameButton;
+	private var _btnCredits:GameButton;
 	private var _shownText:Bool = false;
 	private var _leaving:Bool = false;
 	private var _loading:Bool = true;
@@ -65,7 +58,7 @@ class MenuState extends FlxState
 		_text1Filter = new FlxSpriteFilter(_textMain, 60, 60);
 		_text1Filter.addFilter(_text1Glow);
 		FlxSpriteUtil.screenCenter(_textMain, true, false);
-		_textMainWave = new WaveSprite(_textMain);
+		_textMainWave = new FlxWaveSprite(_textMain,FlxWaveSprite.MODE_BOTTOM);
 		_textMainWave.alpha = 0;
 		_textMainWave.blend = BlendMode.SCREEN;
 		add(_textMainWave);
@@ -100,14 +93,18 @@ class MenuState extends FlxState
 		_sprGhost03 = new FlxSprite(0, 0, "images/title-ghost-03.png");
 		_sprGhost03.alpha = 0;
 		add(_sprGhost03);
-		
-		
-		
-		_btnPlay = new GameButton(0, 0, "Play", goPlay, GameButton.STYLE_BLUE, true); //new FlxButton(0, 0, "Play", goPlay);
+
+		_btnPlay = new GameButton(0, 0, "Play", goPlay, GameButton.STYLE_BLUE, false, 160,40); //new FlxButton(0, 0, "Play", goPlay);
+		_btnPlay.x = (FlxG.width/2)-192;
 		_btnPlay.y = FlxG.height - _btnPlay.height - 16;
-		FlxSpriteUtil.screenCenter(_btnPlay, true, false);
 		_btnPlay.alpha = 0;
 		add(_btnPlay);
+		
+		_btnCredits = new GameButton(0, 0, "Credits", goCredits, GameButton.STYLE_BLUE, false, 160,40); //new FlxButton(0, 0, "Play", goPlay);
+		_btnCredits.x = (FlxG.width/2)+32;
+		_btnCredits.y = FlxG.height - _btnCredits.height - 16;
+		_btnCredits.alpha = 0;
+		add(_btnCredits);
 		
 		FlxG.sound.playMusic("title-a", 1, false);
 		FlxG.sound.music.onComplete = musicFirstDone;
@@ -138,9 +135,24 @@ class MenuState extends FlxState
 		if (_btnPlay.alpha >= 1 && !_leaving && !_loading)
 		{
 			_leaving = true;
-			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, doneGoPlay);
-			FlxG.sound.music.fadeOut(Reg.FADE_DUR);
+			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*4, false, doneGoPlay);
+			FlxG.sound.music.fadeOut(Reg.FADE_DUR*4);
 		}
+	}
+	
+	private function goCredits():Void
+	{
+		if (_btnCredits.alpha >= 1 && !_leaving && !_loading)
+		{
+			_leaving = true;
+			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*4, false, doneGoCredits);
+			FlxG.sound.music.fadeOut(Reg.FADE_DUR*4);
+		}
+	}
+	
+	private function doneGoCredits():Void
+	{
+		FlxG.switchState(new CreditState());
 	}
 	
 	private function doneGoPlay():Void
@@ -211,7 +223,8 @@ class MenuState extends FlxState
 	}
 	private function startButtonIn(T:FlxTimer):Void
 	{
-		var tTween:FlxTween = FlxTween.tween(_btnPlay, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		FlxTween.tween(_btnPlay, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		FlxTween.tween(_btnCredits, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 	}
 	
 	

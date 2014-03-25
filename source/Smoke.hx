@@ -4,8 +4,8 @@ import flixel.system.FlxCollisionType;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxAngle;
-
 import flixel.util.FlxRandom;
+
 
 class Smoke extends ZParticle
 {
@@ -81,7 +81,7 @@ class Smoke extends ZParticle
 		FlxAngle.rotatePoint(0, 20*Reg.playState.windSpeed*FlxRandom.floatRanged(.6,1.4), 0, 0, Reg.playState.windDir, _point);
 		velocity.x = _point.x;
 		velocity.y = _point.y;
-		y -= _yMod/2;
+		y -= _yMod/4;
 		x += _xMod/2;
 		super.update();
 	}

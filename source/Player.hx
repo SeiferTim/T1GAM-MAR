@@ -1,4 +1,5 @@
 package ;
+import flixel.effects.FlxFlicker;
 import flixel.FlxG;
 import flixel.FlxObject;
 
@@ -26,6 +27,16 @@ class Player extends DisplaySprite
 		
 		//immovable = true;
 		
+	}
+	
+	override public function hurt(Damage:Float):Void 
+	{
+		if (FlxFlicker.isFlickering(this))
+			return;
+		FlxG.sound.play("sounds/Hurt.wav",1);
+		FlxFlicker.flicker(this, Reg.FADE_DUR * 2, 0.04, true, true);
+		energy -= Damage;
+		super.hurt(0);
 	}
 	
 	override public function update():Void 

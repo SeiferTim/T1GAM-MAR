@@ -1,6 +1,5 @@
 package;
 
-import flash.display.StageQuality;
 import flash.Lib;
 import flixel.FlxG;
 import flixel.FlxGame;
@@ -37,7 +36,9 @@ class GameClass extends FlxGame
 			gameWidth = Math.ceil(stageWidth / zoom);
 			gameHeight = Math.ceil(stageHeight / zoom);
 		}
-
+		#if debug
+		initialState = PlayState;
+		#end
 		super(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen);
 	}
 }

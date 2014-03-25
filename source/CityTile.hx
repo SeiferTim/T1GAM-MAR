@@ -1,10 +1,7 @@
 package ;
 import flixel.FlxG;
 import flixel.FlxObject;
-import flixel.group.FlxGroup;
 import flixel.tweens.FlxTween;
-import flixel.util.FlxRandom;
-import flixel.util.FlxTimer;
 
 class CityTile extends DisplaySprite
 {
@@ -58,7 +55,10 @@ class CityTile extends DisplaySprite
 		
 		super.hurt(Damage);
 		if (!isDead)
+		{
+			FlxG.sound.play("sounds/Crash.wav",.8);
 			var _t:FlxTween = FlxTween.tween(this, {y: y - 2}, .1, { type:FlxTween.ONESHOT, complete:doneBounceUp } );
+		}
 		
 	}
 	
@@ -71,6 +71,7 @@ class CityTile extends DisplaySprite
 	{
 		if (isDead || !alive || !exists)
 			return;
+		FlxG.sound.play("sounds/Collapse.wav", .8);
 		isDead = true;
 		animation.frameIndex = 0;
 		allowCollisions = FlxObject.NONE;
