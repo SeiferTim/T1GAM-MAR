@@ -56,20 +56,20 @@ class PlayState extends FlxState
 	
 	public var m:GameMap;
 	private var _player:Player;
-	public var grpDisplay:ZGroup;
+	public var grpDisplay:ZGroup<Dynamic>;
 	private var _grpSmokes:FlxTypedGroup<SmokeSpawner>;
 	private var _boundRect:FlxSprite;
 	private var _grpHUD:FlxGroup;
 	private var _barEnergy:FlxBar;
-	private var _grpTanks:ZGroup;
-	private var _grpCopters:ZGroup;
+	private var _grpTanks:ZGroup<Tank>;
+	private var _grpCopters:ZGroup<Copter>;
 	private var _eDistances:Array<Int>;
-	private var _grpExplosions:ZGroup;
-	private var _grpBullets:ZGroup;
+	private var _grpExplosions:ZGroup<Explosion>;
+	private var _grpBullets:ZGroup<Bullet>;
 	private var _bounds:FlxRect;
 	public var _grpWorldWalls:FlxGroup;
 	private var _txtScore:GameFont;
-	private var _grpPowerups:ZGroup;
+	private var _grpPowerups:ZGroup<PowerUp>;
 	private var _roarMarkers:Array<RoarMarker>;
 	private var _sndFoot:FlxSound;
 	private var _pauseScreen:PauseGroup;
@@ -96,14 +96,14 @@ class PlayState extends FlxState
 		
 		_sndFoot = FlxG.sound.load("sounds/Foot.wav", 1);
 		
-		grpDisplay = new ZGroup();
+		grpDisplay = new ZGroup<Dynamic>();
 		_grpSmokes = new FlxTypedGroup<SmokeSpawner>();
-		_grpTanks = new ZGroup();
-		_grpCopters = new ZGroup();
-		_grpExplosions = new ZGroup();
-		_grpBullets = new ZGroup();
+		_grpTanks = new ZGroup<Tank>();
+		_grpCopters = new ZGroup<Copter>();
+		_grpExplosions = new ZGroup<Explosion>();
+		_grpBullets = new ZGroup<Bullet>();
 		_grpWorldWalls = new FlxGroup(4);
-		_grpPowerups = new ZGroup();
+		_grpPowerups = new ZGroup<PowerUp>();
 		
 		m = new GameMap(82, 82);
 		//_trailArea = new FlxTrailArea(0, 0, Std.int(m.mapTerrain.width), Std.int(m.mapTerrain.height), .6, 1, true);
@@ -272,7 +272,7 @@ class PlayState extends FlxState
 	
 	public function shootBullet(Origin:FlxPoint, Angle:Float, Style:Int = 0):Void
 	{
-		var b:Bullet = cast _grpBullets.recycle(Bullet);
+		var b:Bullet = _grpBullets.recycle(Bullet);
 		b.launch(Origin, Angle, Style);
 		//_trailArea.add(b);
 	}
@@ -946,7 +946,7 @@ class PlayState extends FlxState
 				
 				if (_coptersSpawned < _copterCount)
 				{
-					c = cast _grpCopters.recycle(Copter);
+					c =  _grpCopters.recycle(Copter);
 					if (c != null)
 					{
 						c.init(xPos, yPos, pM.x, pM.y - 16);
@@ -957,7 +957,7 @@ class PlayState extends FlxState
 				else if (_tanksSpawned < _tankCount)
 				{
 				
-					t = cast _grpTanks.recycle(Tank);
+					t =  _grpTanks.recycle(Tank);
 					if (t != null)
 					{
 						t.init(xPos, yPos);
@@ -1003,7 +1003,7 @@ class PlayState extends FlxState
 			Reg.scores[Reg.SCORE_BUILDINGS]++;
 			if (FlxRandom.chanceRoll(2 * c.tier))
 			{
-				var p:PowerUp = cast _grpPowerups.recycle(PowerUp);
+				var p:PowerUp =  _grpPowerups.recycle(PowerUp);
 				if (p != null)
 				{
 					p.reset(c.x + (c.width / 2) - (p.width / 2), c.y + (c.height / 2) - (p.height / 2));
@@ -1120,7 +1120,7 @@ class PlayState extends FlxState
 		
 		for (i in 0...FlxRandom.intRanged(minCount,maxCount ))
 		{
-			e = cast _grpExplosions.recycle(Explosion);
+			e =  _grpExplosions.recycle(Explosion);
 			if (e != null)
 			{
 				e.reset(FlxRandom.floatRanged(Xmin, Xmax ), FlxRandom.floatRanged(Ymin, Ymax));
@@ -1141,9 +1141,9 @@ class PlayState extends FlxState
 		var pM:FlxPoint = FlxPoint.get(_player.x + (_player.width / 2), _player.y + (_player.height/2));
 		var tank:Tank;
 		var ePos:FlxPoint;
-		for (basic in _grpTanks.members)
+		for (i in 0..._grpTanks.members.length)
 		{
-			tank = cast basic;
+			tank = _grpTanks.members[i];
 			
 			if (tank.alive && tank.exists && tank.visible)
 			{
@@ -1216,9 +1216,9 @@ class PlayState extends FlxState
 		}
 		
 		var copter:Copter;
-		for (basic in _grpCopters.members)
+		for (i in 0..._grpCopters.members.length)
 		{
-			copter = cast basic;
+			copter = _grpCopters.members[i];
 			
 			if (copter.alive && copter.exists && copter.visible && !copter.isDead)
 			{

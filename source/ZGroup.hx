@@ -1,8 +1,9 @@
 package ;
 
-import flixel.group.FlxGroup;
+import flixel.FlxBasic;
+import flixel.group.FlxTypedGroup;
 
-class ZGroup extends FlxGroup
+class ZGroup<T:FlxBasic> extends FlxTypedGroup<T>
 {
 	public var zMembers:Array<IFlxZ>;
 	

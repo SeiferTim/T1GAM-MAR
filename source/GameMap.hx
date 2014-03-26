@@ -16,7 +16,7 @@ class GameMap
 {
 
 	public var mapTerrain:FlxTilemap;
-	public var cityTiles:ZGroup;
+	public var cityTiles:ZGroup<CityTile>;
 	public var finished(default, null):Bool = false;
 	public var loopMax(default, null):Int;
 	public var mapPathing:FlxTilemap;
@@ -179,7 +179,7 @@ class GameMap
 			}
 		}
 		
-		cityTiles = new ZGroup(_width * _height);
+		cityTiles = new ZGroup<CityTile>(_width * _height);
 		//cityStreets = new FlxGroup();
 		
 		_whichTileRow = 0;
