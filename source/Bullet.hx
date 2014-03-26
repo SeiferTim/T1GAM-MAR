@@ -21,7 +21,6 @@ class Bullet extends DisplaySprite
 		super();
 		makeGraphic(8, 8, FlxColor.CRIMSON);
 		calcOnScreen = false;
-		
 	}
 	
 	public function launch(Location:FlxPoint, Angle:Float = 0, Style:Int = 0):Void
@@ -50,6 +49,7 @@ class Bullet extends DisplaySprite
 		{
 			exists = false;
 			alive = false;
+			return;
 		}
 		else if (!alive)
 		{
@@ -70,7 +70,6 @@ class Bullet extends DisplaySprite
 		{
 			if (os < 1 && _time > 1)
 			{
-				//kill();
 				style = STANDARD;
 			}
 			else
@@ -102,7 +101,6 @@ class Bullet extends DisplaySprite
 		acceleration.y = 0;
 		alive = false;
 		solid = false;
-		//super.kill();
 	}
 	override private function get_z():Float 
 	{
@@ -119,7 +117,5 @@ class Bullet extends DisplaySprite
 		}
 		else
 			return _z;
-		
-		
 	}
 }

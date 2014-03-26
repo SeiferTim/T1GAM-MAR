@@ -11,6 +11,7 @@ import flixel.group.FlxGroup;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
 
 
@@ -180,6 +181,23 @@ class PauseGroup extends FlxGroup
 		if (!shown || !active || !visible)
 			return;
 		super.draw();
+	}
+	
+	override public function destroy():Void 
+	{
+		super.destroy();
+		_back = FlxDestroyUtil.destroy(_back);
+		_backWav = null;
+		
+		_txt = null;
+		_txtWave = null;
+		_btnResume = null;
+		_btnQuit = null;
+		
+		_btnYes = null;
+		_btnNo = null;
+		_txtConfirm = null;
+		
 	}
 	
 }

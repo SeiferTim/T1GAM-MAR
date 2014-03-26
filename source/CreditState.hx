@@ -4,12 +4,14 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
 
 class CreditState extends FlxState
 {
 	private var _loading:Bool = true;
 	private var _leaving:Bool = false;
+	private var _btnBack:GameButton;
 	override public function create():Void 
 	{
 		FlxG.autoPause = false;
@@ -65,10 +67,11 @@ class CreditState extends FlxState
 		FlxSpriteUtil.screenCenter(_t11, true, false);
 		add(_t11);
 		
-		var _btnBack:GameButton = new GameButton(0, 0, "Main Menu", clickMainMenu, GameButton.STYLE_GREEN, true);
+		_btnBack = new GameButton(0, 0, "Main Menu", clickMainMenu, GameButton.STYLE_GREEN, true);
 		_btnBack.x = FlxG.width - _btnBack.width - 16;
 		_btnBack.y = FlxG.height - _btnBack.height - 16;
 		add(_btnBack);
+		
 		
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, true, doneFadeIn);
 		
@@ -93,6 +96,7 @@ class CreditState extends FlxState
 	private function doneFadeIn():Void
 	{
 		_loading = false;
+		_btnBack.active = true;
 	}
 	
 	private function clickMainMenu():Void
@@ -107,6 +111,20 @@ class CreditState extends FlxState
 	private function doneFadeOut():Void
 	{
 		FlxG.switchState(new MenuState());
+	}
+	
+	override public function update():Void 
+	{
+		super.update();
+		if (_loading)
+			_btnBack.active = false;
+	}
+	
+	override public function destroy():Void 
+	{
+		
+		super.destroy();
+		_btnBack = null;
 	}
 	
 }

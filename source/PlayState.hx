@@ -33,70 +33,55 @@ class PlayState extends FlxState
 	private static inline var SPEED:Int = 200;
 	private static inline var FRICTION:Float = .8;
 	
+	private var _finished:Bool = false;
+	private var _startedTween:Bool = false;
+	private var _calcTmr:Float;
+	private var _spawnTimer:Float;
+	private var _spawnTimerSet:Float;
+	private var _tankCount:Float;
+	private var _copterCount:Float;
+	public var windSpeed(default, null):Float;
+	public var windDir(default, null):Float;
+	private var _allowDraw:Bool = false;
+	private var _roarTimer:Float = 0;
+	private var _roarsAvailable:Int = 3;
+	private var _lastRoar:Float = 1;
+	private var _leaving:Bool = false;
+	private var _paused:Bool = false;
+	private var _sortTimer:Float = 0;
+	private var _hudAlpha:Float = 0;
+	private var _sillyLoadings:Array<String>;
+	private var _whichSilly:Int = 0;
+	
+	
 	public var m:GameMap;
 	private var _player:Player;
-	private var _finished:Bool = false;
-	private var _sprLoad:FlxSprite;
-	
-	private var _barLoad:FlxBar;
-	private var _startedTween:Bool = false;
 	public var grpDisplay:FlxGroup;
 	private var _grpSmokes:FlxTypedGroup<SmokeSpawner>;
 	private var _boundRect:FlxSprite;
-	
 	private var _grpHUD:FlxGroup;
 	private var _barEnergy:FlxBar;
-	
 	private var _grpTanks:FlxTypedGroup<Tank>;
 	private var _grpCopters:FlxTypedGroup<Copter>;
 	private var _eDistances:Array<Int>;
 	private var _grpExplosions:FlxTypedGroup<Explosion>;
-
-	private var _calcTmr:Float;
-	
 	private var _grpBullets:FlxTypedGroup<Bullet>;
-	
-	private var _spawnTimer:Float;
-	private var _spawnTimerSet:Float;
-	
-	private var _tankCount:Float;
-	private var _copterCount:Float;
-	
 	private var _bounds:FlxRect;
-	
-	public var windSpeed(default, null):Float;
-	public var windDir(default, null):Float;
 	public var _grpWorldWalls:FlxGroup;
-	
 	private var _txtScore:GameFont;
-	private var _allowDraw:Bool = false;
-	
-	//private var _trailArea:FlxTrailArea;
-	
 	private var _grpPowerups:FlxTypedGroup<PowerUp>;
-	
-	private var _roarTimer:Float = 0;
 	private var _roarMarkers:Array<RoarMarker>;
-	private var _roarsAvailable:Int = 3;
-	private var _lastRoar:Float = 1;
-	
-	private var _leaving:Bool = false;
-	
 	private var _sndFoot:FlxSound;
-	
 	private var _pauseScreen:PauseGroup;
-	private var _paused:Bool = false;
-	private var _sortTimer:Float = 0;
-	
-	private var sprTest:FlxSprite;
-	
-	private var _hudAlpha:Float = 0;
 	public var barLoadLeft:FlxSprite;
 	public var barLoadRight:FlxSprite;
-	
-	private var _sillyLoadings:Array<String>;
 	private var _txtSillyLoad:GameFont;
-	private var _whichSilly:Int = 0;
+	
+	
+	private var sprTest:FlxSprite;
+	private var _sprLoad:FlxSprite;
+	private var _barLoad:FlxBar;
+	
 	
 	override public function create():Void
 	{
@@ -311,14 +296,24 @@ class PlayState extends FlxState
 		m = null;
 		
 		super.destroy();
-		//_gibs = null;
+		
+		_player = null;
+		grpDisplay = null;
+		_boundRect = FlxDestroyUtil.destroy(_boundRect);
+		_grpHUD = null;
+		_barEnergy = null;
+		_bounds = FlxDestroyUtil.put(_bounds);
+		_txtScore = null;
+		_roarMarkers = null;
+		_sndFoot = FlxDestroyUtil.destroy(_sndFoot);
+		_pauseScreen = null;
+
 	}
 
 	override public function draw():Void 
 	{
 		buildDrawGroup();
-		
-		
+
 		super.draw();
 	}
 	

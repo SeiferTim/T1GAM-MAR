@@ -14,7 +14,6 @@ class GameButton extends FlxUITypedButton<GameFont>
 	public static inline var STYLE_YELLOW:Int = 3;
 	public static inline var STYLE_RED:Int = 4;
 	
-	private var _sound:FlxSound;
 
 	private static var  _slices:Array<Array<Int>> = [[7, 7, 41, 38], [7, 7, 41, 38], [7, 7, 41, 38]];
 	
@@ -60,7 +59,6 @@ class GameButton extends FlxUITypedButton<GameFont>
 			h = Height;
 		}
 		
-		
 		loadGraphicSlice9([img], w, h,_slices, FlxUI9SliceSprite.TILE_NONE, -1, false, 49, 49);
 		label = l;
 		
@@ -72,15 +70,18 @@ class GameButton extends FlxUITypedButton<GameFont>
 		autoCenterLabel();
 		
 		broadcastToFlxUI = false;
+
+		var _sound:FlxSound;
 		_sound = FlxG.sound.load("sounds/Button.wav");
 		onUp.sound = _sound;
-		
+
 	}
+
 	
-	override public function update():Void 
+	override public function draw():Void
 	{
 		label.alpha = alpha;
-		super.update();
+		super.draw();
 	}
 	
 }

@@ -26,9 +26,6 @@ class CityTile extends DisplaySprite
 		allowCollisions = FlxObject.ANY;
 		calcOnScreen = false;
 		onScreen = true;
-		
-		
-		
 	}
 	
 	override public function update():Void 
@@ -37,7 +34,6 @@ class CityTile extends DisplaySprite
 			return;
 		if (_hurtTimer > 0)
 			_hurtTimer -= FlxG.elapsed;
-		//super.update();
 	}
 	
 	override public function draw():Void
@@ -86,11 +82,6 @@ class CityTile extends DisplaySprite
 			return y + height;
 		else
 			return y;
-	}
-	override public function destroy():Void 
-	{
-		
-		super.destroy();
 	}
 	
 	

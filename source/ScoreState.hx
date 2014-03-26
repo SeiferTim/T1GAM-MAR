@@ -12,6 +12,8 @@ class ScoreState extends FlxState
 	
 	private var _loading:Bool = true;
 	private var _leaving:Bool = false;
+	private var btnPlayAgain:GameButton;
+	private var btnMenu:GameButton;
 
 	override public function create():Void 
 	{
@@ -54,8 +56,8 @@ class ScoreState extends FlxState
 		txtTotal2.x = FlxG.width - txtTotal2.width - margin;
 		add(txtTotal2);
 		
-		var btnPlayAgain:GameButton = new GameButton(0, 0, "Play Again", goAgain, GameButton.STYLE_GREEN, false, 260,40);
-		var btnMenu:GameButton = new GameButton(0, 0, "Main Menu", goMenu, GameButton.STYLE_RED, false, 260,40);
+		btnPlayAgain = new GameButton(0, 0, "Play Again", goAgain, GameButton.STYLE_GREEN, false, 260,40);
+		btnMenu = new GameButton(0, 0, "Main Menu", goMenu, GameButton.STYLE_RED, false, 260,40);
 		btnPlayAgain.x = (FlxG.width / 2) - 300;
 		btnPlayAgain.y = FlxG.height - 56;
 		btnMenu.x = (FlxG.width / 2) + 40;
@@ -100,5 +102,19 @@ class ScoreState extends FlxState
 	{
 		FlxG.switchState(new MenuState());
 	}
-	
+	override public function update():Void 
+	{
+		super.update();
+		if (_loading || _leaving)
+		{
+			btnMenu.active = false;
+			btnPlayAgain.active = false;
+		}
+	}
+	override public function destroy():Void 
+	{
+		super.destroy();
+		btnMenu = null;
+		btnPlayAgain = null;
+	}
 }

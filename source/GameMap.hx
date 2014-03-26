@@ -17,25 +17,23 @@ class GameMap
 
 	public var mapTerrain:FlxTilemap;
 	public var cityTiles:FlxGroup;
-	//public var cityStreets:FlxGroup;
 	public var finished(default, null):Bool = false;
 	public var loopMax(default, null):Int;
 	public var mapPathing:FlxTilemap;
-	public var mapWater:FlxTilemap;
+	public var mapWater:FlxTilemap;	
 	
-	private var _waterMap:Array<Int>;
 	private var _width:Int;
 	private var _height:Int;
+	private var _waterMap:Array<Int>;
 	private var _popMap:Array<Int>;
 	private var _pathMap:Array<Int>;
 	private var _roadMap:Array<Int>;
+	private var _terrainMap:Array<Int>;
 	private var _tileLoop:FlxAsyncLoop;
 	private var _whichTileRow:Int;
 	private var _whichTileCol:Int;
 	private var _sinceRoadCol:Int = 7;
 	private var _sinceRoadRow:Int = 7;
-	private var _terrainMap:Array<Int>;
-	
 	
 	private static inline var DEEP:Int = 1;
 	private static inline var SHALLOW:Int = 2;
@@ -46,8 +44,6 @@ class GameMap
 	private static inline var STREETV:Int = 7;
 	private static inline var STREETH:Int = 8;
 	private static inline var STREETI:Int = 9;
-	
-	
 
 	public function new(Width:Int, Height:Int ) 
 	{
@@ -221,9 +217,6 @@ class GameMap
 		
 		loopMax = _popMap.length;
 		
-		
-		
-		
 		_tileLoop = new FlxAsyncLoop(loopMax, addCityTiles, 100);
 	}
 
@@ -386,6 +379,14 @@ class GameMap
 				finished = true;
 				_tileLoop.kill();
 				_tileLoop.destroy();
+				_tileLoop = null;
+				
+				_waterMap = null;
+				_popMap  = null;
+				_pathMap = null;
+				_roadMap = null;
+				_terrainMap = null;
+				
 				Reg.playState.barLoadRight.animation.frameIndex = 1;
 			}
 		}

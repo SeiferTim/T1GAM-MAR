@@ -11,6 +11,7 @@ import flixel.FlxState;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxGradient;
 import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
@@ -98,12 +99,14 @@ class MenuState extends FlxState
 		_btnPlay.x = (FlxG.width/2)-192;
 		_btnPlay.y = FlxG.height - _btnPlay.height - 16;
 		_btnPlay.alpha = 0;
+		_btnPlay.active = false;
 		add(_btnPlay);
 		
 		_btnCredits = new GameButton(0, 0, "Credits", goCredits, GameButton.STYLE_BLUE, false, 160,40); //new FlxButton(0, 0, "Play", goPlay);
 		_btnCredits.x = (FlxG.width/2)+32;
 		_btnCredits.y = FlxG.height - _btnCredits.height - 16;
 		_btnCredits.alpha = 0;
+		_btnCredits.active = false;
 		add(_btnCredits);
 		
 		FlxG.sound.playMusic("title-a", 1, false);
@@ -223,6 +226,10 @@ class MenuState extends FlxState
 	}
 	private function startButtonIn(T:FlxTimer):Void
 	{
+		_btnPlay.autoCenterLabel();
+		_btnCredits.autoCenterLabel();
+		_btnPlay.update();
+		_btnCredits.update();
 		FlxTween.tween(_btnPlay, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 		FlxTween.tween(_btnCredits, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 	}
@@ -266,6 +273,22 @@ class MenuState extends FlxState
 	override public function destroy():Void
 	{
 		super.destroy();
+		_textMain = FlxDestroyUtil.destroy(_textMain);
+		_sprBones = null;
+		_sprBonesLight = null;
+		_sprGhost01 = null;
+		_sprGhost02 = null;
+		_sprGhost03 = null;
+		
+		_textSub = null;
+		_textMainWave = null;
+		_text1Glow = null;
+		_text2Glow = null;
+		_text1Filter = null;
+		_text2Filter = null;
+
+		_btnPlay = null;
+		_btnCredits = null;
 	}
 
 	/**
@@ -273,6 +296,12 @@ class MenuState extends FlxState
 	 */
 	override public function update():Void
 	{
+		if (!_btnCredits.active)
+			if (_btnCredits.alpha >= 1)
+				_btnCredits.active = true;
+		if (!_btnPlay.active)
+			if (_btnPlay.alpha >= 1)
+				_btnPlay.active = true;
 		super.update();
 		_text1Filter.applyFilters();
 		_text2Filter.applyFilters();

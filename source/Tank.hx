@@ -18,8 +18,6 @@ class Tank extends DisplaySprite
 	private var _turret:DisplaySprite;
 	private var _target:FlxPoint;
 	private var _shootClock:Float;
-	//private var _bullets:FlxTypedGroup<Bullet>;
-	//private var _gibs:ZEmitterExt;
 	
 	public function new(X:Float=0, Y:Float=0) 
 	{
@@ -46,10 +44,7 @@ class Tank extends DisplaySprite
 	
 	public function init(xPos:Float, yPos:Float):Void
 	{
-		
-		//_bullets = Bullets;
-		//_gibs = Gibs;
-		
+
 		reset(xPos - width / 2, yPos - height / 2);
 		_dest.x = x;
 		_dest.y = y;
@@ -117,8 +112,7 @@ class Tank extends DisplaySprite
 		
 		if (shoot)
 		{
-			//if(isOnScreen())
-			//	Reg.playState.shootBullet(getMidpoint(_point), a);
+
 			if (onScreen)
 				{
 					if (Reg.playState.m.mapPathing.ray(getMidpoint(_point), _target))
@@ -159,7 +153,7 @@ class Tank extends DisplaySprite
 		_dest = FlxDestroyUtil.put(_dest);
 		_target = FlxDestroyUtil.put(_target);
 		_vec = FlxDestroyUtil.put(_vec);
-		//_bullets = null;		
+
 	}
 	
 	override public function kill():Void 

@@ -35,7 +35,7 @@ class Explosion extends DisplaySprite
 	
 	override public function update():Void 
 	{
-		if (animation.finished)
+		if (animation.finished || !onScreen)
 			kill();
 		if (!onScreen || !alive || !exists || !visible)
 			return;

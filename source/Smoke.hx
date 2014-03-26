@@ -17,30 +17,21 @@ class Smoke extends ZParticle
 	{
 		super();
 		collisionType = FlxCollisionType.NONE;
-		//moves = false;
 		immovable = true;
 		allowCollisions  = FlxObject.NONE;
 		solid = false;
 		loadGraphic("images/smoke.png", true, false, 32, 32);
 		
 	}
-	
-	//override public function reset(X:Float, Y:Float):Void 
-	//{
-		//super.reset(X+FlxRandom.floatRanged(-48,48), Y-FlxRandom.intRanged(0,64));
-	//}
-	
+
 	override public function onEmit():Void 
 	{
 		super.onEmit();
 		lifespan = 100;
-		//super.reset(X+FlxRandom.floatRanged(-48,48), Y-FlxRandom.intRanged(0,64));
-		//x += FlxRandom.floatRanged( -48, 48);
-		//y -= FlxRandom.intRanged(0, 64);
 		useColoring = false;
 		useScaling = false;
 		useFading = false;
-		alpha = 0; // change back!
+		alpha = 0; 
 		animation.frameIndex = FlxRandom.intRanged(0, 3);
 		draw();
 		velocity.x = 0;
@@ -51,7 +42,6 @@ class Smoke extends ZParticle
 		FlxTween.tween(this, {alpha: FlxRandom.floatRanged(.4, .9)}, FlxRandom.floatRanged(.2, .6), { type:FlxTween.ONESHOT, ease:FlxEase.sineIn, complete:doneFadeIn } );
 		FlxTween.tween(this, {_yMod:FlxRandom.intRanged(2,4)},FlxRandom.floatRanged(2,4), { type:FlxTween.ONESHOT, ease:FlxEase.quadOut} );
 		FlxTween.tween(this, { _xMod: (FlxRandom.intRanged(1, 3)  * FlxRandom.sign())*.8 }, FlxRandom.floatRanged(.6, 1.6), { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
-		
 	}
 	
 	private function doneFadeIn(T:FlxTween):Void

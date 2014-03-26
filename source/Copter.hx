@@ -94,7 +94,6 @@ class Copter extends DisplaySprite
 			var da:Float = angleTowardPlayer();
 			if (da < angle)
 			{
-				
 				angularAcceleration  = -angularDrag;
 			}
 			else if (da > angle)
@@ -107,7 +106,6 @@ class Copter extends DisplaySprite
 			}
 			
 			var d:Float = FlxMath.getDistance(getMidpoint(_point), _target);
-			//trace(d);
 			if (d < DIST)
 			{
 				// move back
@@ -151,6 +149,7 @@ class Copter extends DisplaySprite
 			if (y + (height/2) >= _floor)
 			{
 				velocity.set();
+				acceleration.set();
 				Reg.playState.createSmallSmoke(x - 8, y - 8, width + 16, height + 16);
 				alive = false;
 				exists = false;
@@ -189,12 +188,14 @@ class Copter extends DisplaySprite
 	{
 		super.destroy();
 		_target = FlxDestroyUtil.put(_target);
+		_body = null;
+		_prop = null;
 		
 	}
 	
 	override public function kill():Void 
 	{
-		if (!alive)
+		if (!alive || isDead)
 			return;
 		if (onScreen)
 		{

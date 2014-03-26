@@ -37,7 +37,7 @@ class GameClass extends FlxGame
 			gameHeight = Math.ceil(stageHeight / zoom);
 		}
 		#if debug
-		initialState = PlayState;
+		//initialState = PlayState;
 		#end
 		super(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen);
 	}
