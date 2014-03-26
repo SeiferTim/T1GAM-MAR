@@ -2,6 +2,7 @@ package ;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxSpriteUtil;
 
 class CityTile extends DisplaySprite
 {
@@ -30,10 +31,7 @@ class CityTile extends DisplaySprite
 	
 	override public function update():Void 
 	{
-		if (isDead)
-			return;
-		if (_hurtTimer > 0)
-			_hurtTimer -= FlxG.elapsed;
+		
 	}
 	
 	override public function draw():Void
@@ -47,20 +45,33 @@ class CityTile extends DisplaySprite
 	{
 		if (_hurtTimer > 0 || isDead)
 			return;
-		_hurtTimer = .2;
+		_hurtTimer = 1;
 		
 		super.hurt(Damage);
 		if (!isDead)
 		{
 			FlxG.sound.play("sounds/Crash.wav",.8);
-			var _t:FlxTween = FlxTween.tween(this, {y: y - 2}, .1, { type:FlxTween.ONESHOT, complete:doneBounceUp } );
+			//var _t:FlxTween = FlxTween.tween(this, {y: y - 2}, .1, { type:FlxTween.ONESHOT, complete:doneBounceUp } );
+			FlxTween.num(y, y - 3, .1, { type:FlxTween.ONESHOT, complete:doneBounceUp }, tweenY);
+			
 		}
 		
 	}
 	
+	private function tweenY(v:Float):Void
+	{
+		y = v;
+	}
+	
 	private function doneBounceUp(T:FlxTween):Void
 	{
-		var _t:FlxTween = FlxTween.tween(this, {y: y + 2}, .1, { type:FlxTween.ONESHOT } );
+		//var _t:FlxTween = FlxTween.tween(this, {y: y + 2}, .1, { type:FlxTween.ONESHOT } );
+		FlxTween.num(y, y + 3, .1, { type:FlxTween.ONESHOT, complete:doneBounceBack }, tweenY);
+	}
+	
+	private function doneBounceBack(T:FlxTween):Void
+	{
+		_hurtTimer = 0;
 	}
 	
 	override public function kill():Void

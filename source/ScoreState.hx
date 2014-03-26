@@ -110,6 +110,11 @@ class ScoreState extends FlxState
 			btnMenu.active = false;
 			btnPlayAgain.active = false;
 		}
+		else if (!btnMenu.active || !btnPlayAgain.active)
+		{
+			btnPlayAgain.active = true;
+			btnMenu.active = true;
+		}
 	}
 	override public function destroy():Void 
 	{

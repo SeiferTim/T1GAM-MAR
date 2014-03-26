@@ -56,20 +56,20 @@ class PlayState extends FlxState
 	
 	public var m:GameMap;
 	private var _player:Player;
-	public var grpDisplay:FlxGroup;
+	public var grpDisplay:ZGroup;
 	private var _grpSmokes:FlxTypedGroup<SmokeSpawner>;
 	private var _boundRect:FlxSprite;
 	private var _grpHUD:FlxGroup;
 	private var _barEnergy:FlxBar;
-	private var _grpTanks:FlxTypedGroup<Tank>;
-	private var _grpCopters:FlxTypedGroup<Copter>;
+	private var _grpTanks:ZGroup;
+	private var _grpCopters:ZGroup;
 	private var _eDistances:Array<Int>;
-	private var _grpExplosions:FlxTypedGroup<Explosion>;
-	private var _grpBullets:FlxTypedGroup<Bullet>;
+	private var _grpExplosions:ZGroup;
+	private var _grpBullets:ZGroup;
 	private var _bounds:FlxRect;
 	public var _grpWorldWalls:FlxGroup;
 	private var _txtScore:GameFont;
-	private var _grpPowerups:FlxTypedGroup<PowerUp>;
+	private var _grpPowerups:ZGroup;
 	private var _roarMarkers:Array<RoarMarker>;
 	private var _sndFoot:FlxSound;
 	private var _pauseScreen:PauseGroup;
@@ -82,6 +82,9 @@ class PlayState extends FlxState
 	private var _sprLoad:FlxSprite;
 	private var _barLoad:FlxBar;
 	
+	private var _keysHint:FlxSprite;
+	private var _spaceHint:SpaceHint;
+	
 	
 	override public function create():Void
 	{
@@ -93,14 +96,14 @@ class PlayState extends FlxState
 		
 		_sndFoot = FlxG.sound.load("sounds/Foot.wav", 1);
 		
-		grpDisplay = new FlxGroup();
+		grpDisplay = new ZGroup();
 		_grpSmokes = new FlxTypedGroup<SmokeSpawner>();
-		_grpTanks = new FlxTypedGroup<Tank>();
-		_grpCopters = new FlxTypedGroup<Copter>();
-		_grpExplosions = new FlxTypedGroup<Explosion>();
-		_grpBullets = new FlxTypedGroup<Bullet>();
+		_grpTanks = new ZGroup();
+		_grpCopters = new ZGroup();
+		_grpExplosions = new ZGroup();
+		_grpBullets = new ZGroup();
 		_grpWorldWalls = new FlxGroup(4);
-		_grpPowerups = new FlxTypedGroup<PowerUp>();
+		_grpPowerups = new ZGroup();
 		
 		m = new GameMap(82, 82);
 		//_trailArea = new FlxTrailArea(0, 0, Std.int(m.mapTerrain.width), Std.int(m.mapTerrain.height), .6, 1, true);
@@ -248,7 +251,20 @@ class PlayState extends FlxState
 		add(_pauseScreen);
 		
 		_paused = false;
-		FlxG.watch.add(grpDisplay.members, "length");
+
+		_spaceHint = new SpaceHint();
+		_spaceHint.x = (FlxG.width / 2) + 93;
+		_spaceHint.y = FlxG.height - _spaceHint.height - 8;
+		_spaceHint.scrollFactor.set();
+		_spaceHint.alpha = 0;
+		_grpHUD.add(_spaceHint);
+		
+		_keysHint = new FlxSprite(0, 0, "images/keyboard-controls.png");
+		_keysHint.x = (FlxG.width/2) - 300;
+		_keysHint.y = _spaceHint.y + (_spaceHint.height / 2) - (_keysHint.height / 2);
+		_keysHint.scrollFactor.set();
+		_keysHint.alpha = 0;
+		_grpHUD.add(_keysHint);
 		
 		super.create();
 	}
@@ -256,7 +272,7 @@ class PlayState extends FlxState
 	
 	public function shootBullet(Origin:FlxPoint, Angle:Float, Style:Int = 0):Void
 	{
-		var b:Bullet = _grpBullets.recycle(Bullet);
+		var b:Bullet = cast _grpBullets.recycle(Bullet);
 		b.launch(Origin, Angle, Style);
 		//_trailArea.add(b);
 	}
@@ -317,7 +333,7 @@ class PlayState extends FlxState
 		super.draw();
 	}
 	
-	private function getZ(O:Dynamic):Float
+	/*private function getZ(O:Dynamic):Float
 	{
 		var aName:String = Type.getClassName(Type.getClass(O));
 		var zA:Float = 0;
@@ -332,22 +348,22 @@ class PlayState extends FlxState
 		}
 		return zA;
 		
-	}
+	}*/
 	
-	private function addSort(O:Dynamic):Void
+	private function addSort(O:IFlxZ):Void
 	{
 		var first:Int = 0;
-		var last:Int = grpDisplay._members.length;
+		var last:Int = grpDisplay.zMembers.length;
 		var i:Int = last;
 		
-		var value:Float = getZ(O);
+		var value:Float = O.z;
 		
-		while ((i > first) && (value < getZ(cast grpDisplay.members[i - 1])))
+		while ((i > first) && (value < grpDisplay.zMembers[i - 1].z))
 		{
-			grpDisplay.members[i] = grpDisplay.members[i - 1];
+			grpDisplay.zMembers[i] = grpDisplay.zMembers[i - 1];
 			i = i - 1;
 		}
-		grpDisplay.members[i] = O;
+		grpDisplay.zMembers[i] = O;
 		grpDisplay.length++;
 	}
 	
@@ -362,20 +378,16 @@ class PlayState extends FlxState
 		grpDisplay.clear();
 		grpDisplay.add(_player, true);
 		
-		
-		var c:CityTile;
-		for (o in m.cityTiles.members)
+		var c:FlxBasic;
+		for (i in 0...m.cityTiles.members.length)
 		{
-			
-			c = cast(o, CityTile);
-			c.onScreen = false;
+			c = m.cityTiles.members[i];
 			if (c.alive && c.exists && c.visible)
 			{
 				if(_boundRect.overlaps(c,true))
 				{
-					c.onScreen = true;
-					//grpDisplay.add(c, true);
-					addSort(c);
+					m.cityTiles.zMembers[i].onScreen = true;
+					addSort(m.cityTiles.zMembers[i]);
 				}
 			}
 		}
@@ -388,110 +400,93 @@ class PlayState extends FlxState
 			{
 				if (_boundRect.overlaps(smk.bounds,true))
 				{
-					//grpDisplay.add(smk, true);
 					addSort(smk);
 				}
 			}
 		}
 		
-		var tank:Tank;
-		for (t in _grpTanks.members)
+		for (i in 0..._grpTanks.members.length)
 		{
-			tank = cast t;
-			if (tank.alive && tank.exists && tank.visible && _boundRect.overlaps(tank,true))
+			c = _grpTanks.members[i]; 
+			if (c.alive && c.exists && c.visible && _boundRect.overlaps(c,true))
 			{
-				tank.onScreen = true;
-				//grpDisplay.add(tank, true);
-				
+				_grpTanks.zMembers[i].onScreen = true;
 			}
 			else
 			{
-				tank.onScreen = false;
-				//tank.kill();
+				_grpTanks.zMembers[i].onScreen = false;
 			}
-			addSort(tank);
+			addSort(_grpTanks.zMembers[i]);
 		}
-		var copter:Copter;
-		for (c in _grpCopters.members)
+
+		for (i in 0..._grpCopters.members.length)
 		{
-			copter = cast c;
-			if (copter.alive && copter.exists && copter.visible && _boundRect.overlaps(copter,true))
+			c = _grpCopters.members[i]; 
+			if (c.alive && c.exists && c.visible && _boundRect.overlaps(c,true))
 			{
-				copter.onScreen = true;
-				//grpDisplay.add(copter, true);
-				
+				_grpCopters.zMembers[i].onScreen = true;
 			}
 			else
 			{
-				copter.onScreen = false;
-				//copter.kill();
+				_grpCopters.zMembers[i].onScreen = false;
 			}
-			addSort(copter);
+			addSort(_grpCopters.zMembers[i]);
 		}
-		var exp:Explosion;
-		for (e in _grpExplosions.members)
+		
+		for (i in 0..._grpExplosions.members.length)
 		{
-			exp = cast e;
-			if (exp.alive && exp.exists && exp.visible && _boundRect.overlaps(exp,true))
+			c = _grpExplosions.members[i]; 
+			if (c.alive && c.exists && c.visible && _boundRect.overlaps(c,true))
 			{
-				exp.onScreen = true;
-				//grpDisplay.add(exp, true);
-				addSort(exp);
+				_grpExplosions.zMembers[i].onScreen = true;
+				addSort(_grpExplosions.zMembers[i]);
 			}
 			else
-				exp.onScreen = false;
+				_grpExplosions.zMembers[i].onScreen = false;
 		}
-		var bul:Bullet;
-		for (b in _grpBullets.members)
+
+		for (i in 0..._grpBullets.members.length)
 		{
-			bul = cast b;
-			if (bul.exists && bul.visible)
+			c = _grpBullets.members[i]; 
+			if (c.exists && c.visible)
 			{
-				if (_boundRect.overlaps(bul, true))
+				if (_boundRect.overlaps(c, true))
 				{
-					bul.onScreen = true;
-					//grpDisplay.add(bul, true);
-					addSort(bul);
+					_grpBullets.zMembers[i].onScreen = false;
+					addSort(_grpBullets.zMembers[i]);
 				}
 				else
 				{
-					bul.onScreen = false;
-					bul.kill();
+					_grpBullets.zMembers[i].onScreen = false;
+					c.kill();
 				}
 			}
 		}
-		var pow:PowerUp;
-		for (p in _grpPowerups.members)
+		
+		for (i in 0..._grpPowerups.members.length)
 		{
-			pow = cast p;
-			if (pow.exists && pow.visible && pow.alive)
+			c = _grpPowerups.members[i]; 
+			if (c.exists && c.visible && c.alive)
 			{
-				if (_boundRect.overlaps(pow, true))
+				if (_boundRect.overlaps(c, true))
 				{
-					pow.onScreen = true;
-					//grpDisplay.add(pow, true);
-					addSort(pow);
+					_grpPowerups.zMembers[i].onScreen = true;
+					addSort(_grpPowerups.zMembers[i]);
 				}
 				else
 				{
-					pow.onScreen = false;
+					_grpPowerups.zMembers[i].onScreen = false;
 				}
 			}
 		}
-		
-		
-		
-		//grpDisplay.sort(zSort, FlxSort.ASCENDING);
-		//quickZSort(grpDisplay.members,0, grpDisplay.members.length-1);
-		
 
 	}
 	
-	private function quickZSort(arrayInput:Array<FlxBasic>,left:Int, right:Int):Void
+	/*private function quickZSort(arrayInput:Array<FlxBasic>,left:Int, right:Int):Void
 	{
 		var i:Int = left;
 		var j:Int = right;
-		var pivotPoint:Float = getZ(arrayInput[Math.round((left + right) * .5)]);
+		var pivotPoint:Float = arrayInput[Math.round((left + right) * .5)].z;
 		var temp:Dynamic;
 		while (i <= j)
 		{
@@ -521,10 +516,11 @@ class PlayState extends FlxState
 			quickZSort(arrayInput, i, right);
 		}
 		
-	}
+	}*/
 	
 	private function goScoreState():Void
 	{
+		FlxG.camera.zoom = 1;
 		FlxG.switchState(new ScoreState());
 	}
 	
@@ -559,23 +555,28 @@ class PlayState extends FlxState
 			else
 			{
 			
-				#if !FLX_NO_KEYBOARD
-				if (FlxG.keys.anyJustReleased(["P", "ESCAPE"]))
-				{
-					_pauseScreen.show();
-					_paused = true;
-				}
-				#end
+				
 				
 				_player.energy -= FlxG.elapsed * 6;
 				if (_player.energy <= 0 )
 				{
-					_leaving = true;
-					FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, goScoreState);
-					FlxG.sound.music.fadeOut(Reg.FADE_DUR);
+					_leaving = true;						
+					FlxG.camera.follow(null);
+					FlxG.sound.music.fadeOut(Reg.FADE_DUR*4);
+					FlxTween.tween(FlxG.camera, { zoom:4 }, .8, { type:FlxTween.ONESHOT, ease:FlxEase.circInOut, complete:doneGOZoomIn } );
+					
 				}
 				else
 				{
+					
+					#if !FLX_NO_KEYBOARD
+					if (FlxG.keys.anyJustReleased(["P", "ESCAPE"]))
+					{
+						_pauseScreen.show();
+						_paused = true;
+					}
+					#end
+					
 					changeWind();
 					checkEnemySpawn();
 					FlxG.collide(_player, _grpWorldWalls);
@@ -622,8 +623,26 @@ class PlayState extends FlxState
 			}
 			
 		}
+		else
+		{
+			FlxG.camera.width = Std.int(FlxG.width / FlxG.camera.zoom);
+			FlxG.camera.height = Std.int(FlxG.height / FlxG.camera.zoom);
+			FlxG.camera.focusOn(_player.getMidpoint());
+		}
 		
 		super.update();
+	}
+	
+	private function doneGOZoomIn(T:FlxTween):Void
+	{
+		FlxG.sound.play("sounds/roar.wav");
+		
+		FlxTween.tween(_player, { alpha:0 }, .66, { type:FlxTween.ONESHOT, ease:FlxEase.circInOut, complete:doneGOFadeOut } );
+	}
+	
+	private function doneGOFadeOut(T:FlxTween):Void
+	{
+		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, goScoreState);
 	}
 	
 	private function preGameSetup():Void
@@ -655,15 +674,15 @@ class PlayState extends FlxState
 				_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
 				_allowDraw = true;
 				_player.alpha = 0;
+				
 				FlxTween.tween(_sprLoad, {alpha:0}, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneFadeIn } );
 			}
 			if (_sprLoad!=null)
 				_txtSillyLoad.alpha = barLoadLeft.alpha = barLoadRight.alpha = _barLoad.alpha = _sprLoad.alpha;
 			
-			var s:FlxPoint = _player.getMidpoint();
 			FlxG.camera.width = Std.int(FlxG.width / FlxG.camera.zoom);
 			FlxG.camera.height = Std.int(FlxG.height / FlxG.camera.zoom);
-			FlxG.camera.focusOn(s);
+			FlxG.camera.focusOn(_player.getMidpoint());
 			for (h in 0..._grpHUD.members.length)
 			{
 				cast(_grpHUD.members[h], FlxSprite).alpha = _hudAlpha;
@@ -927,7 +946,7 @@ class PlayState extends FlxState
 				
 				if (_coptersSpawned < _copterCount)
 				{
-					c = _grpCopters.recycle(Copter);
+					c = cast _grpCopters.recycle(Copter);
 					if (c != null)
 					{
 						c.init(xPos, yPos, pM.x, pM.y - 16);
@@ -938,7 +957,7 @@ class PlayState extends FlxState
 				else if (_tanksSpawned < _tankCount)
 				{
 				
-					t = _grpTanks.recycle(Tank);
+					t = cast _grpTanks.recycle(Tank);
 					if (t != null)
 					{
 						t.init(xPos, yPos);
@@ -984,7 +1003,7 @@ class PlayState extends FlxState
 			Reg.scores[Reg.SCORE_BUILDINGS]++;
 			if (FlxRandom.chanceRoll(2 * c.tier))
 			{
-				var p:PowerUp = _grpPowerups.recycle(PowerUp);
+				var p:PowerUp = cast _grpPowerups.recycle(PowerUp);
 				if (p != null)
 				{
 					p.reset(c.x + (c.width / 2) - (p.width / 2), c.y + (c.height / 2) - (p.height / 2));
@@ -999,7 +1018,7 @@ class PlayState extends FlxState
 		_txtScore.text = StringTools.lpad( Std.string(Reg.score),"0",9);
 	}
 	
-	private function zSort(Order:Int, A:FlxBasic, B:FlxBasic):Int
+	/*private function zSort(Order:Int, A:FlxBasic, B:FlxBasic):Int
 	{
 		var result:Int = 0;
 		var aName:String = Type.getClassName(Type.getClass(A));
@@ -1031,21 +1050,38 @@ class PlayState extends FlxState
 		else if (zA > zB)
 			result = -Order;
 		return result;
-	}
+	}*/
 	
 	private function doneLoad(T:FlxTween):Void
 	{
 		_finished = true;
-		FlxG.sound.playMusic("game-music", 1, true);
-		calculateDistances();
 		FlxG.camera.follow(_player, FlxCamera.STYLE_TOPDOWN_TIGHT, null, 4);
 		FlxG.camera.followLead.x = 2;
 		FlxG.camera.followLead.y = 2;
+		FlxG.sound.playMusic("game-music", 1, true);
+		calculateDistances();
 		for (h in 0..._grpHUD.members.length)
 		{
 			cast(_grpHUD.members[h], FlxSprite).alpha = _hudAlpha;
 		}
+		FlxTimer.start(5, hideHints);
 		
+	}
+	
+	private function hideHints(T:FlxTimer):Void
+	{
+		FlxTween.tween(_spaceHint, { alpha:0 }, Reg.FADE_DUR * 2, { type:FlxTween.ONESHOT, ease:FlxEase.circInOut, complete:destroySpaceHint } );
+		FlxTween.tween(_keysHint, { alpha:0 }, Reg.FADE_DUR * 2, { type:FlxTween.ONESHOT, ease:FlxEase.circInOut, complete:destroyKeysHint } );
+	}
+	
+	private function destroySpaceHint(T:FlxTween):Void
+	{
+		_spaceHint = FlxDestroyUtil.destroy(_spaceHint);
+	}
+	
+	private function destroyKeysHint(T:FlxTween):Void
+	{
+		_keysHint = FlxDestroyUtil.destroy(_keysHint);
 	}
 	
 	private function addSmoke(X:Float, Y:Float, Width:Float, Height:Float):Void
@@ -1204,15 +1240,10 @@ class PlayState extends FlxState
 		var startX:Int = Std.int((pM.y * m.mapPathing.widthInTiles)+ pM.x);
 		var endX:Int = startX+1;
 		
-		//pM.put();
 		pM = FlxDestroyUtil.put(pM);
 		
 		var tmpDistances = m.mapPathing.computePathDistance(startX, startX, true, false);
-		if (tmpDistances == null)
-		{
-			//return;
-		}
-		else
+		if (tmpDistances != null)
 			_eDistances = tmpDistances;
 		
 		
@@ -1360,4 +1391,6 @@ class PlayState extends FlxState
 			}
 		}
 	}
+	
+	
 }

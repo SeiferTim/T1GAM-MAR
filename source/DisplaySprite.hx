@@ -2,10 +2,12 @@ package ;
 
 import flixel.addons.display.FlxNestedSprite;
 
-class DisplaySprite extends FlxNestedSprite
+class DisplaySprite extends FlxNestedSprite implements IFlxZ
 {
 
+	public var z(get, set):Float;
 	private var _z:Float = 0;
+	
 	public var calcOnScreen:Bool;
 	public var onScreen:Bool;
 	
@@ -33,8 +35,6 @@ class DisplaySprite extends FlxNestedSprite
 			_z = Value;
 		return _z;
 	}
-	
-	public var z(get_z, set_z):Float;
 	
 	override public function update():Void 
 	{

@@ -102,6 +102,7 @@ class Bullet extends DisplaySprite
 		alive = false;
 		solid = false;
 	}
+	
 	override private function get_z():Float 
 	{
 		if (calcZ)
@@ -116,6 +117,6 @@ class Bullet extends DisplaySprite
 			}
 		}
 		else
-			return _z;
+			return super.get_z();
 	}
 }

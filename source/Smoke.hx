@@ -39,14 +39,34 @@ class Smoke extends ZParticle
 		_yMod = 0;
 		_xMod = 0;
 		floor = y + height;
-		FlxTween.tween(this, {alpha: FlxRandom.floatRanged(.4, .9)}, FlxRandom.floatRanged(.2, .6), { type:FlxTween.ONESHOT, ease:FlxEase.sineIn, complete:doneFadeIn } );
-		FlxTween.tween(this, {_yMod:FlxRandom.intRanged(2,4)},FlxRandom.floatRanged(2,4), { type:FlxTween.ONESHOT, ease:FlxEase.quadOut} );
-		FlxTween.tween(this, { _xMod: (FlxRandom.intRanged(1, 3)  * FlxRandom.sign())*.8 }, FlxRandom.floatRanged(.6, 1.6), { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
+		
+		FlxTween.num(alpha, FlxRandom.floatRanged(.4, .9), FlxRandom.floatRanged(.2, .6), { type:FlxTween.ONESHOT, ease:FlxEase.sineIn, complete:doneFadeIn }, tweenAlpha);
+		FlxTween.num(_yMod , FlxRandom.intRanged(2, 4), FlxRandom.floatRanged(2, 4), { type:FlxTween.ONESHOT, ease:FlxEase.quadOut }, tweenYMod);
+		FlxTween.num(_xMod, (FlxRandom.intRanged(1, 3)  * FlxRandom.sign()) * .8, FlxRandom.floatRanged(.6, 1.6), { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut }, tweenXMod);
+
+//		FlxTween.tween(this, { _xMod:  }, ,  );
 	}
+	
+	private function tweenAlpha(v:Float):Void
+	{ 
+		alpha = v;
+	}
+	
+	private function tweenYMod(v:Float):Void
+	{
+		_yMod = v;
+	}
+	
+	private function tweenXMod(v:Float):Void
+	{
+		_xMod = v;
+	}
+	
 	
 	private function doneFadeIn(T:FlxTween):Void
 	{
-		FlxTween.tween(this, {alpha: 0}, FlxRandom.floatRanged(1.6, 3.6) ,{ type:FlxTween.ONESHOT, ease:FlxEase.quartIn, complete:doneFadeOut } );
+		//FlxTween.tween(this, {alpha: 0}, FlxRandom.floatRanged(1.6, 3.6) ,{ type:FlxTween.ONESHOT, ease:FlxEase.quartIn, complete:doneFadeOut } );
+		FlxTween.num(alpha, 0, FlxRandom.floatRanged(1.6, 3.6), { type:FlxTween.ONESHOT, ease:FlxEase.quartIn, complete:doneFadeOut }, tweenAlpha);
 	}
 	
 	private function doneFadeOut(T:FlxTween):Void

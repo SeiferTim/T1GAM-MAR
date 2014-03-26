@@ -2,7 +2,7 @@ package ;
 
 import flixel.effects.particles.FlxParticle;
 
-class ZParticle extends FlxParticle
+class ZParticle extends FlxParticle implements IFlxZ
 {
 
 	private var _floor:Float;
@@ -10,6 +10,9 @@ class ZParticle extends FlxParticle
 	private var _touchingFloor:Bool = false;
 	private var _wasTouchingFloor:Bool = false;
 	private var _z:Float;
+	public var z(get, set):Float;
+	public var onScreen:Bool = true;
+	
 	public function new() 
 	{
 		super();
@@ -33,12 +36,15 @@ class ZParticle extends FlxParticle
 	}
 	
 	public var floor(null, set_floor):Float;
-	
+
+	function set_z(value:Float):Float 
+	{
+		return _z;
+	}
+
 	function get_z():Float 
 	{
 		return y;
 	}
-	
-	public var z(get_z, null):Float;
 	
 }
