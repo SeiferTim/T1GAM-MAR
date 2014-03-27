@@ -24,7 +24,7 @@ class SmokeSpawner extends ZEmitterExt
 		particleDrag.x = 0;
 		particleDrag.y = 0;
 		
-		for (i in 0...100)
+		for (i in 0...40)
 		{
 			add(new Smoke());
 		}		
@@ -40,7 +40,7 @@ class SmokeSpawner extends ZEmitterExt
 		bounds = new FlxSprite(X, Y);
 		bounds.makeGraphic(Std.int(Width), Std.int(Height),FlxColor.WHITE);
 		z = Y+Height;
-		var quant:Int = Std.int((Width / 4) + (Height / 4));
+		var quant:Int = Std.int(((Width / 4) + (Height / 4)) *.66);
 		start(true, 100, .1, quant, 100);
 	}
 	
@@ -66,18 +66,36 @@ class SmokeSpawner extends ZEmitterExt
 			}
 			else
 			{
-				T.abort();
-				_quantity = 1;
-				_waitForKill = true;
-				life.max = 4;
+				markForDeath();
 			}
 		}
 	}
 	
+	public function markForDeath():Void
+	{
+		if (_t != null)
+		{
+			_t.abort();
+			_t = FlxDestroyUtil.destroy(_t);
+		}
+		
+		_quantity = 1;
+		_waitForKill = true;
+		life.max = 4;
+	}
+	
 	override public function kill():Void
 	{
-		bounds.kill();
-		bounds = FlxDestroyUtil.destroy(bounds);
+		if (_t != null)
+		{
+			_t.abort();
+			_t = FlxDestroyUtil.destroy(_t);
+		}
+		if (bounds!=null)
+		{
+			bounds.kill();
+			bounds = FlxDestroyUtil.destroy(bounds);
+		}
 		super.kill();
 	}
 	

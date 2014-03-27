@@ -51,6 +51,7 @@ class Copter extends DisplaySprite
 		angularDrag = 200;
 		drag.x = 60;
 		_thrust = 0;
+		onScreen = true;
 	}
 	
 	public function setTarget(X:Float, Y:Float):Void

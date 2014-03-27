@@ -46,25 +46,29 @@ class MenuState extends FlxState
 	 */
 	override public function create():Void
 	{
-		//add(FlxGridOverlay.create(32, 32, -1, -1, false, true, 0xff111111, 0xff333333));
+		FlxG.autoPause = false;
+		#if !FLX_NO_MOUSE
+		FlxG.mouse.visible = false;
+		#end
 		add( new FlxSprite(0, 0, "images/title-back.png"));
 		
 		add(FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0x0, 0x0, 0xff000000], 1, 90));
 		
 		
 		_textMain = new GameFont(0, 24, "Dinosaur-Ghost", GameFont.STYLE_HUGE_TITLE, GameFont.COLOR_CYAN, "center");
-		_text1Glow = new GlowFilter(0xff66ffff, .9, 60, 60, 1, 1);
+		_text1Glow = new GlowFilter(0xff66ffff, .9, 50, 50, 1, 1);
 		FlxTween.tween(_text1Glow, {alpha:.6 }, 2, { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut,  loopDelay:.6 } );
 		
 		_text1Filter = new FlxSpriteFilter(_textMain, 60, 60);
 		_text1Filter.addFilter(_text1Glow);
 		FlxSpriteUtil.screenCenter(_textMain, true, false);
-		_textMainWave = new FlxWaveSprite(_textMain,FlxWaveSprite.MODE_BOTTOM);
+		_textMainWave = new FlxWaveSprite(_textMain,FlxWaveSprite.MODE_BOTTOM,400,0);
 		_textMainWave.alpha = 0;
 		_textMainWave.blend = BlendMode.SCREEN;
+		_textMainWave.y = 124;
 		add(_textMainWave);
 		
-		_textSub = new GameFont(0, _textMainWave.y+_textMainWave.height-58,  "RAMPAGE", GameFont.STYLE_BIG_TITLE, GameFont.COLOR_RED, "center");
+		_textSub = new GameFont(0, _textMain.y+_textMain.height-68,  "RAMPAGE", GameFont.STYLE_BIG_TITLE, GameFont.COLOR_RED, "center");
 		FlxSpriteUtil.screenCenter(_textSub, true, false);
 		_textSub.alpha = 0;
 		_textSub.angle = -3;
@@ -206,10 +210,19 @@ class MenuState extends FlxState
 		if (!_shownText)
 		{
 			_shownText = true;
-			var tTween:FlxTween = FlxTween.tween(_textMainWave, {alpha:.9}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+			var tTween:FlxTween = FlxTween.tween(_textMainWave, { alpha:.9, center:_textMainWave.height*.33, strength: 40, y:-16}, 4, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:textMainBob } );
+			
 			FlxTimer.start(.33, startSubTextIn);
 			FlxTimer.start(.66, startButtonIn);
 		}
+	}
+	
+	private function textMainBob(T:FlxTween):Void
+	{
+		FlxTween.tween(_textMainWave, { alpha:.66 }, 3, { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
+		FlxTween.tween(_textMainWave, { y:0 }, 2, { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
+		FlxTween.tween(_textMainWave, {center:_textMain.height*.5}, 4,{ type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
+		FlxTween.tween(_textMainWave, {strength:20}, 3,{ type:FlxTween.PINGPONG, ease:FlxEase.backInOut } );
 	}
 	
 	
@@ -222,8 +235,16 @@ class MenuState extends FlxState
 	
 	private function startSubTextIn(T:FlxTimer):Void
 	{
-		var tTween:FlxTween = FlxTween.tween(_textSub, {alpha:.98}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		var tTween:FlxTween = FlxTween.tween(_textSub, {alpha:.98}, 4, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:textSubBob } );
 	}
+	
+	private function textSubBob(T:FlxTween):Void
+	{
+		FlxTween.tween(_textSub.scale, { x:.9, y:.9 }, 1.66, { type:FlxTween.PINGPONG, ease:FlxEase.backInOut } );
+		FlxTween.tween(_textSub, { alpha:.8 }, 3, { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
+		
+	}
+	
 	private function startButtonIn(T:FlxTimer):Void
 	{
 		_btnPlay.autoCenterLabel();
@@ -231,7 +252,10 @@ class MenuState extends FlxState
 		_btnPlay.update();
 		_btnCredits.update();
 		FlxTween.tween(_btnPlay, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
-		FlxTween.tween(_btnCredits, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		FlxTween.tween(_btnCredits, { alpha:1 }, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		#if !FLX_NO_MOUSE
+		FlxG.mouse.visible = true;
+		#end
 	}
 	
 	

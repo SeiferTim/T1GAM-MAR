@@ -40,6 +40,7 @@ class Tank extends DisplaySprite
 		_turret.setOriginToCenter();
 		add(_turret);
 		_target = FlxPoint.get();
+		onScreen = true;
 	}
 	
 	public function init(xPos:Float, yPos:Float):Void

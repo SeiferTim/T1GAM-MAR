@@ -121,16 +121,23 @@ class PauseGroup extends FlxGroup
 		_back.resetFrameBitmapDatas();
 		_back.dirty = true;
 		
-		FlxTween.tween(this, {_alpha:1}, Reg.FADE_DUR*2, { type:FlxTween.ONESHOT, ease:FlxEase.circIn, complete:doneFadeIn } );
+		FlxTween.num(0, 1, Reg.FADE_DUR*2, { type:FlxTween.ONESHOT, ease:FlxEase.circInOut, complete:doneFadeIn }, updateAlpha );
 		active = true;
 		_loading = true;
 		_leaving = false;
 		shown = true;
 	}
 	
+	private function updateAlpha(Value:Float):Void
+	{
+		_alpha = Value;
+	}
+	
 	private function doneFadeIn(T:FlxTween):Void
 	{
-		
+		#if !FLX_NO_MOUSE
+		FlxG.mouse.visible = true;
+		#end
 		_loading = false;
 	}
 	
@@ -141,7 +148,10 @@ class PauseGroup extends FlxGroup
 			return;
 		}
 		_leaving = true;
-		FlxTween.tween(this, {_alpha:0}, Reg.FADE_DUR*2, { type:FlxTween.ONESHOT, ease:FlxEase.circIn, complete:doneFadeOut } );
+		FlxTween.num(1, 0, Reg.FADE_DUR * 2, { type:FlxTween.ONESHOT, ease:FlxEase.circInOut, complete:doneFadeOut }, updateAlpha );
+		#if !FLX_NO_MOUSE
+		FlxG.mouse.visible = false;
+		#end
 	}
 	
 	private function goResume():Void

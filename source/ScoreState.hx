@@ -17,6 +17,8 @@ class ScoreState extends FlxState
 
 	override public function create():Void 
 	{
+		FlxG.autoPause = false;
+		
 		var margin:Int = 256;
 		var buffer:Int = 30;
 		
