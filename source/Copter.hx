@@ -25,9 +25,13 @@ class Copter extends DisplaySprite
 	{
 		super(X, Y);
 		calcOnScreen = false;
-		makeGraphic(50, 50, 0x0);
+		makeGraphic(64, 64, 0x0);
 		_body = new DisplaySprite();
-		_body.loadGraphic("images/copter.png", false, false, 50, 50);
+		_body.loadGraphic("images/copter.png", false, false, 64, 64);
+		width = 24;
+		height = 24;
+		offset.x = 20;
+		offset.y = 20;
 		add(_body);
 		setPosition(X, Y);
 		_prop = new DisplaySprite(0, 0);
@@ -136,11 +140,11 @@ class Copter extends DisplaySprite
 			var m:FlxPoint = getMidpoint();
 			if (shoot)
 			{
-				if (onScreen)
-				{
+				//if (onScreen)
+				//{
 					Reg.playState.shootBullet(m, _body.angle, Bullet.MISSLE);
 					FlxG.sound.play("sounds/Shoot-Missle.wav",.8);
-				}
+				//}
 			}
 			m = FlxDestroyUtil.put(m);
 		}

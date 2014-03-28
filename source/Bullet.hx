@@ -39,7 +39,7 @@ class Bullet extends DisplaySprite
 				acceleration.x = _point.x*2;
 				acceleration.y = _point.y*2;
 		}
-		
+		onScreen = true;
 		solid = true;
 	}
 	
@@ -109,7 +109,7 @@ class Bullet extends DisplaySprite
 		{
 			if (style == MISSLE)
 			{
-				return y + (height/2) + 16 + 130;
+				return y + (height / 2) + 16 + 130;
 			}
 			else
 			{

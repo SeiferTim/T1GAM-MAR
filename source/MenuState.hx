@@ -2,6 +2,7 @@ package;
 
 import flash.display.BlendMode;
 import flash.filters.GlowFilter;
+import flash.geom.Point;
 import flixel.addons.effects.FlxWaveSprite;
 import flixel.effects.FlxSpriteFilter;
 import flixel.FlxCamera;
@@ -41,6 +42,7 @@ class MenuState extends FlxState
 	private var _leaving:Bool = false;
 	private var _loading:Bool = true;
 	
+	
 	/**
 	 * Function that is called up when to state is created to set it up. 
 	 */
@@ -56,23 +58,25 @@ class MenuState extends FlxState
 		
 		
 		_textMain = new GameFont(0, 24, "Dinosaur-Ghost", GameFont.STYLE_HUGE_TITLE, GameFont.COLOR_CYAN, "center");
-		_text1Glow = new GlowFilter(0xff66ffff, .9, 50, 50, 1, 1);
+		_text1Glow = new GlowFilter(0xff66ffff, .8, 50, 50, 1.5, 1);
 		FlxTween.tween(_text1Glow, {alpha:.6 }, 2, { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut,  loopDelay:.6 } );
 		
 		_text1Filter = new FlxSpriteFilter(_textMain, 60, 60);
 		_text1Filter.addFilter(_text1Glow);
 		FlxSpriteUtil.screenCenter(_textMain, true, false);
+		
 		_textMainWave = new FlxWaveSprite(_textMain,FlxWaveSprite.MODE_BOTTOM,400,0);
 		_textMainWave.alpha = 0;
-		_textMainWave.blend = BlendMode.SCREEN;
+		//_textMainWave.blend = BlendMode.SCREEN;
 		_textMainWave.y = 124;
 		add(_textMainWave);
 		
+		//add(_txtBuffer);
 		_textSub = new GameFont(0, _textMain.y+_textMain.height-68,  "RAMPAGE", GameFont.STYLE_BIG_TITLE, GameFont.COLOR_RED, "center");
 		FlxSpriteUtil.screenCenter(_textSub, true, false);
 		_textSub.alpha = 0;
 		_textSub.angle = -3;
-		_textSub.blend  = BlendMode.HARDLIGHT;
+		//_textSub.blend  = BlendMode.HARDLIGHT;
 		add(_textSub);
 
 		_text2Glow = new GlowFilter(0xffff0000, .8, 50, 50, 1.5, 1);
@@ -327,7 +331,7 @@ class MenuState extends FlxState
 			if (_btnPlay.alpha >= 1)
 				_btnPlay.active = true;
 		super.update();
-		_text1Filter.applyFilters();
+		//_text1Filter.applyFilters();
 		_text2Filter.applyFilters();
 	}	
 }

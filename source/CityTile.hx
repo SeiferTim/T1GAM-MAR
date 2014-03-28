@@ -2,7 +2,6 @@ package ;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.tweens.FlxTween;
-import flixel.util.FlxSpriteUtil;
 
 class CityTile extends DisplaySprite
 {

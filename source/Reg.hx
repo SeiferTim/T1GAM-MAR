@@ -3,10 +3,6 @@ package;
 import flash.text.Font;
 import flixel.FlxG;
 import flixel.util.FlxSave;
-@:font("assets/fonts/gomarice_kaiju_monster.ttf") class FontKaiju extends Font { }
-@:font("assets/fonts/scary.TTF") class FontScary extends Font { }
-@:font("assets/fonts/04B_03__.TTF") class FontPixel extends Font { }
-@:font("assets/fonts/kenpixel_mini.ttf") class FontKPixelMini extends Font { }
 
 /**
  * Handy, pre-built Registry class that can be used to store 
@@ -22,7 +18,7 @@ class Reg
 	*/
 	
 	// Fonts
-	public static var FONT_BIG:String = "fonts/gomarice_kaiju_monster.ttf";
+	public static var FONT_BIG:String = "fonts/g_k_m.ttf";
 	public static var FONT_SCARY:String = "fonts/scary.TTF";
 	public static var FONT_PIXEL:String = "fonts/04B_03__.TTF";
 	public static var FONT_KPIXELMINI:String = "fonts/kenpixel_mini.ttf";
@@ -81,11 +77,11 @@ class Reg
 		if (GameInitialized)
 			return;
 		FlxG.debugger.drawDebug = false;
-		Font.registerFont(FontKaiju);
+	/*	Font.registerFont(FontKaiju);
 		Font.registerFont(FontScary);
 		Font.registerFont(FontPixel);
 		Font.registerFont(FontKPixelMini);
-		
+		*/
 		loadData();
 		
 		GameInitialized = true;

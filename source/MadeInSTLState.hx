@@ -49,6 +49,8 @@ class MadeInSTLState extends FlxState
 		_startYB = _txtWave.y;
 		_txtWave.y += 40;
 		
+		//add(_txtText);
+		
 		FlxTimer.start(1, doFirstFlash);
 		
 		super.create();
@@ -76,7 +78,7 @@ class MadeInSTLState extends FlxState
 	private function doTextIn(T:FlxTimer):Void
 	{
 		FlxG.sound.play("sounds/madeinstl.wav", 1, false, true,doneMadeInSound);
-		FlxTween.tween(_txtWave, { alpha:.8, strength:20, center:_txtText.height * .33, y:_startYB }, 1, { type:FlxTween.ONESHOT, ease:FlxEase.sineInOut } );
+		FlxTween.tween(_txtWave, { alpha:.8, strength:20, center:Std.int(_txtText.height * .33), y:_startYB }, 1, { type:FlxTween.ONESHOT, ease:FlxEase.sineInOut } );
 	}
 	
 	private function doneMadeInSound():Void

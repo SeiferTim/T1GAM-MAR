@@ -12,10 +12,35 @@ class Player extends DisplaySprite
 	{
 		super(X, Y);
 		loadGraphic("images/player.png", true, true, 64, 64);
-		animation.add("lr", [0], 1);
-		animation.add("d", [1], 1);
-		animation.add("u", [2], 1);
-		animation.play("lr");
+		animation.add("lr-w", [1, 0, 2, 0], 4);
+		animation.add("d-w", [4, 3, 5, 3], 4);
+		animation.add("u-w", [7, 6, 8, 6], 4);
+		animation.add("lr", [1], 1);
+		animation.add("d", [4], 1);
+		animation.add("u", [7], 1);
+		
+		animation.add("lr-w-r", [10, 9, 11, 9], 4);
+		animation.add("d-w-r", [13, 12, 13, 14], 4);
+		animation.add("u-w-r", [16, 15, 16, 17], 4);
+		animation.add("lr-r", [10], 1);
+		animation.add("d-r", [13], 1);
+		animation.add("u-r", [16], 1);
+		
+		animation.add("lr-w-s", [19, 18, 20, 18], 4);
+		animation.add("d-w-s", [22, 21, 23, 21], 4);
+		animation.add("u-w-s", [25, 24, 26, 24], 4);
+		animation.add("lr-s", [19], 1);
+		animation.add("d-s", [22], 1);
+		animation.add("u-s", [25], 1);
+		
+		animation.add("lr-w-r-s", [28, 27, 29, 27], 4);
+		animation.add("d-w-r-s", [31, 30, 31, 30], 4);
+		animation.add("u-w-r-s", [34, 33, 34, 34], 4);
+		animation.add("lr-r-s", [28], 1);
+		animation.add("d-r-s", [31], 1);
+		animation.add("u-r-s", [34], 1);
+		
+		animation.play("d");
 		height = 22;
 		width = 22;
 		offset.x = 20;

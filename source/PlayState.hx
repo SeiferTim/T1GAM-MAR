@@ -1,14 +1,12 @@
 package;
 
 import flash.geom.Rectangle;
-import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
-import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxTypedGroup.FlxTypedGroup;
 import flixel.system.FlxSound;
 import flixel.tweens.FlxEase;
@@ -79,7 +77,7 @@ class PlayState extends FlxState
 	public var barLoadLeft:FlxSprite;
 	public var barLoadRight:FlxSprite;
 	private var _txtSillyLoad:GameFont;
-	
+	private var _sndRoar:FlxSound;
 	
 	private var sprTest:FlxSprite;
 	private var _sprLoad:FlxSprite;
@@ -87,7 +85,14 @@ class PlayState extends FlxState
 	
 	private var _keysHint:FlxSprite;
 	private var _spaceHint:SpaceHint;
-	
+	private var _roaring:Bool = false;
+	private var _walking:Bool = false;
+	private var _wasRoaring:Bool = false;
+	private var _wasFacing:Int = -1;
+	private var _wasWalking:Bool = false;
+	private var _swimming:Bool = false;
+	private var _wasSwimming:Bool = false;
+
 	
 	override public function create():Void
 	{
@@ -101,6 +106,7 @@ class PlayState extends FlxState
 		Reg.score = 0;
 		
 		_sndFoot = FlxG.sound.load("sounds/Foot.wav", 1);
+		_sndRoar = FlxG.sound.load("sounds/roar.wav", 1);
 		
 		grpDisplay = new ZGroup<Dynamic>();
 		_grpSmokes = new FlxTypedGroup<SmokeSpawner>();
@@ -111,7 +117,7 @@ class PlayState extends FlxState
 		_grpWorldWalls = new FlxGroup(4);
 		_grpPowerups = new ZGroup<PowerUp>();
 		
-		m = new GameMap(82, 82);
+		m = new GameMap(77, 77);
 		//_trailArea = new FlxTrailArea(0, 0, Std.int(m.mapTerrain.width), Std.int(m.mapTerrain.height), .6, 1, true);
 
 		/*for (i in 0...40)
@@ -170,7 +176,7 @@ class PlayState extends FlxState
 		
 		_player = new Player();
 		
-		
+		_player.facing = FlxObject.DOWN;
 		
 		_barEnergy = new FlxBar(0, 0, FlxBar.FILL_LEFT_TO_RIGHT, 300, 16, _player, "energy", 0, 100, true);
 		_barEnergy.scrollFactor.x = _barEnergy.scrollFactor.y = 0;
@@ -267,11 +273,7 @@ class PlayState extends FlxState
 		
 		updateHUDAlpha(0);
 		
-		FlxG.watch.add(_grpSmokes.members, "length", "smokes");
-		FlxG.watch.add(_grpCopters.members, "length","copters");
-		FlxG.watch.add(_grpTanks.members, "length","tanks");
-		FlxG.watch.add(_grpBullets.members, "length","bullets");
-		FlxG.watch.add(_grpExplosions.members, "length","explosions");
+		
 		
 		super.create();
 	}
@@ -440,13 +442,14 @@ class PlayState extends FlxState
 			{
 				if (rectsIntersect(_boundRect.pixels.rect, c.pixels.rect))
 				{
-					c.onScreen = false;
+					c.onScreen = true;
 					addSort(c);
 				}
 				else
 				{
 					c.onScreen = false;
-					c.kill();
+					c.alive = false;
+					c.exists = false;
 				}
 			}
 		}
@@ -514,8 +517,15 @@ class PlayState extends FlxState
 				}
 				
 				_player.energy -= FlxG.elapsed * 6;
-				if (_player.energy <= 0 )
+				
+				var isDebug = false;
+				#if debug
+				isDebug = true;
+				#end
+				
+				if (_player.energy <= 0 && !isDebug)
 				{
+					
 					_leaving = true;						
 					FlxG.camera.follow(null);
 					FlxG.sound.music.fadeOut(Reg.FADE_DUR * 4);
@@ -593,14 +603,52 @@ class PlayState extends FlxState
 			FlxG.camera.height = Std.int(FlxG.height / FlxG.camera.zoom);
 			FlxG.camera.focusOn(_player.getMidpoint());
 		}
-		
+		if (_player != null)
+		{
+			updatePlayerAnimation();
+			
+		}
 		super.update();
+	}
+	
+	private function updatePlayerAnimation():Void
+	{
+		if (_player.facing == _wasFacing && _walking == _wasWalking && _roaring == _wasRoaring && _swimming == _wasSwimming)
+			return;
+			
+		var anim:String="";
+		switch(_player.facing)
+		{
+			case FlxObject.RIGHT, FlxObject.LEFT:
+				anim = "lr";
+			case FlxObject.UP:
+				anim = "u";
+			case FlxObject.DOWN:
+				anim = "d";
+		}
+		if (_walking)
+			anim += "-w";
+		if (_roaring)
+			anim += "-r";
+		if (_swimming)
+			anim += "-s";
+		
+		var frame:Int = 0;
+		if ((_roaring != _wasRoaring || _swimming != _wasSwimming) && _player.facing == _wasFacing && _walking == _wasWalking)
+		{
+			frame = _player.animation.frameIndex;
+		}
+			
+		_player.animation.play(anim, true, frame);
+		_wasRoaring = _roaring;
+		_wasFacing = _player.facing;
+		_wasWalking = _walking;
+		_wasSwimming = _swimming;
 	}
 	
 	private function doneGOZoomIn(T:FlxTween):Void
 	{
-		FlxG.sound.play("sounds/roar.wav");
-
+		roar();
 		FlxTween.num(1,0, 1.8, { type:FlxTween.ONESHOT, ease:FlxEase.bounceInOut, complete:doneGOFadeOut }, updatePlayerAlpha );
 	}
 	
@@ -626,22 +674,24 @@ class PlayState extends FlxState
 			if (!_startedTween)
 			{
 				_startedTween = true;
-				sprTest = new FlxSprite().makeGraphic(96, 96, 0xcc000000);
+				sprTest = new FlxSprite().makeGraphic(30, 30, 0xcc000000);
 				
 				sprTest.moves = false;
 				sprTest.immovable = true;
-				sprTest.x = (m.mapTerrain.width / 2) - (sprTest.width / 2);
-				sprTest.y = (m.mapTerrain.height / 2) - (sprTest.height / 2);
+				sprTest.x = (m.mapTerrain.width / 2) - (sprTest.width / 2)-31;
+				sprTest.y = (m.mapTerrain.height / 2) - (sprTest.height / 2)-31;
 				sprTest.draw();
 				sprTest.update();
-				_player.x = sprTest.x + (sprTest.width / 2) - (_player.width / 2) - FlxG.camera.scroll.x;
-				_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2) - FlxG.camera.scroll.y;
+				_player.x = sprTest.x + (sprTest.width / 2) - (_player.width / 2)-16;// - FlxG.camera.scroll.x - 16;
+				_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2)-16;// - FlxG.camera.scroll.y - 16;
 				_allowDraw = true;
 				_player.alpha = 0;
 				FlxG.camera.followLead.x = 2;
 				FlxG.camera.followLead.y = 2;
 				FlxG.camera.follow(_player, FlxCamera.STYLE_NO_DEAD_ZONE, null, 8);
 				FlxTween.num(1, 0, Reg.FADE_DUR * 2, { type:FlxTween.ONESHOT, ease:FlxEase.quintInOut, complete:doneFadeIn }, updateLoadAlpha );
+				
+				
 			}
 		}
 	}
@@ -675,8 +725,7 @@ class PlayState extends FlxState
 	
 	private function doneZoomIn(T:FlxTween):Void
 	{
-		FlxG.camera.shake(.005, 2);
-		FlxG.sound.play("sounds/roar.wav");
+		roar();
 		FlxTimer.start(.66, doneStartRoar);
 	}
 	
@@ -1020,7 +1069,7 @@ class PlayState extends FlxState
 	private function enemyMovement():Void
 	{
 		
-		var pM:FlxPoint = FlxPoint.get(_player.x + (_player.width / 2), _player.y + (_player.height/2));
+		var pM:FlxPoint = _player.getMidpoint();//FlxPoint.get(_player.x + (_player.width / 2), _player.y + (_player.height/2));
 		var tank:Tank;
 		var ePos:FlxPoint;
 		for (tank in _grpTanks.members)
@@ -1028,12 +1077,10 @@ class PlayState extends FlxState
 			if (tank.alive && tank.exists && tank.visible)
 			{
 				tank.setTarget(pM.x, pM.y);
-				
-				if (!tank.moving)
+				ePos = FlxPoint.get(tank.x + (tank.width / 2), tank.y + (tank.height / 2));
+				if (Math.abs(FlxMath.getDistance(ePos, pM)) >= 128)
 				{
-					
-					ePos = FlxPoint.get(tank.x + (tank.width / 2), tank.y + (tank.height / 2));
-					if (Math.abs(FlxMath.getDistance(ePos, pM)) >= 48)
+					if (!tank.moving)
 					{
 						var tx:Int = Std.int((tank.x - tank.offset.x) / 32);
 						var ty:Int = Std.int((tank.y - tank.offset.y) / 32);
@@ -1081,12 +1128,14 @@ class PlayState extends FlxState
 							tank.moveTo((tx * 32) + (bestX * 32) + tank.offset.x, (ty * 32) + (bestY * 32) + tank.offset.y, Tank.SPEED);
 						}
 					}
-					else
-					{
-						tank.stopMoving();
-					}
-					ePos = FlxDestroyUtil.put(ePos);
+					
+					
 				}
+				else if (tank.moving)
+				{
+					tank.stopMoving();
+				}
+				ePos = FlxDestroyUtil.put(ePos);
 			}
 			
 		}
@@ -1096,7 +1145,7 @@ class PlayState extends FlxState
 		{		
 			if (copter.alive && copter.exists && copter.visible && !copter.isDead)
 			{
-				copter.setTarget(pM.x, pM.y-16);
+				copter.setTarget(pM.x, pM.y);
 			}
 		}
 		
@@ -1106,7 +1155,7 @@ class PlayState extends FlxState
 	
 	private function calculateDistances():Void
 	{
-		var pM:FlxPoint = FlxPoint.get(_player.x + (_player.width / 2), _player.y + _player.height);
+		var pM:FlxPoint = _player.getMidpoint();// FlxPoint.get(_player.x + (_player.width / 2), _player.y + _player.height);
 		pM.x -= (pM.x % 32);
 		pM.y -= (pM.y % 32);
 		pM.x /= 32;
@@ -1144,6 +1193,8 @@ class PlayState extends FlxState
 		_pressingShoot = FlxG.keys.anyPressed(["SPACE", "X"]);
 		#end
 		
+		_walking = _pressingDown || _pressingLeft || _pressingRight || _pressingUp;
+		
 		var mA:Float = -400;
 		if (_pressingUp)
 		{
@@ -1170,41 +1221,49 @@ class PlayState extends FlxState
 		if (mA != -400)
 		{
 			var v:FlxPoint;
-			if (_player.overlaps(m.mapWater))
+			if (!_player.overlaps(m.mapWater))
 			{
-				
+				_swimming = true;
 				v = FlxAngle.rotatePoint(SPEED*.4, 0, 0, 0, mA);
 			}
 			else
 			{
+				_swimming = false;
 				v = FlxAngle.rotatePoint(SPEED, 0, 0, 0, mA);
 			}
 				
 			_player.velocity.x = v.x;
 			_player.velocity.y = v.y;
-			
-			if (_player.velocity.x > 0 && Math.abs(_player.velocity.x) > Math.abs(_player.velocity.y))
-			{
-				_player.facing = FlxObject.RIGHT;
-				_player.animation.play("lr");
-			}
-			else if (_player.velocity.x < 0 && Math.abs(_player.velocity.x) > Math.abs(_player.velocity.y))
-			{
-				_player.facing = FlxObject.LEFT;
-				_player.animation.play("lr");
-			}
-			else if (_player.velocity.y > 0)
-			{
-				_player.facing = FlxObject.DOWN;
-				_player.animation.play("d");
-			}
-			else if (_player.velocity.y < 0)
-			{
-				_player.facing = FlxObject.UP;
-				_player.animation.play("u");
-			}
-			//v.put();
 			v = FlxDestroyUtil.put(v);
+			
+			if (_walking)
+			{
+				
+				if (_player.velocity.x > 0 && Math.abs(_player.velocity.x) > Math.abs(_player.velocity.y))
+				{
+					_player.facing = FlxObject.RIGHT;
+					//_player.animation.play("lr-w");
+					
+				}
+				else if (_player.velocity.x < 0 && Math.abs(_player.velocity.x) > Math.abs(_player.velocity.y))
+				{
+					_player.facing = FlxObject.LEFT;
+					//_player.animation.play("lr-w");
+				}
+				else if (_player.velocity.y > 0)
+				{
+					_player.facing = FlxObject.DOWN;
+					//_player.animation.play("d-w");
+				}
+				else if (_player.velocity.y < 0)
+				{
+					_player.facing = FlxObject.UP;
+					//_player.animation.play("u-w");
+				}
+			}
+			
+			//v.put();
+			
 		}
 		
 		if (!_pressingDown && !_pressingUp)
@@ -1214,7 +1273,7 @@ class PlayState extends FlxState
 			if (Math.abs(_player.velocity.x) > 1)
 				_player.velocity.x *= FRICTION;
 		
-		if (_pressingDown || _pressingLeft || _pressingRight || _pressingUp)
+		if (_walking)
 		{
 			if (!_sndFoot.playing)
 				_sndFoot.play();
@@ -1228,8 +1287,9 @@ class PlayState extends FlxState
 				{
 					_roarsAvailable--;
 					_lastRoar = 4;
-					FlxG.sound.play("sounds/roar.wav", .9);
-					FlxG.camera.shake(.005, 2);
+					
+					roar();
+					
 					
 					for (c in _grpCopters.members)
 					{
@@ -1264,6 +1324,18 @@ class PlayState extends FlxState
 				}
 			}
 		}
+	}
+	
+	private function roar():Void
+	{
+		_sndRoar.play();
+		_roaring = true;
+		FlxG.camera.shake(.005, 2.3,doneRoar);
+	}
+	
+	private function doneRoar():Void
+	{
+		_roaring = false;
 	}
 	
 	override public function onFocusLost():Void 

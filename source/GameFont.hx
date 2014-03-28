@@ -154,9 +154,11 @@ class GameFont extends FlxSprite
 		
 		var tmpText:FlxText = new FlxText(0, 0, FlxG.width, _text);
 		tmpText.setFormat(font, size, 0x000000, align);
+		tmpText.resetFrameBitmapDatas();
 		//tmpText.update();
 		tmpText.drawFrame();
 		//tmpText.draw();
+		
 		
 		var r:Rectangle = tmpText.pixels.getColorBoundsRect(0xff000000, 0x00000000, false);
 		var b1:BitmapData = new BitmapData(Std.int(r.width), Std.int(r.height), true, 0x0);

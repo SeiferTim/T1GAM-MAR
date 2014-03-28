@@ -1,5 +1,6 @@
 package ;
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.util.FlxAngle;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxPoint;
@@ -18,26 +19,32 @@ class Tank extends DisplaySprite
 	private var _turret:DisplaySprite;
 	private var _target:FlxPoint;
 	private var _shootClock:Float;
+	private var _wasFacing:Int = -1;
 	
 	public function new(X:Float=0, Y:Float=0) 
 	{
 		super(X, Y);
 		calcOnScreen = false;
-		loadGraphic("images/tank.png", false, false, 28, 28);
+		loadGraphic("images/tank.png", true, true, 64, 64);
 		width = 24;
 		height = 24;
-		offset.x = 2;
-		offset.y = 2;
+		offset.x = 20;
+		offset.y = 20;
 		_dest = FlxPoint.get();
 		_dest.x = X;
 		_dest.y = Y;
 		_vec = FlxVector.get();
 		setPosition(X, Y);
 		_turret = new DisplaySprite(0, 0);
-		_turret.loadGraphic("images/tank-turret.png", false, false, 48, 48);		
+		_turret.loadGraphic("images/tank-turret.png", false, false, 64, 64);		
 		_turret.relativeX = (width / 2) - (_turret.width/2);
 		_turret.relativeY = (height / 2) - (_turret.width / 2);
 		_turret.setOriginToCenter();
+		animation.add("lr", [0, 1], 12);
+		animation.add("u", [2, 3], 12);
+		animation.add("d", [4, 5], 12);
+		animation.play("lr");
+		facing = FlxObject.LEFT;
 		add(_turret);
 		_target = FlxPoint.get();
 		onScreen = true;
@@ -65,13 +72,56 @@ class Tank extends DisplaySprite
 		_vec.normalize();
 		velocity.x = _vec.x * Speed;
 		velocity.y = _vec.y * Speed;
+		updateAnimation();
+	}
+	
+	private function updateAnimation():Void
+	{
 		
+		if (velocity.x > 0 && Math.abs(velocity.x) > Math.abs(velocity.y))
+		{
+			facing = FlxObject.RIGHT;
+		}
+		else if (velocity.x < 0 && Math.abs(velocity.x) > Math.abs(velocity.y))
+		{
+			facing = FlxObject.LEFT;
+		}
+		else if (velocity.y > 0)
+		{
+			facing = FlxObject.DOWN;
+		}
+		else if (velocity.y < 0)
+		{
+			facing = FlxObject.UP;
+		}
+		
+		if (animation.paused)
+			animation.resume();
+		
+		if (_wasFacing == facing)
+			return;
+		
+		var anim:String = "";
+		switch(facing)
+		{
+			case FlxObject.LEFT, FlxObject.RIGHT:
+				anim = "lr";
+			case FlxObject.UP:
+				anim = "u";
+			case FlxObject.DOWN:
+				anim = "d";
+				
+		}
+		animation.play(anim, true);
+		
+		_wasFacing = facing;
 	}
 	
 	private function finishMoveTo():Void
 	{
 		setPosition(_dest.x, _dest.y);
 		stopMoving();
+		animation.pause();
 	}
 	
 	public function stopMoving():Void
@@ -82,6 +132,8 @@ class Tank extends DisplaySprite
 	
 	override public function draw():Void 
 	{
+		_turret.relativeX = 0;
+		_turret.relativeY = 0;
 		_turret.x = x + (width / 2) - (_turret.width / 2);
 		_turret.y = y + (height / 2) - (_turret.height / 2);
 		super.draw();
@@ -114,16 +166,17 @@ class Tank extends DisplaySprite
 		if (shoot)
 		{
 
-			if (onScreen)
-				{
-					if (Reg.playState.m.mapPathing.ray(getMidpoint(_point), _target))
-					{					
-						Reg.playState.shootBullet(getMidpoint(_point), a);
-						FlxG.sound.play("sounds/Shoot-Standard.wav",.8);
-					}
-				}
+			//if (onScreen)
+			//	{
+			if (Reg.playState.m.mapPathing.ray(getMidpoint(_point), _target))
+			{					
+				Reg.playState.shootBullet(getMidpoint(_point),a);
+				FlxG.sound.play("sounds/Shoot-Standard.wav",.8);
+			}
+			//	}
 			
 		}
+		
 		
 		var oldx:Float = _vec.x;
 		var oldy:Float = _vec.y;
