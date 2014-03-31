@@ -10,7 +10,7 @@ class RoarMarker extends FlxSprite
 	public function new(X:Float=0, Y:Float=0) 
 	{
 		super(X, Y);
-		loadGraphic("images/roars.png", true, false, 16, 16);
+		loadGraphic("images/roars.png", true, false, 18, 18);
 		animation.frameIndex = 0;
 		scrollFactor.set();
 		_available = false;

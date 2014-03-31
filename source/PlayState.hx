@@ -78,10 +78,13 @@ class PlayState extends FlxState
 	public var barLoadRight:FlxSprite;
 	private var _txtSillyLoad:GameFont;
 	private var _sndRoar:FlxSound;
+	private var _sprLightning:FlxSprite;
 	
 	private var sprTest:FlxSprite;
 	private var _sprLoad:FlxSprite;
 	private var _barLoad:FlxBar;
+	
+	private var _playerGlow:FlxSprite;
 	
 	private var _keysHint:FlxSprite;
 	private var _spaceHint:SpaceHint;
@@ -168,28 +171,41 @@ class PlayState extends FlxState
 		wall.immovable = true;
 		_grpWorldWalls.add(wall);
 
+		
+		_player = new Player();
+		_playerGlow = new FlxSprite();
+		_playerGlow.loadGraphic("images/player-glow.png", true, true, 74, 74);
+		_playerGlow.width = _player.width;
+		_playerGlow.height = _player.height;
+		_playerGlow.offset.x = _player.offset.x+5;
+		_playerGlow.offset.y = _player.offset.y+5;
+		_playerGlow.animation.copyFrom(_player.animation);
+		updateGlow();
+		
+		add(_playerGlow);
+		
 		_grpHUD = new FlxTypedGroup<Dynamic>();
 		add(_grpHUD);
 		
 		
 		FlxG.worldBounds.set(-8, -8, m.mapTerrain.width+16, m.mapTerrain.height+16);
 		
-		_player = new Player();
+		
 		
 		_player.facing = FlxObject.DOWN;
 		
-		_barEnergy = new FlxBar(0, 0, FlxBar.FILL_LEFT_TO_RIGHT, 300, 16, _player, "energy", 0, 100, true);
+		_barEnergy = new FlxBar(0, 0, FlxBar.FILL_LEFT_TO_RIGHT, 300, 18, _player, "energy", 0, 100, true);
 		_barEnergy.scrollFactor.x = _barEnergy.scrollFactor.y = 0;
 		_barEnergy.createImageBar("images/energy_bar_empty.png", "images/energy_bar_full.png");
 		FlxSpriteUtil.screenCenter(_barEnergy, true, false);
-		_barEnergy.y = 16;
+		_barEnergy.y = 15;
 		_grpHUD.add(_barEnergy);
 		
 		_roarMarkers = new Array<RoarMarker>();
 		var r:RoarMarker;
 		for (i in 0...3)
 		{
-			r = new RoarMarker(_barEnergy.x + _barEnergy.width + 32 + (24 * i), _barEnergy.height);
+			r = new RoarMarker(_barEnergy.x + _barEnergy.width + 32 + (24 * i), _barEnergy.y);
 			_roarMarkers.push(r);
 			_grpHUD.add(r);
 		}
@@ -233,7 +249,7 @@ class PlayState extends FlxState
 		
 		_calcTmr = .33;
 		
-		_txtScore = new GameFont(0, 16, "000000000", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right");
+		_txtScore = new GameFont(0, 13, "000000000", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right",25);
 		_txtScore.x = FlxG.width - _txtScore.width - 16;
 		_txtScore.scrollFactor.x = _txtScore.scrollFactor.y  = 0;
 		_grpHUD.add(_txtScore);
@@ -254,6 +270,15 @@ class PlayState extends FlxState
 		
 		_pauseScreen = new PauseGroup();
 		add(_pauseScreen);
+		
+		_sprLightning = new FlxSprite(0, -10, "images/lightning.png");
+		FlxSpriteUtil.screenCenter(_sprLightning, true, false);
+		_sprLightning.x += 16;
+		_sprLightning.alpha = 0;
+		_sprLightning.visible = false;
+		_sprLightning.scrollFactor.set();
+		add(_sprLightning);
+		
 		
 		_paused = false;
 
@@ -278,6 +303,15 @@ class PlayState extends FlxState
 		super.create();
 	}
 	
+	private function updateGlow():Void
+	{
+		//_playerGlow.animation.play(_player.animation.curAnim.name, true, _player.animation.frameIndex);
+		_playerGlow.animation.frameIndex = _player.animation.frameIndex;
+		_playerGlow.facing = _player.facing;
+		_playerGlow.x = _player.x;
+		_playerGlow.y = _player.y;
+		_playerGlow.alpha = _player.alpha;
+	}
 	
 	public function shootBullet(Origin:FlxPoint, Angle:Float, Style:Int = 0):Void
 	{
@@ -338,7 +372,12 @@ class PlayState extends FlxState
 	override public function draw():Void 
 	{
 		buildDrawGroup();
-
+		
+		
+		if (_player != null && _playerGlow != null)
+		{
+			updateGlow();
+		}
 		super.draw();
 	}
 	
@@ -607,6 +646,7 @@ class PlayState extends FlxState
 		{
 			updatePlayerAnimation();
 			
+			
 		}
 		super.update();
 	}
@@ -721,6 +761,9 @@ class PlayState extends FlxState
 	private function doneFirstWait(T:FlxTimer):Void
 	{
 		FlxG.camera.flash(0x99ffffff, .2, doneFlashOne);
+		_sprLightning.visible = true;
+		_sprLightning.alpha = 0;
+		FlxTween.tween(_sprLightning, { alpha:1 }, .2, { type:FlxTween.ONESHOT, ease:FlxEase.bounceIn } );
 	}
 	
 	private function doneZoomIn(T:FlxTween):Void
@@ -733,12 +776,23 @@ class PlayState extends FlxState
 	{
 		FlxG.sound.play("sounds/thunder.wav");
 		FlxG.camera.flash(0x99ffffff, .6, doneFlashTwo);
+		_sprLightning.alpha = .66;
+		
+	}
+	
+	private function doneLightningShow(T:FlxTween):Void
+	{
+		_sprLightning.kill();
+		_sprLightning = FlxDestroyUtil.destroy(_sprLightning);
 	}
 	
 	private function doneFlashTwo():Void
 	{
 		FlxG.sound.play("sounds/thunder.wav");
 		FlxTimer.start(.66, doneShortWait);
+		_sprLightning.alpha = 1;
+		FlxTween.tween(_sprLightning, { alpha:0 }, .2, { type:FlxTween.ONESHOT, ease:FlxEase.bounceOut } );
+		
 	}
 	
 	private function doneShortWait(T:FlxTimer):Void

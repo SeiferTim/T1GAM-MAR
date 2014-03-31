@@ -19,7 +19,11 @@ class Bullet extends DisplaySprite
 	public function new() 
 	{
 		super();
-		makeGraphic(8, 8, FlxColor.CRIMSON);
+		loadGraphic("images/missilepix.png", true, false, 16, 16);
+		width = 6;
+		height = 6;
+		offset.x = 5;
+		offset.y = 5;
 		calcOnScreen = false;
 	}
 	
@@ -33,12 +37,15 @@ class Bullet extends DisplaySprite
 		switch(style)
 		{
 			case STANDARD:
+				//makeGraphic(8, 8, FlxColor.CRIMSON);
 				velocity.x = _point.x;
 				velocity.y = _point.y;
 			case MISSLE:
+				
 				acceleration.x = _point.x*2;
 				acceleration.y = _point.y*2;
 		}
+		
 		onScreen = true;
 		solid = true;
 	}
