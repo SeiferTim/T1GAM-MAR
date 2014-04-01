@@ -14,13 +14,15 @@ class CityTile extends DisplaySprite
 	{
 		super(X, Y);
 		tier = Tier;
-		health = tier;
+		
 		loadGraphic("images/city-tiles.png", true, false, 64, 128);
 		width = 66;
 		height = 66;
 		offset.y = 63;
 		offset.x = -1;
 		animation.frameIndex = tier;
+		tier =  tier % 7;
+		health = tier;
 		moves = false;
 		immovable = true;
 		allowCollisions = FlxObject.ANY;

@@ -11,6 +11,8 @@ class CreditState extends FlxState
 	private var _loading:Bool = true;
 	private var _leaving:Bool = false;
 	private var _btnBack:GameButton;
+	private var _hfLogo:FlxSprite;
+	
 	override public function create():Void 
 	{
 		FlxG.autoPause = false;
@@ -26,7 +28,7 @@ class CreditState extends FlxState
 		FlxSpriteUtil.screenCenter(_t1, true, false);
 		add(_t1);
 		
-		var _t2:GameFont = new GameFont(0, _t1.y + _t1.height + 4, "Tim's 1-Game-a-Month Project", GameFont.STYLE_SMSIMPLE,GameFont.COLOR_SIMPLEGOLD,"center",48);
+		var _t2:GameFont = new GameFont(0, _t1.y + _t1.height + 4, "Tim's 1-Game-a-Month Project", GameFont.STYLE_SMSIMPLE,GameFont.COLOR_SIMPLEGOLD,"center",28);
 		FlxSpriteUtil.screenCenter(_t2, true, false);
 		add(_t2);
 		
@@ -38,7 +40,7 @@ class CreditState extends FlxState
 		FlxSpriteUtil.screenCenter(_t4, true, false);
 		add(_t4);
 		
-		var _t5:GameFont = new GameFont(0,_t4.y + _t4.height + 4, "Tim I Hely",GameFont.STYLE_SMSIMPLE,GameFont.COLOR_SIMPLEGOLD,48);
+		var _t5:GameFont = new GameFont(0,_t4.y + _t4.height + 4, "Tim I Hely",GameFont.STYLE_SMSIMPLE,GameFont.COLOR_SIMPLEGOLD,28);
 		FlxSpriteUtil.screenCenter(_t5, true, false);
 		add(_t5);
 		
@@ -50,7 +52,7 @@ class CreditState extends FlxState
 		FlxSpriteUtil.screenCenter(_t7, true, false);
 		add(_t7);
 		
-		var _t8:GameFont = new GameFont(0,_t7.y+_t7.height + 4,"Fat Bard", GameFont.STYLE_SMSIMPLE,GameFont.COLOR_SIMPLEGOLD,"center", 48);
+		var _t8:GameFont = new GameFont(0,_t7.y+_t7.height + 4,"Fat Bard", GameFont.STYLE_SMSIMPLE,GameFont.COLOR_SIMPLEGOLD,"center", 28);
 		FlxSpriteUtil.screenCenter(_t8, true, false);
 		add(_t8);
 		
@@ -62,9 +64,20 @@ class CreditState extends FlxState
 		FlxSpriteUtil.screenCenter(_t10, true, false);
 		add(_t10);
 		
-		var _t11:GameFont = new GameFont(0,_t10.y + _t10.height + 4, "Vicky Hedgecock", GameFont.STYLE_SMSIMPLE,GameFont.COLOR_SIMPLEGOLD, "center", 48);
+		var _t11:GameFont = new GameFont(0,_t10.y + _t10.height + 4, "Vicky Hedgecock", GameFont.STYLE_SMSIMPLE,GameFont.COLOR_SIMPLEGOLD, "center", 28);
 		FlxSpriteUtil.screenCenter(_t11, true, false);
 		add(_t11);
+		
+		var _t12:GameFont = new GameFont(0, _t11.y + _t11.height + 16, "Andrew-David Jahchan", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "center", 28);
+		FlxSpriteUtil.screenCenter(_t12, true, false);
+		add(_t12);
+		
+		var _t13:LinkText = new LinkText(0, _t12.y + _t12.height + 4, "andrewdavid.net", clickADLink, "center", 20);
+		FlxSpriteUtil.screenCenter(_t13, true, false);
+		add(_t13);
+		
+		
+		
 		
 		_btnBack = new GameButton(0, 0, "Main Menu", clickMainMenu, GameButton.STYLE_GREEN, true);
 		_btnBack.x = FlxG.width - _btnBack.width - 16;
@@ -85,6 +98,11 @@ class CreditState extends FlxState
 	private function clickT1GamLink():Void
 	{
 		FlxG.openURL("http://t1gam.tims-world.com");
+	}
+	
+	private function clickADLink():Void
+	{
+		FlxG.openURL("http://andrewdavid.net/");
 	}
 	
 	private function clickTimsLink():Void

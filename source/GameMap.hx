@@ -43,6 +43,8 @@ class GameMap
 	private static inline var STREETV:Int = 7;
 	private static inline var STREETH:Int = 8;
 	private static inline var STREETI:Int = 9;
+	
+	private var _cityRows:Int = 2;
 
 	public function new(Width:Int, Height:Int ) 
 	{
@@ -293,7 +295,7 @@ class GameMap
 				waterCount = _pathMap[(_whichTileRow * _width) +_whichTileCol] + _pathMap[((_whichTileRow + 1) * _width) +_whichTileCol] + _pathMap[(_whichTileRow * _width) +_whichTileCol +1] + _pathMap[((_whichTileRow + 1) * _width) +_whichTileCol + 1];
 				if (blockAvg > 0 && waterCount == 0)
 				{
-					cityTiles.add( new CityTile(_whichTileCol * 32, _whichTileRow * 32, Math.ceil(blockAvg)));
+					cityTiles.add( new CityTile(_whichTileCol * 32, _whichTileRow * 32, Math.ceil(blockAvg)+(FlxRandom.intRanged(0,_cityRows-1)*7)));
 					_popMap[(_whichTileRow * _width) + _whichTileCol] = 1;
 					_popMap[((_whichTileRow + 1) * _width) + _whichTileCol] = 1;
 					_popMap[(_whichTileRow * _width) + _whichTileCol + 1] = 1;
