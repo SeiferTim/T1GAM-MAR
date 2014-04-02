@@ -33,14 +33,14 @@ class MadeInSTLState extends FlxState
 		
 		_sprArch = new FlxSprite(0, 0, "images/arch.png");
 		FlxSpriteUtil.screenCenter(_sprArch);
-		_sprArchWave = new FlxWaveSprite(_sprArch, FlxWaveSprite.MODE_ALL, 500);
+		_sprArchWave = new FlxWaveSprite(_sprArch, WaveMode.ALL, 500);
 		_sprArchWave.alpha = 0;
 		add(_sprArchWave);
 		
 		_txtText = new GameFont(0, 0, "Made in Saint Louis", GameFont.STYLE_HUGE_TITLE, GameFont.COLOR_CYAN, "center",100);
 		FlxSpriteUtil.screenCenter(_txtText, true, false);
 		_txtText.y = _sprArch.y - (_txtText.height *.25) + _sprArch.height - _txtText.height;
-		_txtWave = new FlxWaveSprite(_txtText, FlxWaveSprite.MODE_BOTTOM, 500,0);
+		_txtWave = new FlxWaveSprite(_txtText, WaveMode.BOTTOM, 500,0);
 		_txtWave.alpha = 0;
 		add(_txtWave);
 		

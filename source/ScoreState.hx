@@ -27,7 +27,7 @@ class ScoreState extends FlxState
 		
 		var txtGameOver:GameFont = new GameFont(0, 16, "GAME OVER!", GameFont.STYLE_BIG_TITLE, GameFont.COLOR_CYAN, "center");
 		FlxSpriteUtil.screenCenter(txtGameOver, true, false);
-		var txtGOWave:FlxWaveSprite = new FlxWaveSprite(txtGameOver,FlxWaveSprite.MODE_BOTTOM);
+		var txtGOWave:FlxWaveSprite = new FlxWaveSprite(txtGameOver,WaveMode.BOTTOM);
 		add(txtGOWave);
 		
 		var txtScoreHead:GameFont = new GameFont(0, txtGameOver.y + txtGameOver.height + 16, "Your Score", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEBLUE, "center", 36);

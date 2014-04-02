@@ -43,11 +43,11 @@ class PauseGroup extends FlxGroup
 		
 		FlxSpriteUtil.screenCenter(_back);
 		
-		_backWav = new FlxWaveSprite(_back, FlxWaveSprite.MODE_ALL, 4);
+		_backWav = new FlxWaveSprite(_back, WaveMode.ALL, 4);
 
 		_txt = new GameFont(0, 16, "PAUSED", GameFont.STYLE_BIG_TITLE, GameFont.COLOR_CYAN, "center");
 		FlxSpriteUtil.screenCenter(_txt, true, false);
-		_txtWave = new FlxWaveSprite(_txt,FlxWaveSprite.MODE_BOTTOM);
+		_txtWave = new FlxWaveSprite(_txt,WaveMode.BOTTOM);
 
 		add(_backWav);
 		add(_txtWave);

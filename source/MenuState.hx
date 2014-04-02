@@ -65,7 +65,7 @@ class MenuState extends FlxState
 		_text1Filter.addFilter(_text1Glow);
 		FlxSpriteUtil.screenCenter(_textMain, true, false);
 		
-		_textMainWave = new FlxWaveSprite(_textMain,FlxWaveSprite.MODE_BOTTOM,400,0);
+		_textMainWave = new FlxWaveSprite(_textMain,WaveMode.BOTTOM,400,0);
 		_textMainWave.alpha = 0;
 		//_textMainWave.blend = BlendMode.SCREEN;
 		_textMainWave.y = 124;
