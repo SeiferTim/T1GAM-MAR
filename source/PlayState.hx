@@ -96,7 +96,6 @@ class PlayState extends FlxState
 	private var _swimming:Bool = false;
 	private var _wasSwimming:Bool = false;
 
-	
 	override public function create():Void
 	{
 		FlxG.autoPause = false;
@@ -298,8 +297,10 @@ class PlayState extends FlxState
 		
 		updateHUDAlpha(0);
 		
-		
-		
+		FlxG.watch.add(grpDisplay, "length");
+		FlxG.watch.add(grpDisplay.members, "length");
+		FlxG.watch.add(grpDisplay.zMembers, "length");
+		trace(grpDisplay.zMembers == grpDisplay.members);
 		super.create();
 	}
 	
@@ -391,11 +392,11 @@ class PlayState extends FlxState
 		
 		while ((i > first) && (value < grpDisplay.zMembers[i - 1].z))
 		{
-			grpDisplay.zMembers[i] = grpDisplay.zMembers[i - 1];
 			i = i - 1;
 		}
-		grpDisplay.zMembers[i] = O;
+		grpDisplay.zMembers.insert(i, O);
 		grpDisplay.length++;
+		
 	}
 	
 	private function rectsIntersect(a:Rectangle, b:Rectangle):Bool
@@ -412,7 +413,7 @@ class PlayState extends FlxState
 		FlxG.worldBounds.y = FlxG.camera.scroll.y -8;
 		
 		grpDisplay.clear();
-		grpDisplay.add(_player, true);
+		grpDisplay.add(_player);
 
 		for (c in m.cityTiles.members)
 		{
@@ -508,6 +509,8 @@ class PlayState extends FlxState
 				}
 			}
 		}
+		
+		grpDisplay.updateMembers();
 
 	}
 	
@@ -555,11 +558,13 @@ class PlayState extends FlxState
 					_paused = true;
 				}
 				
+				Reg.playTime += FlxG.elapsed;
 				_player.energy -= FlxG.elapsed * 6;
+				
 				
 				var isDebug = false;
 				#if debug
-				isDebug = true;
+				//isDebug = true;
 				#end
 				
 				if (_player.energy <= 0 && !isDebug)
@@ -1061,6 +1066,7 @@ class PlayState extends FlxState
 		calculateDistances();
 		updateHUDAlpha(1);
 		FlxTimer.start(5, hideHints);
+		Reg.playTime = 0;
 		
 	}
 	

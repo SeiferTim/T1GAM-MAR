@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
 	<!------------------------------APPLICATION SETTINGS---------------------------->
-	<meta title="T1GAM-MAR" package="com.timsworld.t1gam.mar" version="1.0.1" company="Tile Isle" />
-	<app title="T1GAM-MAR" file="T1GAM-MAR" main="Main" version="0.0.2" company="Tile Isle" />
+	<meta title="Dinosaur-Ghost Rampage" package="com.timsworld.t1gam.mar" version="1.0.2" company="Tile Isle" />
+	<app title="Dinosaur-Ghost Rampage" file="DinosaurGhostRampage" main="Main" version="1.0.2" company="Tile Isle" />
 	
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file, or you can set the actual size of your file manually at "Flxpreloader-onUpdate-bytesTotal"!-->
 	<app preloader="flixel.system.FlxPreloader" />
 	
 	<!--The swf version should be at least 11.2 without FLX_NO_MOUSE_ADVANCED -->
-	<set name="SWF_VERSION" value="11.2" />
+	<set name="SWF_VERSION" value="11.8" />
 	
 	<!--------------------------------WINDOW SETTINGS------------------------------->
 	
@@ -82,10 +82,10 @@
 	<haxedef name="FLX_NO_MOUSE" if="mobile" />
 	<haxedef name="FLX_NO_KEYBOARD" if="mobile" />
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
-	<haxedef name="FLX_NO_GAMEPAD" />
+	<!--<haxedef name="FLX_NO_GAMEPAD" />-->
 	
 	<!--Disable the Flixel core sound tray-->
-	<!--<haxedef name="FLX_NO_SOUND_TRAY" />-->
+	<haxedef name="FLX_NO_SOUND_TRAY" />
 	
 	<!--Disable the Flixel sound management code-->
 	<!--<haxedef name="FLX_NO_SOUND_SYSTEM" />-->
@@ -95,4 +95,5 @@
 	
 	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
+	
 </project>

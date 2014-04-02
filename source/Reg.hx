@@ -63,7 +63,7 @@ class Reg
 	static public inline var FADE_DUR:Float = 0.3;
 	static public var playState:PlayState;
 	
-	
+	static public var playTime:Float = 0;
 	
 	static public var GameInitialized:Bool = false;
 	#if desktop

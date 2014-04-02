@@ -10,7 +10,13 @@ class ZGroup<T:FlxBasic> extends FlxTypedGroup<T>
 	public function new(MaxSize:Int = 0)
 	{
 		super(MaxSize);
+		
 		zMembers = cast members;
+	}
+	
+	public function updateMembers():Void
+	{
+		members = cast zMembers;
 	}
 	
 }

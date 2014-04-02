@@ -22,7 +22,7 @@ class GameClass extends FlxGame
 	public function new()
 	{
 		
-		Lib.current.stage.quality = StageQuality.LOW;
+		//Lib.current.stage.quality = StageQuality.LOW;
 		Reg.initGame();
 		FlxG.fixedTimestep = false;
 		FlxG.debugger.drawDebug = false;

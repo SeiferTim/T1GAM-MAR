@@ -52,7 +52,22 @@ class ScoreState extends FlxState
 		txtCopters2.x = FlxG.width - txtCopters2.width - margin;
 		add(txtCopters2);
 		
-		var txtTotal1:GameFont = new GameFont(margin, txtCopters1.y + txtCopters1.height + 16, "Total Score ", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 32);
+		var txtTime1:GameFont = new GameFont(margin, txtCopters1.y + txtCopters1.height + 8, "Time Survived ", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		add(txtTime1);
+		var txtTime2:GameFont = new GameFont(0, txtTime1.y, StringTools.lpad(" " + Std.string(Std.int(Reg.playTime * 10) / 10) + " s", ".", buffer), GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		txtTime2.x = FlxG.width - txtTime2.width - margin;
+		add(txtTime2);
+		
+		var txtTimeBonus1:GameFont = new GameFont(margin, txtTime1.y + txtTime1.height + 8, "Time Bonus ", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		add(txtTimeBonus1);
+		var txtTimeBonus2:GameFont = new GameFont(0, txtTimeBonus1.y, StringTools.lpad(" " + Std.string(Math.floor(Reg.playTime)*5) , ".", buffer), GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		txtTimeBonus2.x = FlxG.width - txtTimeBonus2.width - margin;
+		add(txtTimeBonus2);
+		
+		
+		Reg.score += Math.floor(Reg.playTime)*5;
+		
+		var txtTotal1:GameFont = new GameFont(margin, txtTimeBonus2.y + txtTimeBonus2.height + 16, "Total Score ", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 32);
 		add(txtTotal1);
 		var txtTotal2:GameFont = new GameFont(0,txtTotal1.y, StringTools.lpad(" " + Std.string(Reg.score), ".", buffer), GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
 		txtTotal2.x = FlxG.width - txtTotal2.width - margin;
