@@ -2,6 +2,7 @@ package ;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxRandom;
 
 class CityTile extends DisplaySprite
 {
@@ -81,7 +82,7 @@ class CityTile extends DisplaySprite
 			return;
 		FlxG.sound.play("sounds/Collapse.wav", .8);
 		isDead = true;
-		animation.frameIndex = 0;
+		animation.frameIndex = FlxRandom.intRanged(0, 2) * 7;
 		allowCollisions = FlxObject.NONE;
 		solid = false;
 		Reg.playState.createCitySmoke(x, y, this);

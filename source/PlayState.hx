@@ -726,6 +726,14 @@ class PlayState extends FlxState
 				_player.y = sprTest.y + (sprTest.height / 2) - (_player.height / 2)-16;// - FlxG.camera.scroll.y - 16;
 				_allowDraw = true;
 				_player.alpha = 0;
+				for (c in m.cityTiles.members)
+				{
+					if (sprTest.overlaps(c, true))
+					{						
+						c.animation.frameIndex = 21;
+					}
+				}
+				
 				FlxG.camera.followLead.x = 2;
 				FlxG.camera.followLead.y = 2;
 				FlxG.camera.follow(_player, FlxCamera.STYLE_NO_DEAD_ZONE, null, 8);

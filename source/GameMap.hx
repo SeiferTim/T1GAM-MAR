@@ -4,6 +4,7 @@ import flash.geom.Point;
 import flixel.addons.util.FlxAsyncLoop;
 import flixel.FlxObject;
 import flixel.tile.FlxTilemap;
+import flixel.util.FlxArrayUtil;
 import flixel.util.FlxBitmapUtil;
 import flixel.util.FlxColorUtil;
 import flixel.util.FlxDestroyUtil;
@@ -44,7 +45,7 @@ class GameMap
 	private static inline var STREETH:Int = 8;
 	private static inline var STREETI:Int = 9;
 	
-	private var _cityRows:Int = 2;
+	private var _rowsWeight:Array<Int>;
 
 	public function new(Width:Int, Height:Int ) 
 	{
@@ -57,7 +58,7 @@ class GameMap
 		var _terrainData:BitmapData;
 		var _popData:BitmapData;
 		
-		
+		_rowsWeight = [0, 0, 0, 0, 0, 1, 1, 1, 2];
 		_width = Width;
 		_height = Height;
 		_terrainData = new BitmapData(_width, _height, true, 0x0);
@@ -295,7 +296,7 @@ class GameMap
 				waterCount = _pathMap[(_whichTileRow * _width) +_whichTileCol] + _pathMap[((_whichTileRow + 1) * _width) +_whichTileCol] + _pathMap[(_whichTileRow * _width) +_whichTileCol +1] + _pathMap[((_whichTileRow + 1) * _width) +_whichTileCol + 1];
 				if (blockAvg > 0 && waterCount == 0)
 				{
-					cityTiles.add( new CityTile(_whichTileCol * 32, _whichTileRow * 32, Math.ceil(blockAvg)+(FlxRandom.intRanged(0,_cityRows-1)*7)));
+					cityTiles.add( new CityTile(_whichTileCol * 32, _whichTileRow * 32, Math.ceil(blockAvg)+(FlxArrayUtil.getRandom(_rowsWeight)*7)));
 					_popMap[(_whichTileRow * _width) + _whichTileCol] = 1;
 					_popMap[((_whichTileRow + 1) * _width) + _whichTileCol] = 1;
 					_popMap[(_whichTileRow * _width) + _whichTileCol + 1] = 1;
