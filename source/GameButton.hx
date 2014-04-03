@@ -1,10 +1,16 @@
 package ;
 
+import flash.display.BitmapData;
+import flash.geom.Point;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUITypedButton;
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.system.FlxSound;
 import flixel.ui.FlxButton;
+import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
+import flixel.util.FlxSpriteUtil;
 
 class GameButton extends FlxUITypedButton<GameFont>
 {
@@ -14,8 +20,12 @@ class GameButton extends FlxUITypedButton<GameFont>
 	public static inline var STYLE_YELLOW:Int = 3;
 	public static inline var STYLE_RED:Int = 4;
 	
-
 	private static var  _slices:Array<Array<Int>> = [[7, 7, 41, 38], [7, 7, 41, 38], [7, 7, 41, 38]];
+	
+	public var selected:Bool = false;
+	
+	private var _sprSelected:FlxSprite;
+	
 	
 	
 	public function new(X:Float=0, Y:Float=0, ?Label:String, ?OnClick:Void -> Void, Style:Int = 0, FitText:Bool = true, Width:Int = 0, Height:Int =0, LabelFontSize:Int = -1) 
@@ -59,8 +69,28 @@ class GameButton extends FlxUITypedButton<GameFont>
 			h = Height;
 		}
 		
+		
+		
 		loadGraphicSlice9([img], w, h,_slices, FlxUI9SliceSprite.TILE_NONE, -1, false, 49, 49);
 		label = l;
+		
+		_sprSelected = new FlxSprite(0, 0).makeGraphic(w + 4, h + 4, 0x0);
+		var b:BitmapData = new BitmapData(w, h, true, FlxColor.WHITE);
+		var spr:FlxSprite = new FlxSprite();
+		FlxSpriteUtil.alphaMask(spr, b, framePixels);
+		for (sx in 0...5)
+		{
+			for (sy in 0...5)
+			{
+				_sprSelected.pixels.copyPixels(spr.pixels, spr.pixels.rect,new Point(sx,sy),spr.pixels, new Point(0, 0), true);
+			}
+		}
+		_sprSelected.dirty = true;
+		
+		_sprSelected.x = x - 2;
+		_sprSelected.y = y - 2;
+		b = FlxDestroyUtil.dispose(b);
+		spr = FlxDestroyUtil.destroy(spr);
 		
 		up_toggle_color = over_toggle_color = over_color = down_color = down_toggle_color = up_color = 0xffffff;
 		
@@ -74,13 +104,32 @@ class GameButton extends FlxUITypedButton<GameFont>
 		var _sound:FlxSound;
 		_sound = FlxG.sound.load("sounds/Button.wav");
 		onUp.sound = _sound;
-
+		
+		
+		
+		
 	}
 
-	
+	override public function destroy():Void
+	{
+		_sprSelected = FlxDestroyUtil.destroy(_sprSelected);
+		super.destroy();
+	}
 	override public function draw():Void
 	{
+		
 		label.alpha = alpha;
+	
+		if (selected)
+		{
+			_sprSelected.alpha = alpha*.8;
+			_sprSelected.scrollFactor = scrollFactor;
+			_sprSelected.x = x - 2;
+			_sprSelected.y = y - 2;
+			_sprSelected.cameras = cameras;
+			_sprSelected.draw();
+		}
+		
 		super.draw();
 	}
 	

@@ -50,6 +50,11 @@ class OptionsState extends FlxState
 		_optScreen.active = false;
 		#end
 		
+		
+		#if !FLX_NO_GAMEPAD
+		
+		#end
+		
 		_btnDone = new GameButton(0, 0, "Done", goDone, GameButton.STYLE_GREEN, true);
 		_btnDone.y = FlxG.height - _btnDone.height - 16;
 		FlxSpriteUtil.screenCenter(_btnDone, true, false);

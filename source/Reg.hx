@@ -2,6 +2,7 @@ package;
 
 import flash.text.Font;
 import flixel.FlxG;
+import flixel.input.gamepad.FlxGamepad;
 import flixel.util.FlxSave;
 
 /**
@@ -26,24 +27,10 @@ class Reg
 	//Images
 	public static inline var TANK_GIBS:String = "images/tank-gibs.png";
 	
-	
-	
 	static public inline var SCORE_BUILDINGS:Int = 0;
 	static public inline var SCORE_TANKS:Int = 1;
 	static public inline var SCORE_COPTERS:Int = 2;
 	
-	
-	
-	/**
-	 * Generic levels Array that can be used for cross-state stuff.
-	 * Example usage: Storing the levels of a platformer.
-	 */
-	//static public var levels:Array<Dynamic> = [];
-	/**
-	 * Generic level variable that can be used for cross-state stuff.
-	 * Example usage: Storing the current level number.
-	 */
-	//static public var level:Int = 0;
 	/**
 	 * Generic scores Array that can be used for cross-state stuff.
 	 * Example usage: Storing the scores for level.
@@ -79,6 +66,8 @@ class Reg
 		FlxG.debugger.drawDebug = false;
 
 		loadData();
+		
+		GameControls.init();
 		
 		GameInitialized = true;
 	}

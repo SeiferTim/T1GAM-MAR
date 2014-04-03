@@ -82,6 +82,11 @@ class CreditState extends FlxState
 		_btnBack = new GameButton(0, 0, "Main Menu", clickMainMenu, GameButton.STYLE_GREEN, true);
 		_btnBack.x = FlxG.width - _btnBack.width - 16;
 		_btnBack.y = FlxG.height - _btnBack.height - 16;
+		
+		#if !FLX_NO_GAMEPAD
+		if (GameControls.hasGamepad)
+			_btnBack.selected = true;
+		#end
 		add(_btnBack);
 		
 		

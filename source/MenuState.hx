@@ -1,18 +1,22 @@
 package;
 
 import flash.display.BlendMode;
+import flash.events.MouseEvent;
 import flash.filters.GlowFilter;
 import flash.geom.Point;
 import flash.system.System;
 import flixel.addons.effects.FlxWaveSprite;
 import flixel.addons.ui.FlxUIButton;
+import flixel.addons.ui.FlxUITypedButton;
 import flixel.effects.FlxSpriteFilter;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.input.gamepad.LogitechButtonID;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxGradient;
@@ -45,9 +49,14 @@ class MenuState extends FlxState
 	private var _leaving:Bool = false;
 	private var _loading:Bool = true;
 	
+	private var _pressDelay:Float = .5;
+	
 	#if (desktop)
 	private var _btnExit:FlxUIButton;
 	#end
+	
+	private var _selButton:Int = -1;
+	
 	
 	/**
 	 * Function that is called up when to state is created to set it up. 
@@ -135,6 +144,10 @@ class MenuState extends FlxState
 		add(_btnExit);
 		_btnExit.alpha = 0;
 		_btnExit.active = false;
+		#end
+		
+		#if !FLX_NO_GAMEPAD
+		
 		#end
 		
 		FlxG.sound.playMusic("title-a", 1, false);
@@ -383,9 +396,135 @@ class MenuState extends FlxState
 			if (_btnExit.alpha >= 1)
 				_btnExit.active = true;
 		#end
+		
+		var leftPressed:Bool = false;
+		var upPressed:Bool = false;
+		var rightPressed:Bool = false;
+		var downPressed:Bool = false;
+		var xPressed:Bool = false;
+		
+		if (_pressDelay > 0)
+			_pressDelay -= FlxG.elapsed;
+		if (_pressDelay <= 0)
+		{
+			#if !FLX_NO_KEYBOARD
+			
+			if (FlxG.keys.anyPressed(GameControls.keys[GameControls.SELRIGHT]))
+			{
+				rightPressed = downPressed = true;
+			}
+			else if (FlxG.keys.anyPressed(GameControls.keys[GameControls.SELLEFT]))
+			{
+				leftPressed = upPressed = true;
+			}
+			if (FlxG.keys.anyPressed(GameControls.keys[GameControls.FIRE]))
+			{
+				xPressed = true;
+			}
+			#end
+			
+			#if !FLX_NO_GAMEPAD
+			if (GameControls.hasGamepad)
+			{
+				if (GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.SELRIGHT]))
+				{
+					rightPressed = downPressed = true;
+				}
+				else if (GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.SELLEFT]))
+				{
+					leftPressed = upPressed = true;
+				}
+				if (GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.FIRE]))
+				{
+					xPressed = true;
+				}
+			}
+			else
+			{
+				GameControls.gamepad = FlxG.gamepads.lastActive;
+				if (GameControls.gamepad != null)
+				{
+					GameControls.hasGamepad = true;
+					_selButton++;
+				}
+			}
+			#end
+			/*#if !FLX_NO_MOUSE
+			if (FlxG.mouse.visible)
+			{
+				if (xPressed || leftPressed || rightPressed)
+					FlxG.mouse.visible = false);
+			}
+			#end*/
+			if (!_loading)
+			{
+				if (xPressed)
+				{
+					
+					switch (_selButton)
+					{	
+						case 0:
+							_btnPlay.forceStateHandler(FlxUITypedButton.CLICK_EVENT);
+							
+						case 1:
+							_btnOptions.forceStateHandler(FlxUITypedButton.CLICK_EVENT);
+							
+						case 2:
+							_btnCredits.forceStateHandler(FlxUITypedButton.CLICK_EVENT);
+							
+					}
+				}
+				else if (rightPressed || downPressed)
+				{
+					_pressDelay = .33;
+					_selButton++;
+					if (_selButton > 2)
+						_selButton = 0;
+				}
+				else if (leftPressed || upPressed)
+				{
+					_pressDelay = .33;
+					_selButton--;
+					if (_selButton < 0)
+						_selButton = 2;
+				}
+			}
+			
+		}
+
+		switch (_selButton)
+		{
+			case -1:
+				_btnPlay.selected = false;
+				_btnCredits.selected = false;
+				_btnOptions.selected = false;
+			case 0:
+				_btnPlay.selected = true;
+				_btnCredits.selected = false;
+				_btnOptions.selected = false;
+			case 1:
+				_btnPlay.selected = false;
+				_btnCredits.selected = false;
+				_btnOptions.selected = true;
+			case 2:
+				_btnPlay.selected = false;
+				_btnCredits.selected = true;
+				_btnOptions.selected = false;
+		}
+		/*#if !FLX_NO_MOUSE
+		if (!FlxG.mouse.visible)
+		{
+			if (!_loading)
+			{
+				if (FlxG.mouse.ismo
+				FlxG.mouse.visible = true;
+			}
+		}*/
 		super.update();
-		//_text1Filter.applyFilters();
 		_text2Filter.applyFilters();
+		
+		
+		
 	}
 	
 	#if desktop
