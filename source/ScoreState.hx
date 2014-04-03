@@ -19,6 +19,10 @@ class ScoreState extends FlxState
 	{
 		FlxG.autoPause = false;
 		
+		#if !FLX_NO_MOUSE
+		FlxG.mouse.visible = true;
+		#end
+		
 		var margin:Int = 256;
 		var buffer:Int = 30;
 		
@@ -54,7 +58,7 @@ class ScoreState extends FlxState
 		
 		var txtTime1:GameFont = new GameFont(margin, txtCopters1.y + txtCopters1.height + 8, "Time Survived ", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
 		add(txtTime1);
-		var txtTime2:GameFont = new GameFont(0, txtTime1.y, StringTools.lpad(" " + Std.string(Std.int(Reg.playTime * 10) / 10) + " s", ".", buffer), GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		var txtTime2:GameFont = new GameFont(0, txtTime1.y, StringTools.lpad(" " + Reg.formatPlayTime(), ".", buffer), GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
 		txtTime2.x = FlxG.width - txtTime2.width - margin;
 		add(txtTime2);
 		

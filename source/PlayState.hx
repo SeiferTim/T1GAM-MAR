@@ -95,6 +95,8 @@ class PlayState extends FlxState
 	private var _wasWalking:Bool = false;
 	private var _swimming:Bool = false;
 	private var _wasSwimming:Bool = false;
+	
+	private var _txtPlayTime:GameFont;
 
 	override public function create():Void
 	{
@@ -109,6 +111,7 @@ class PlayState extends FlxState
 		
 		_sndFoot = FlxG.sound.load("sounds/Foot.wav", 1);
 		_sndRoar = FlxG.sound.load("sounds/roar.wav", 1);
+		
 		
 		grpDisplay = new ZGroup<Dynamic>();
 		_grpSmokes = new FlxTypedGroup<SmokeSpawner>();
@@ -248,11 +251,15 @@ class PlayState extends FlxState
 		
 		_calcTmr = .33;
 		
-		_txtScore = new GameFont(0, 13, "000000000", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right",25);
-		_txtScore.x = FlxG.width - _txtScore.width - 16;
+		_txtScore = new GameFont(16, 13, "000000000", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "left",25);
+		
 		_txtScore.scrollFactor.x = _txtScore.scrollFactor.y  = 0;
 		_grpHUD.add(_txtScore);
 		
+		_txtPlayTime = new GameFont(16, 13, "00:00", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 25);
+		_txtPlayTime.x = FlxG.width - _txtPlayTime.width - 16;
+		_txtPlayTime.scrollFactor.x = _txtPlayTime.scrollFactor.y  = 0;
+		_grpHUD.add(_txtPlayTime);
 		
 		_spawnTimer = _spawnTimerSet = 12;
 		_spawnTimer = 1;
@@ -365,6 +372,7 @@ class PlayState extends FlxState
 		_bounds = FlxDestroyUtil.put(_bounds);
 		_txtScore = null;
 		_roarMarkers = null;
+		_txtPlayTime = null;
 		_sndFoot = FlxDestroyUtil.destroy(_sndFoot);
 		_pauseScreen = null;
 
@@ -552,6 +560,8 @@ class PlayState extends FlxState
 			else
 			{
 			
+				
+				
 				if (!_hasFocus)
 				{
 					_pauseScreen.show();
@@ -559,6 +569,9 @@ class PlayState extends FlxState
 				}
 				
 				Reg.playTime += FlxG.elapsed;
+				
+				_txtPlayTime.text = Reg.formatPlayTime();
+				
 				_player.energy -= FlxG.elapsed * 6;
 				
 				
@@ -853,7 +866,7 @@ class PlayState extends FlxState
 	
 	private function updateHUDAlpha(Value:Float):Void
 	{
-		_barEnergy.alpha = _txtScore.alpha = _roarMarkers[0].alpha  = _roarMarkers[1].alpha = _roarMarkers[2].alpha = _keysHint.alpha = _spaceHint.alpha = Value;
+		_txtPlayTime.alpha = _barEnergy.alpha = _txtScore.alpha = _roarMarkers[0].alpha  = _roarMarkers[1].alpha = _roarMarkers[2].alpha = _keysHint.alpha = _spaceHint.alpha = Value;
 	}
 	
 	

@@ -8,6 +8,7 @@ import flash.geom.Rectangle;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
+import flixel.util.FlxBitmapUtil;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxGradient;
 import flixel.util.FlxSpriteUtil;
@@ -154,6 +155,8 @@ class GameFont extends FlxSprite
 		
 		var tmpText:FlxText = new FlxText(0, 0, FlxG.width, _text);
 		tmpText.setFormat(font, size, 0x000000, align);
+		
+		
 		tmpText.resetFrameBitmapDatas();
 		//tmpText.update();
 		tmpText.drawFrame();
@@ -168,7 +171,12 @@ class GameFont extends FlxSprite
 		var spr:FlxSprite;
 		var dropShad:DropShadowFilter;
 		var outline:DropShadowFilter;
-		var inglow:GlowFilter;
+		var inglow:DropShadowFilter;// GlowFilter;
+		var spr2:FlxSprite;
+		var b3:BitmapData;
+		var b4:BitmapData;
+		spr = new FlxSprite();
+		
 		
 		pixels = new BitmapData(Std.int(r.width), Std.int(r.height), true, 0x0);
 		
@@ -190,46 +198,93 @@ class GameFont extends FlxSprite
 		}
 		else if (style != STYLE_GLOSSY && style != STYLE_SMGLOSSY)
 		{
+			spr2 = new FlxSprite();
 			b2 = FlxGradient.createGradientBitmapData(Std.int(r.width), Std.int(r.height), [colors[0], colors[1]]);
-			spr = new FlxSprite();
-			FlxSpriteUtil.alphaMask(spr, b2, b1);
-			makeGraphic(Std.int(spr.width + 4), Std.int(spr.height + 14), 0x0, true);
-			pixels.copyPixels(spr.pixels, spr.pixels.rect, new Point(2, 2));
-			
-			if (_hasInnerGlow)
-			{			
-				inglow = new GlowFilter(colors[2], 1, 2, 2, 4, 1, true);
-				pixels.applyFilter(pixels, pixels.rect, new Point(), inglow);
-			}
+			b3 = new BitmapData(b1.width, b1.height, true, colors[3]);
+			b4 = new BitmapData(b1.width + 4, b1.height +4, true, 0x0);
 			if (_hasOutline)
 			{
-				outline = new DropShadowFilter(0, 90, colors[3], 1, 2, 2, 20);
-				pixels.applyFilter(pixels, pixels.rect, new Point(), outline);
+				//outline = new DropShadowFilter(0, 90, colors[3], 1, 4, 4, 20);
+				//pixels.applyFilter(pixels, pixels.rect, new Point(), outline);
+				
+				FlxSpriteUtil.alphaMask(spr2, b3, b1);
+				
+				
+				for (sx in 0...3)
+				{
+					for (sy in 0...3)
+					{
+						b4.copyPixels(spr2.pixels, spr2.pixels.rect, new Point(sx, sy), spr2.pixels, new Point(0, 0), true);
+					}
+				}
 			}
+			
+			FlxSpriteUtil.alphaMask(spr, b2, b1);
+			makeGraphic(Std.int(spr.width + 4), Std.int(spr.height + 14), 0x0, true);
+			if (_hasOutline)
+			{
+				pixels.copyPixels(b4, b4.rect, new Point(1, 1));
+			}
+			pixels.copyPixels(spr.pixels, spr.pixels.rect, new Point(2, 2), pixels,new Point(2,2),true);
+			
+			/*if (_hasInnerGlow)
+			{			
+				//inglow = new GlowFilter(colors[2], 1, 2, 2, 4, 1, true, false);
+				inglow = new DropShadowFilter(0, 0, colors[2], 1, 8, 8, 4, 1, true, false);
+				inglow
+				pixels.applyFilter(pixels, pixels.rect, new Point(), inglow);
+			}*/
+			
 			if (_hasShadow)
 			{
 				dropShad = new DropShadowFilter(1, 90, colors[3], .8, 4, 4, 2);
 				pixels.applyFilter(pixels, pixels.rect, new Point(), dropShad);
 			}
+			
+			b3 = FlxDestroyUtil.dispose(b3);
+			b4 = FlxDestroyUtil.dispose(b4);
+			spr2 = FlxDestroyUtil.destroy(spr2);
 		}
 		else
 		{
+			spr2 = new FlxSprite();
 			b2 = new BitmapData(b1.width, b1.height, true, 0xffffffff);
-			b2.fillRect(new Rectangle(0, 0, b1.width, (b1.height / 2) ), colors[0]);
+			b3 = new BitmapData(b1.width, b1.height, true, colors[3]);
+			b4 = new BitmapData(b1.width + 4, b1.height +4, true, 0x0);
+			FlxSpriteUtil.alphaMask(spr2, b3, b1);			
+			
+			for (sx in 0...3)
+			{
+				for (sy in 0...3)
+				{
+					b4.copyPixels(spr2.pixels, spr2.pixels.rect, new Point(sx, sy), spr2.pixels, new Point(0, 0), true);
+				}
+			}
+			
+			
+			b2.fillRect(new Rectangle(0, 0, b1.width, b1.height), colors[0]);
 			b2.fillRect(new Rectangle(0, (b1.height / 2), b1.width, 1), colors[1]);
-			b2.fillRect(new Rectangle(0, (b1.height / 2) + 1, b1.width, (b1.height / 2) - 1), colors[2]);
+			b2.fillRect(new Rectangle(0, (b1.height / 2) + 1, b1.width, b1.height), colors[2]);
 			
-			spr = new FlxSprite();
-		
 			FlxSpriteUtil.alphaMask(spr, b2, b1);
-			makeGraphic(Std.int(spr.width+4), Std.int(spr.height + 4), 0x0,true);
-			pixels.copyPixels(spr.pixels, spr.pixels.rect, new Point(2, 2));
+			makeGraphic(Std.int(spr.width + 4), Std.int(spr.height + 4), 0x0, true);
 			
+			//
+			pixels.copyPixels(b4, b4.rect, new Point(1, 1));
+			pixels.copyPixels(spr.pixels, spr.pixels.rect, new Point(2, 2), pixels,new Point(2,2),true);
+			
+			
+			
+			/*
 			inglow = new GlowFilter(colors[0], 1, 2, 2, 4, 1, true);
 			pixels.applyFilter(pixels, pixels.rect, new Point(), inglow);
 			
-			outline = new DropShadowFilter(0, 90, colors[3], 1, 2, 2, 20);
-			pixels.applyFilter(pixels, pixels.rect, new Point(), outline);
+			outline = new DropShadowFilter(0, 90, colors[3], 1, 4, 4, 20);
+			pixels.applyFilter(pixels, pixels.rect, new Point(), outline);*/
+			
+			b3 = FlxDestroyUtil.dispose(b3);
+			b4 = FlxDestroyUtil.dispose(b4);
+			spr2 = FlxDestroyUtil.destroy(spr2);
 		}
 		
 		
@@ -239,7 +294,9 @@ class GameFont extends FlxSprite
 		
 		b1 = FlxDestroyUtil.dispose(b1);
 		b2 = FlxDestroyUtil.dispose(b1);
+		
 		spr = FlxDestroyUtil.destroy(spr);
+		
 	}
 	
 	function get_text():String 

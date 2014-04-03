@@ -52,7 +52,7 @@ class CityTile extends DisplaySprite
 		super.hurt(Damage);
 		if (!isDead)
 		{
-			FlxG.sound.play("sounds/Crash.wav",.8);
+			FlxG.sound.play("sounds/Crash.wav",.3);
 			//var _t:FlxTween = FlxTween.tween(this, {y: y - 2}, .1, { type:FlxTween.ONESHOT, complete:doneBounceUp } );
 			FlxTween.num(y, y - 3, .1, { type:FlxTween.ONESHOT, complete:doneBounceUp }, tweenY);
 			

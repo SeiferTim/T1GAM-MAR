@@ -18,7 +18,7 @@ class GameButton extends FlxUITypedButton<GameFont>
 	private static var  _slices:Array<Array<Int>> = [[7, 7, 41, 38], [7, 7, 41, 38], [7, 7, 41, 38]];
 	
 	
-	public function new(X:Float=0, Y:Float=0, ?Label:String, ?OnClick:Void -> Void, Style:Int = 0, FitText:Bool = true, Width:Int = 0, Height:Int =0) 
+	public function new(X:Float=0, Y:Float=0, ?Label:String, ?OnClick:Void -> Void, Style:Int = 0, FitText:Bool = true, Width:Int = 0, Height:Int =0, LabelFontSize:Int = -1) 
 	{
 		super(X, Y, Label, OnClick);
 		
@@ -44,7 +44,7 @@ class GameButton extends FlxUITypedButton<GameFont>
 				img = "images/red_button.png";
 		}
 		
-		var l:GameFont = new GameFont(0, 0, Label, GameFont.STYLE_GLOSSY, col);
+		var l:GameFont = new GameFont(0, 0, Label, GameFont.STYLE_GLOSSY, col,"left", LabelFontSize);
 		var w:Int;
 		var h:Int;
 		

@@ -77,11 +77,7 @@ class Reg
 		if (GameInitialized)
 			return;
 		FlxG.debugger.drawDebug = false;
-	/*	Font.registerFont(FontKaiju);
-		Font.registerFont(FontScary);
-		Font.registerFont(FontPixel);
-		Font.registerFont(FontKPixelMini);
-		*/
+
 		loadData();
 		
 		GameInitialized = true;
@@ -102,9 +98,24 @@ class Reg
 		IsFullscreen = (save.data.fullscreen != null) ? save.data.fullscreen : true;
 		//screensize = (save.data.screensize != null) ? save.data.screensize : SIZE_LARGE;
 		#end
-
+		
+		FlxG.sound.volumeHandler = onVolChange;
+		
 		save.close();
 		
+	}
+	
+	public static function onVolChange(Value:Float):Void
+	{
+		save.bind("flixel");
+		Reg.save.data.volume = FlxG.sound.volume;
+		Reg.save.flush();
+		save.close();
+	}
+	
+	public static function formatPlayTime():String
+	{
+		return (Math.floor(playTime / 60) >= 10 ? "" : "0") + Math.floor(playTime / 60) + ":" + (playTime % 60 >= 10 ? "" : "0") + Math.floor(playTime % 60);
 	}
 	
 }

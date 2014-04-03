@@ -3,7 +3,9 @@ package;
 import flash.display.BlendMode;
 import flash.filters.GlowFilter;
 import flash.geom.Point;
+import flash.system.System;
 import flixel.addons.effects.FlxWaveSprite;
+import flixel.addons.ui.FlxUIButton;
 import flixel.effects.FlxSpriteFilter;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -38,10 +40,14 @@ class MenuState extends FlxState
 	
 	private var _btnPlay:GameButton;
 	private var _btnCredits:GameButton;
+	private var _btnOptions:GameButton;
 	private var _shownText:Bool = false;
 	private var _leaving:Bool = false;
 	private var _loading:Bool = true;
 	
+	#if (desktop)
+	private var _btnExit:FlxUIButton;
+	#end
 	
 	/**
 	 * Function that is called up when to state is created to set it up. 
@@ -103,19 +109,33 @@ class MenuState extends FlxState
 		_sprGhost03.alpha = 0;
 		add(_sprGhost03);
 
-		_btnPlay = new GameButton(0, 0, "Play", goPlay, GameButton.STYLE_BLUE, false, 160,40); //new FlxButton(0, 0, "Play", goPlay);
-		_btnPlay.x = (FlxG.width/2)-192;
+		_btnPlay = new GameButton(0, 0, "Play", goPlay, GameButton.STYLE_RED, false, 160,40,36); //new FlxButton(0, 0, "Play", goPlay);
+		FlxSpriteUtil.screenCenter(_btnPlay, true, false);
 		_btnPlay.y = FlxG.height - _btnPlay.height - 16;
 		_btnPlay.alpha = 0;
 		_btnPlay.active = false;
 		add(_btnPlay);
 		
-		_btnCredits = new GameButton(0, 0, "Credits", goCredits, GameButton.STYLE_BLUE, false, 160,40); //new FlxButton(0, 0, "Play", goPlay);
-		_btnCredits.x = (FlxG.width/2)+32;
+		_btnOptions = new GameButton(8, 0, "Options", goOptions, GameButton.STYLE_BLUE, true, 0, 0, 18);
+		_btnOptions.y = FlxG.height - _btnOptions.height - 16;
+		_btnOptions.alpha = 0;
+		_btnOptions.active = false;
+		add(_btnOptions);
+		
+		_btnCredits = new GameButton(0, 0, "Credits", goCredits, GameButton.STYLE_BLUE, false, Std.int(_btnOptions.width), Std.int(_btnOptions.height), 18);
+		_btnCredits.x = _btnOptions.x + _btnOptions.width + 16;
 		_btnCredits.y = FlxG.height - _btnCredits.height - 16;
 		_btnCredits.alpha = 0;
 		_btnCredits.active = false;
 		add(_btnCredits);
+		
+		#if (desktop && !FLX_NO_MOUSE)
+		_btnExit = new FlxUIButton(FlxG.width - 48, 16, "", exitGame);
+		_btnExit.loadGraphicsUpOverDown("images/exit.png");
+		add(_btnExit);
+		_btnExit.alpha = 0;
+		_btnExit.active = false;
+		#end
 		
 		FlxG.sound.playMusic("title-a", 1, false);
 		FlxG.sound.music.onComplete = musicFirstDone;
@@ -149,6 +169,21 @@ class MenuState extends FlxState
 			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*4, false, doneGoPlay);
 			FlxG.sound.music.fadeOut(Reg.FADE_DUR*4);
 		}
+	}
+	
+	private function goOptions():Void
+	{
+		if (_btnOptions.alpha >= 1 && !_leaving && !_loading)
+		{
+			_leaving = true;
+			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR * 4, false, doneGoOptions);
+			FlxG.sound.music.fadeOut(Reg.FADE_DUR * 4);
+		}
+	}
+	
+	private function doneGoOptions():Void
+	{
+		FlxG.switchState(new OptionsState());
 	}
 	
 	private function goCredits():Void
@@ -253,10 +288,16 @@ class MenuState extends FlxState
 	{
 		_btnPlay.autoCenterLabel();
 		_btnCredits.autoCenterLabel();
+		_btnOptions.autoCenterLabel();
 		_btnPlay.update();
 		_btnCredits.update();
+		_btnOptions.update();
 		FlxTween.tween(_btnPlay, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 		FlxTween.tween(_btnCredits, { alpha:1 }, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		FlxTween.tween(_btnOptions, { alpha:1 }, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		#if desktop
+		FlxTween.tween(_btnExit, { alpha:1 }, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		#end
 		#if !FLX_NO_MOUSE
 		FlxG.mouse.visible = true;
 		#end
@@ -317,6 +358,10 @@ class MenuState extends FlxState
 
 		_btnPlay = null;
 		_btnCredits = null;
+		_btnOptions = null;
+		#if (desktop)
+		_btnExit = null;
+		#end
 	}
 
 	/**
@@ -330,8 +375,23 @@ class MenuState extends FlxState
 		if (!_btnPlay.active)
 			if (_btnPlay.alpha >= 1)
 				_btnPlay.active = true;
+		if (!_btnOptions.active)
+			if (_btnOptions.alpha >= 1)
+				_btnOptions.active = true;
+		#if (desktop)
+		if (!_btnExit.active)
+			if (_btnExit.alpha >= 1)
+				_btnExit.active = true;
+		#end
 		super.update();
 		//_text1Filter.applyFilters();
 		_text2Filter.applyFilters();
-	}	
+	}
+	
+	#if desktop
+	private function exitGame():Void
+	{
+		System.exit(0);
+	}
+	#end
 }
