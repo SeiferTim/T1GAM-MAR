@@ -34,6 +34,10 @@ class PauseGroup extends FlxGroup
 	private var _btnNo:GameButton;
 	private var _txtConfirm:GameFont;
 	
+	public var _btnsMain(default, null):Array<Dynamic>;
+	public var _btnsConf(default, null):Array<Dynamic>;
+	
+	
 	public function new() 
 	{
 		super();
@@ -80,6 +84,10 @@ class PauseGroup extends FlxGroup
 		_back.alpha = _backWav.alpha = _btnQuit.alpha = _btnResume.alpha = _txt.alpha = _txtWave.alpha = _txtConfirm.alpha = _alpha = 0;
 		_btnNo.visible = _btnYes.visible = _txtConfirm.visible = false;
 		active = false;
+		
+		_btnsMain = [_btnResume, _btnQuit];
+		_btnsConf = [_btnNo, _btnYes];
+		
 		update();
 		
 	}
@@ -101,6 +109,7 @@ class PauseGroup extends FlxGroup
 	{
 		if (_loading || _leaving)
 			return;
+		GameControls.changeUIs(_btnsMain);
 		_btnNo.visible = _btnYes.visible = _txtConfirm.visible = false;
 		_btnQuit.visible = _btnResume.visible = true;
 	}
@@ -126,6 +135,8 @@ class PauseGroup extends FlxGroup
 		_loading = true;
 		_leaving = false;
 		shown = true;
+		
+		
 	}
 	
 	private function updateAlpha(Value:Float):Void
@@ -135,9 +146,8 @@ class PauseGroup extends FlxGroup
 	
 	private function doneFadeIn(T:FlxTween):Void
 	{
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = true;
-		#end
+		GameControls.changeUIs(_btnsMain);
+		GameControls.canInteract = true;
 		_loading = false;
 	}
 	
@@ -149,13 +159,13 @@ class PauseGroup extends FlxGroup
 		}
 		_leaving = true;
 		FlxTween.num(1, 0, Reg.FADE_DUR * 2, { type:FlxTween.ONESHOT, ease:FlxEase.circInOut, complete:doneFadeOut }, updateAlpha );
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = false;
-		#end
+		GameControls.canInteract = false;
+		GameControls.changeUIs([]);
 	}
 	
 	private function goResume():Void
 	{
+		
 		hide();
 	}
 	
@@ -173,6 +183,7 @@ class PauseGroup extends FlxGroup
 			return;
 		_btnQuit.visible = _btnResume.visible = false;
 		_btnNo.visible = _btnYes.visible = _txtConfirm.visible = true;
+		GameControls.changeUIs(_btnsConf);
 	}
 	
 	override public function update():Void 

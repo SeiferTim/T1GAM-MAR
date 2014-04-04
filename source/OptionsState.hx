@@ -11,6 +11,7 @@ class OptionsState extends FlxState
 {
 	private var _loading:Bool = true;
 	private var _leaving:Bool = false;
+	
 	#if desktop
 	private var _optScreen:GameButton;
 	#end
@@ -21,9 +22,7 @@ class OptionsState extends FlxState
 	override public function create():Void 
 	{
 		FlxG.autoPause = false;
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = true;
-		#end
+		FlxG.sound.soundTrayEnabled = false;
 		add( new FlxSprite(0, 0, "images/title-back.png"));
 		add( new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, 0x99000000));
 		
@@ -37,6 +36,8 @@ class OptionsState extends FlxState
 		_optSlide1 = new CustomSlider(txtVol.x + txtVol.width + 16, txtVol.y + (txtVol.height / 2) - 8, Std.int(FlxG.width - txtVol.width -80), 64, 16, 14, 0, 1, SlideChange);
 		_optSlide1.decimals = 1;
 		_optSlide1.value = FlxG.sound.volume;
+		var _uiVolume:FakeUIElement = new FakeUIElement(_optSlide1.x - 10, _optSlide1.y - 10, Std.int(_optSlide1.width +20), Std.int(_optSlide1.height + 20), null, changeVol);
+		add(_uiVolume);
 		add(_optSlide1);
 		_optSlide1.active = false;
 		
@@ -51,10 +52,6 @@ class OptionsState extends FlxState
 		#end
 		
 		
-		#if !FLX_NO_GAMEPAD
-		
-		#end
-		
 		_btnDone = new GameButton(0, 0, "Done", goDone, GameButton.STYLE_GREEN, true);
 		_btnDone.y = FlxG.height - _btnDone.height - 16;
 		FlxSpriteUtil.screenCenter(_btnDone, true, false);
@@ -63,10 +60,24 @@ class OptionsState extends FlxState
 		
 		
 		
+		#if desktop
+		GameControls.newState([_btnDone, _uiVolume, _optScreen]);
+		#else
+		GameControls.newState([_btnDone, _uiVolume]);
+		#end
+		
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, true, doneFadeIn);
 		
 		super.create();
 		
+	}
+	
+	private function changeVol(Input:Int = 0):Void
+	{
+		if (Input == GameControls.SELLEFT)
+			FlxG.sound.volume-=.1;
+		else if (Input == GameControls.SELRIGHT)
+			FlxG.sound.volume+=.1;
 	}
 	
 	#if desktop
@@ -97,7 +108,8 @@ class OptionsState extends FlxState
 		#if desktop
 		_optScreen.active = false;
 		#end
-		
+		GameControls.canInteract = false;
+		FlxG.sound.soundTrayEnabled = true;
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, goDoneDone);
 	}
 	
@@ -121,5 +133,14 @@ class OptionsState extends FlxState
 		#if desktop
 		_optScreen.active = true;
 		#end
+		GameControls.canInteract = true;
+	}
+	
+	override public function update():Void 
+	{
+		if (FlxG.sound.volume != _optSlide1.value)
+			_optSlide1.value = FlxG.sound.volume;
+		GameControls.checkScreenControls();
+		super.update();
 	}
 }

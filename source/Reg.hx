@@ -18,6 +18,8 @@ class Reg
 	 * Assets
 	*/
 	
+	public static var GAME_VERSION:String = "1.0.2";
+	
 	// Fonts
 	public static var FONT_BIG:String = "fonts/g_k_m.ttf";
 	public static var FONT_SCARY:String = "fonts/scary.TTF";
@@ -58,6 +60,8 @@ class Reg
 	#end
 	
 	static public var EMITTER_EXPLOSION:Int = 0;
+	
+	static public var alreadyStarted:Bool = false;
 	
 	public static function initGame():Void
 	{

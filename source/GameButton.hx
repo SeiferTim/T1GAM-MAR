@@ -24,6 +24,7 @@ class GameButton extends FlxUITypedButton<GameFont>
 	
 	public var selected:Bool = false;
 	
+	
 	private var _sprSelected:FlxSprite;
 	
 	

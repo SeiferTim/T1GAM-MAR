@@ -4,6 +4,7 @@ import flash.display.BlendMode;
 import flash.events.MouseEvent;
 import flash.filters.GlowFilter;
 import flash.geom.Point;
+import flash.Lib;
 import flash.system.System;
 import flixel.addons.effects.FlxWaveSprite;
 import flixel.addons.ui.FlxUIButton;
@@ -14,6 +15,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.input.gamepad.LogitechButtonID;
+import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
@@ -49,13 +51,13 @@ class MenuState extends FlxState
 	private var _leaving:Bool = false;
 	private var _loading:Bool = true;
 	
-	private var _pressDelay:Float = .5;
+	
 	
 	#if (desktop)
 	private var _btnExit:FlxUIButton;
 	#end
 	
-	private var _selButton:Int = -1;
+	
 	
 	
 	/**
@@ -64,9 +66,7 @@ class MenuState extends FlxState
 	override public function create():Void
 	{
 		FlxG.autoPause = false;
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = false;
-		#end
+
 		add( new FlxSprite(0, 0, "images/title-back.png"));
 		
 		add(FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0x0, 0x0, 0xff000000], 1, 90));
@@ -145,17 +145,34 @@ class MenuState extends FlxState
 		_btnExit.alpha = 0;
 		_btnExit.active = false;
 		#end
+
+		var _txtVer = new FlxText(0,0,0, "v" + Reg.GAME_VERSION, 8);
+		_txtVer.setFormat(null, 8, 0xffffff, "right", FlxText.BORDER_OUTLINE);
+		_txtVer.x = FlxG.width - _txtVer.width;
+		_txtVer.y = FlxG.height - _txtVer.height;
+		add(_txtVer);
 		
-		#if !FLX_NO_GAMEPAD
+		GameControls.newState([_btnPlay, _btnOptions, _btnCredits]);
 		
-		#end
-		
-		FlxG.sound.playMusic("title-a", 1, false);
-		FlxG.sound.music.onComplete = musicFirstDone;
-		
-		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*2, true, doneFadeIn);
+		if (Reg.alreadyStarted)
+		{
+			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*2, true, secondTimeIn);
+		}
+		else
+		{
+			Reg.alreadyStarted = true;
+			FlxG.sound.playMusic("title-a", 1, false);
+			FlxG.sound.music.onComplete = musicFirstDone;
+			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*2, true, doneFadeIn);
+		}
 		_loading = false;
 		super.create();
+	}
+	
+	private function secondTimeIn():Void
+	{
+		musicFirstDone();
+		ghostTwoIn();
 	}
 	
 	private function musicFirstDone():Void
@@ -179,6 +196,7 @@ class MenuState extends FlxState
 		if (_btnPlay.alpha >= 1 && !_leaving && !_loading)
 		{
 			_leaving = true;
+			GameControls.canInteract = false;
 			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*4, false, doneGoPlay);
 			FlxG.sound.music.fadeOut(Reg.FADE_DUR*4);
 		}
@@ -189,6 +207,7 @@ class MenuState extends FlxState
 		if (_btnOptions.alpha >= 1 && !_leaving && !_loading)
 		{
 			_leaving = true;
+			GameControls.canInteract = false;
 			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR * 4, false, doneGoOptions);
 			FlxG.sound.music.fadeOut(Reg.FADE_DUR * 4);
 		}
@@ -204,6 +223,7 @@ class MenuState extends FlxState
 		if (_btnCredits.alpha >= 1 && !_leaving && !_loading)
 		{
 			_leaving = true;
+			GameControls.canInteract = false;
 			FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*4, false, doneGoCredits);
 			FlxG.sound.music.fadeOut(Reg.FADE_DUR*4);
 		}
@@ -252,7 +272,12 @@ class MenuState extends FlxState
 	
 	private function doneGhostOneOut(T:FlxTween):Void
 	{
-		var gTween:FlxTween = FlxTween.tween(_sprGhost02, {alpha:.8}, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostTwoIn } );
+		ghostTwoIn();
+	}
+	
+	private function ghostTwoIn():Void
+	{
+		FlxTween.tween(_sprGhost02, {alpha:.8}, .2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneGhostTwoIn } );
 	}
 	
 	private function doneGhostTwoIn(T:FlxTween):Void
@@ -305,15 +330,17 @@ class MenuState extends FlxState
 		_btnPlay.update();
 		_btnCredits.update();
 		_btnOptions.update();
-		FlxTween.tween(_btnPlay, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
+		FlxTween.tween(_btnPlay, {alpha:1}, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:doneButtonIn } );
 		FlxTween.tween(_btnCredits, { alpha:1 }, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 		FlxTween.tween(_btnOptions, { alpha:1 }, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 		#if desktop
 		FlxTween.tween(_btnExit, { alpha:1 }, 2, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut } );
 		#end
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = true;
-		#end
+	}
+	
+	private function doneButtonIn(T:FlxTween):Void
+	{
+		GameControls.canInteract = true;
 	}
 	
 	
@@ -397,129 +424,11 @@ class MenuState extends FlxState
 				_btnExit.active = true;
 		#end
 		
-		var leftPressed:Bool = false;
-		var upPressed:Bool = false;
-		var rightPressed:Bool = false;
-		var downPressed:Bool = false;
-		var xPressed:Bool = false;
 		
-		if (_pressDelay > 0)
-			_pressDelay -= FlxG.elapsed;
-		if (_pressDelay <= 0)
-		{
-			#if !FLX_NO_KEYBOARD
-			
-			if (FlxG.keys.anyPressed(GameControls.keys[GameControls.SELRIGHT]))
-			{
-				rightPressed = downPressed = true;
-			}
-			else if (FlxG.keys.anyPressed(GameControls.keys[GameControls.SELLEFT]))
-			{
-				leftPressed = upPressed = true;
-			}
-			if (FlxG.keys.anyPressed(GameControls.keys[GameControls.FIRE]))
-			{
-				xPressed = true;
-			}
-			#end
-			
-			#if !FLX_NO_GAMEPAD
-			if (GameControls.hasGamepad)
-			{
-				if (GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.SELRIGHT]))
-				{
-					rightPressed = downPressed = true;
-				}
-				else if (GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.SELLEFT]))
-				{
-					leftPressed = upPressed = true;
-				}
-				if (GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.FIRE]))
-				{
-					xPressed = true;
-				}
-			}
-			else
-			{
-				GameControls.gamepad = FlxG.gamepads.lastActive;
-				if (GameControls.gamepad != null)
-				{
-					GameControls.hasGamepad = true;
-					_selButton++;
-				}
-			}
-			#end
-			/*#if !FLX_NO_MOUSE
-			if (FlxG.mouse.visible)
-			{
-				if (xPressed || leftPressed || rightPressed)
-					FlxG.mouse.visible = false);
-			}
-			#end*/
-			if (!_loading)
-			{
-				if (xPressed)
-				{
-					
-					switch (_selButton)
-					{	
-						case 0:
-							_btnPlay.forceStateHandler(FlxUITypedButton.CLICK_EVENT);
-							
-						case 1:
-							_btnOptions.forceStateHandler(FlxUITypedButton.CLICK_EVENT);
-							
-						case 2:
-							_btnCredits.forceStateHandler(FlxUITypedButton.CLICK_EVENT);
-							
-					}
-				}
-				else if (rightPressed || downPressed)
-				{
-					_pressDelay = .33;
-					_selButton++;
-					if (_selButton > 2)
-						_selButton = 0;
-				}
-				else if (leftPressed || upPressed)
-				{
-					_pressDelay = .33;
-					_selButton--;
-					if (_selButton < 0)
-						_selButton = 2;
-				}
-			}
-			
-		}
-
-		switch (_selButton)
-		{
-			case -1:
-				_btnPlay.selected = false;
-				_btnCredits.selected = false;
-				_btnOptions.selected = false;
-			case 0:
-				_btnPlay.selected = true;
-				_btnCredits.selected = false;
-				_btnOptions.selected = false;
-			case 1:
-				_btnPlay.selected = false;
-				_btnCredits.selected = false;
-				_btnOptions.selected = true;
-			case 2:
-				_btnPlay.selected = false;
-				_btnCredits.selected = true;
-				_btnOptions.selected = false;
-		}
-		/*#if !FLX_NO_MOUSE
-		if (!FlxG.mouse.visible)
-		{
-			if (!_loading)
-			{
-				if (FlxG.mouse.ismo
-				FlxG.mouse.visible = true;
-			}
-		}*/
+		
+		GameControls.checkScreenControls();
+		
+		
 		super.update();
 		_text2Filter.applyFilters();
 		

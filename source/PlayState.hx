@@ -102,9 +102,6 @@ class PlayState extends FlxState
 	{
 		FlxG.autoPause = false;
 		Reg.playState = this;
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = false;
-		#end
 		//FlxG.fixedTimestep = false;
 		
 		Reg.score = 0;
@@ -304,10 +301,8 @@ class PlayState extends FlxState
 		
 		updateHUDAlpha(0);
 		
-		FlxG.watch.add(grpDisplay, "length");
-		FlxG.watch.add(grpDisplay.members, "length");
-		FlxG.watch.add(grpDisplay.zMembers, "length");
-		trace(grpDisplay.zMembers == grpDisplay.members);
+		GameControls.newState([]);
+		
 		super.create();
 	}
 	
@@ -544,12 +539,31 @@ class PlayState extends FlxState
 		{
 			if (_paused)
 			{
+				
+				var unpause:Bool = false;
 				#if !FLX_NO_KEYBOARD
-				if (FlxG.keys.anyJustReleased(["P", "ESCAPE"]))
+				if (FlxG.keys.anyJustReleased(GameControls.keys[GameControls.PAUSE])||FlxG.keys.anyJustReleased(GameControls.keys[GameControls.BACK]))
+				{
+					unpause = true;
+				}
+				#end
+				#if !FLX_NO_GAMEPAD
+				if (GameControls.hasGamepad)
+				{
+					if (GameControls.gamepad.anyJustReleased(GameControls.buttons[GameControls.PAUSE]) || GameControls.gamepad.anyJustReleased(GameControls.buttons[GameControls.BACK]))
+					{
+						unpause = true;
+					}
+				}
+				#end
+				
+				if (unpause)
 				{
 					_pauseScreen.hide();					
 				}
-				#end
+				
+				GameControls.checkScreenControls();
+				
 				if (!_pauseScreen.shown)
 				{
 					_paused = false;
@@ -588,19 +602,36 @@ class PlayState extends FlxState
 					FlxG.sound.music.fadeOut(Reg.FADE_DUR * 4);
 					_player.velocity.set();
 					_player.acceleration.set();
+					FlxTween.num(0, 0, .33, { type:FlxTween.ONESHOT, ease:FlxEase.circInOut }, updateHUDAlpha );
 					FlxTween.num(FlxG.camera.zoom, 4, 1.2, { type:FlxTween.ONESHOT, ease:FlxEase.circInOut, complete:doneGOZoomIn }, updateCameraZoom );
 					
 				}
 				else
 				{
 					
+					var showpause:Bool = false;
+					
 					#if !FLX_NO_KEYBOARD
-					if (FlxG.keys.anyJustReleased(["P", "ESCAPE"]))
+					if (FlxG.keys.anyJustReleased(GameControls.keys[GameControls.PAUSE]))
+					{
+						showpause = true;
+					}
+					#end
+					#if !FLX_NO_GAMEPAD
+					if (GameControls.hasGamepad)
+					{
+						if (GameControls.gamepad.anyJustReleased(GameControls.buttons[GameControls.PAUSE]))
+						{
+							showpause = true;
+						}
+					}
+					#end
+					
+					if (showpause)
 					{
 						_pauseScreen.show();
 						_paused = true;
 					}
-					#end
 					
 					changeWind();
 					checkEnemySpawn();
@@ -866,7 +897,11 @@ class PlayState extends FlxState
 	
 	private function updateHUDAlpha(Value:Float):Void
 	{
-		_txtPlayTime.alpha = _barEnergy.alpha = _txtScore.alpha = _roarMarkers[0].alpha  = _roarMarkers[1].alpha = _roarMarkers[2].alpha = _keysHint.alpha = _spaceHint.alpha = Value;
+		if (_keysHint!=null) 
+		{
+			_keysHint.alpha = _spaceHint.alpha = Value;
+		}
+		_txtPlayTime.alpha = _barEnergy.alpha = _txtScore.alpha = _roarMarkers[0].alpha  = _roarMarkers[1].alpha = _roarMarkers[2].alpha= Value;
 	}
 	
 	
@@ -1080,7 +1115,7 @@ class PlayState extends FlxState
 		updateHUDAlpha(1);
 		FlxTimer.start(5, hideHints);
 		Reg.playTime = 0;
-		
+		GameControls.canInteract = true;
 	}
 	
 	private function hideHints(T:FlxTimer):Void
@@ -1262,17 +1297,27 @@ class PlayState extends FlxState
 		var _pressingShoot:Bool = false;
 		
 		#if (!FLX_NO_KEYBOARD)
-		_pressingUp = FlxG.keys.anyPressed(["W", "UP"]);
-		_pressingDown = FlxG.keys.anyPressed(["S", "DOWN"]);
-		_pressingLeft = FlxG.keys.anyPressed(["A", "LEFT"]);
-		_pressingRight = FlxG.keys.anyPressed(["D", "RIGHT"]);
+		_pressingUp = FlxG.keys.anyPressed(GameControls.keys[GameControls.UP]);
+		_pressingDown = FlxG.keys.anyPressed(GameControls.keys[GameControls.DOWN]);
+		_pressingLeft = FlxG.keys.anyPressed(GameControls.keys[GameControls.LEFT]);
+		_pressingRight = FlxG.keys.anyPressed(GameControls.keys[GameControls.RIGHT]);
+		_pressingShoot = FlxG.keys.anyPressed(GameControls.keys[GameControls.FIRE]);
+		#end
+		#if !FLX_NO_GAMEPAD
+		if (GameControls.hasGamepad)
+		{
+			_pressingUp = GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.UP]);
+			_pressingDown = GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.DOWN]);
+			_pressingLeft = GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.LEFT]);
+			_pressingRight = GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.RIGHT]);
+			_pressingShoot = GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.FIRE]);
+		}
+		#end
+		
 		if (_pressingDown && _pressingUp)
 			_pressingDown = _pressingUp = false;
 		if (_pressingLeft && _pressingRight)
 			_pressingLeft = _pressingRight = false;
-			
-		_pressingShoot = FlxG.keys.anyPressed(["SPACE", "X"]);
-		#end
 		
 		_walking = _pressingDown || _pressingLeft || _pressingRight || _pressingUp;
 		
@@ -1323,27 +1368,20 @@ class PlayState extends FlxState
 				if (_player.velocity.x > 0 && Math.abs(_player.velocity.x) > Math.abs(_player.velocity.y))
 				{
 					_player.facing = FlxObject.RIGHT;
-					//_player.animation.play("lr-w");
-					
 				}
 				else if (_player.velocity.x < 0 && Math.abs(_player.velocity.x) > Math.abs(_player.velocity.y))
 				{
 					_player.facing = FlxObject.LEFT;
-					//_player.animation.play("lr-w");
 				}
 				else if (_player.velocity.y > 0)
 				{
 					_player.facing = FlxObject.DOWN;
-					//_player.animation.play("d-w");
 				}
 				else if (_player.velocity.y < 0)
 				{
 					_player.facing = FlxObject.UP;
-					//_player.animation.play("u-w");
 				}
 			}
-			
-			//v.put();
 			
 		}
 		

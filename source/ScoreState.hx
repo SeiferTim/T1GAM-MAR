@@ -19,10 +19,6 @@ class ScoreState extends FlxState
 	{
 		FlxG.autoPause = false;
 		
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = true;
-		#end
-		
 		var margin:Int = 256;
 		var buffer:Int = 30;
 		
@@ -86,14 +82,18 @@ class ScoreState extends FlxState
 		add(btnPlayAgain);
 		add(btnMenu);
 		
+		GameControls.newState([btnPlayAgain, btnMenu]);
+		
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, true, doneFadeIn);
 		FlxG.sound.playMusic("score");
 		super.create();
 	}
 	
+	
 	private function doneFadeIn():Void
 	{
 		_loading = false;
+		GameControls.canInteract = true;
 	}
 	
 	private function goAgain():Void
@@ -101,6 +101,7 @@ class ScoreState extends FlxState
 		if (_loading || _leaving)
 			return;
 		_leaving = true;
+		GameControls.canInteract = false;
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, doneGoAgain);
 		FlxG.sound.music.fadeOut(Reg.FADE_DUR);
 	}
@@ -115,6 +116,7 @@ class ScoreState extends FlxState
 		if (_loading || _leaving)
 			return;
 		_leaving = true;
+		GameControls.canInteract = false;
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, doneGoMenu);
 		FlxG.sound.music.fadeOut(Reg.FADE_DUR);
 	}
@@ -123,8 +125,10 @@ class ScoreState extends FlxState
 	{
 		FlxG.switchState(new MenuState());
 	}
+	
 	override public function update():Void 
 	{
+		GameControls.checkScreenControls();
 		super.update();
 		if (_loading || _leaving)
 		{

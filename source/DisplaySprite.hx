@@ -1,6 +1,7 @@
 package ;
 
 import flixel.addons.display.FlxNestedSprite;
+import flixel.FlxG;
 
 class DisplaySprite extends FlxNestedSprite implements IFlxZ
 {
@@ -40,7 +41,7 @@ class DisplaySprite extends FlxNestedSprite implements IFlxZ
 	{
 		if (calcOnScreen)
 		{
-			onScreen = isOnScreen();
+			onScreen = isOnScreen(FlxG.camera);
 		}
 		if (!onScreen)
 		{

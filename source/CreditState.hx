@@ -17,9 +17,6 @@ class CreditState extends FlxState
 	{
 		FlxG.autoPause = false;
 		
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = true;
-		#end
 		add( new FlxSprite(0, 0, "images/title-back.png"));
 		add( new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, 0x99000000));
 		
@@ -34,6 +31,8 @@ class CreditState extends FlxState
 		
 		var _t3:LinkText = new LinkText(0, _t2.y + _t2.height + 4, "t1gam.tims-world.com", clickT1GamLink,"center", 20);
 		FlxSpriteUtil.screenCenter(_t3, true, false);
+		var _ui3:FakeUIElement = new FakeUIElement(_t3.x-2,_t3.y-2, Std.int(_t3.width +4), Std.int(_t3.height + 4), clickT1GamLink, null,false);
+		add(_ui3);
 		add(_t3);
 		
 		var _t4:GameFont = new GameFont(0,_t3.y + _t3.height + 16,"Concept, Programming, Design",GameFont.STYLE_SMSIMPLE,GameFont.COLOR_SIMPLERED,"center", 20);
@@ -42,10 +41,13 @@ class CreditState extends FlxState
 		
 		var _t5:GameFont = new GameFont(0,_t4.y + _t4.height + 4, "Tim I Hely",GameFont.STYLE_SMSIMPLE,GameFont.COLOR_SIMPLEGOLD,28);
 		FlxSpriteUtil.screenCenter(_t5, true, false);
+		
 		add(_t5);
 		
 		var _t6:LinkText = new LinkText(0, _t5.y + _t5.height + 4, "tims-world.com", clickTimsLink,"center", 20);
 		FlxSpriteUtil.screenCenter(_t6, true, false);
+		var _ui6:FakeUIElement = new FakeUIElement(_t6.x-2,_t6.y-2, Std.int(_t6.width +4), Std.int(_t6.height + 4), clickTimsLink, null,false);
+		add(_ui6);
 		add(_t6);
 		
 		var _t7:GameFont = new GameFont(0,_t6.y + _t6.height + 16,"Music",GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLERED, "center", 20);
@@ -58,6 +60,8 @@ class CreditState extends FlxState
 		
 		var _t9:LinkText = new LinkText(0, _t8.y + _t8.height + 4, "fatbard.tumblr.com", clickFBLink, "center", 20);
 		FlxSpriteUtil.screenCenter(_t9, true, false);
+		var _ui9:FakeUIElement = new FakeUIElement(_t9.x-2,_t9.y-2, Std.int(_t9.width +4), Std.int(_t9.height + 4), clickFBLink, null,false);
+		add(_ui9);
 		add(_t9);
 		
 		var _t10:GameFont = new GameFont(0,_t9.y+ _t9.height + 16,"Art",GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLERED,"center", 20);
@@ -74,20 +78,16 @@ class CreditState extends FlxState
 		
 		var _t13:LinkText = new LinkText(0, _t12.y + _t12.height + 4, "andrewdavid.net", clickADLink, "center", 20);
 		FlxSpriteUtil.screenCenter(_t13, true, false);
+		var _ui13:FakeUIElement = new FakeUIElement(_t13.x-2,_t13.y-2, Std.int(_t13.width +4), Std.int(_t13.height + 4), clickADLink, null,false);
+		add(_ui13);
 		add(_t13);
-		
-		
-		
 		
 		_btnBack = new GameButton(0, 0, "Main Menu", clickMainMenu, GameButton.STYLE_GREEN, true);
 		_btnBack.x = FlxG.width - _btnBack.width - 16;
 		_btnBack.y = FlxG.height - _btnBack.height - 16;
-		
-		#if !FLX_NO_GAMEPAD
-		if (GameControls.hasGamepad)
-			_btnBack.selected = true;
-		#end
 		add(_btnBack);
+		
+		GameControls.newState([_btnBack, _ui3, _ui6, _ui9, _ui13]);
 		
 		
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, true, doneFadeIn);
@@ -119,6 +119,7 @@ class CreditState extends FlxState
 	{
 		_loading = false;
 		_btnBack.active = true;
+		GameControls.canInteract = true;
 	}
 	
 	private function clickMainMenu():Void
@@ -126,6 +127,7 @@ class CreditState extends FlxState
 		if (_loading || _leaving)
 			return;
 		_leaving = true;
+		GameControls.canInteract = false;
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, doneFadeOut);
 		
 	}
@@ -137,6 +139,7 @@ class CreditState extends FlxState
 	
 	override public function update():Void 
 	{
+		GameControls.checkScreenControls();
 		super.update();
 		if (_loading)
 			_btnBack.active = false;

@@ -32,7 +32,7 @@ class Smoke extends ZParticle
 		useScaling = false;
 		useFading = false;
 		alpha = 0; 
-		animation.frameIndex = FlxRandom.intRanged(0, 3);
+		animation.frameIndex = FlxRandom.intRanged(0, 7);
 		draw();
 		velocity.x = 0;
 		velocity.y = 0;
