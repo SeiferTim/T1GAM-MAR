@@ -86,6 +86,7 @@ class GameControls
 		lastMouseMove = 0;
 		lastMousePos = FlxPoint.get();
 		#end
+		_uis = new Array<Dynamic>();
 	}
 	
 	public static function newState(Buttons:Array<Dynamic>):Void

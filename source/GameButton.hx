@@ -75,9 +75,11 @@ class GameButton extends FlxUITypedButton<GameFont>
 		loadGraphicSlice9([img], w, h,_slices, FlxUI9SliceSprite.TILE_NONE, -1, false, 49, 49);
 		label = l;
 		
-		_sprSelected = new FlxSprite(0, 0).makeGraphic(w + 4, h + 4, 0x0);
+		_sprSelected = new FlxSprite(0, 0);
+		_sprSelected.makeGraphic(w + 4, h + 4, 0x0);
 		var b:BitmapData = new BitmapData(w, h, true, FlxColor.WHITE);
 		var spr:FlxSprite = new FlxSprite();
+		spr.makeGraphic(Std.int(_sprSelected.width), Std.int(_sprSelected.height), 0x0);
 		FlxSpriteUtil.alphaMask(spr, b, framePixels);
 		for (sx in 0...5)
 		{

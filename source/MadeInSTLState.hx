@@ -77,8 +77,15 @@ class MadeInSTLState extends FlxState
 	
 	private function doTextIn(T:FlxTimer):Void
 	{
-		FlxG.sound.play("sounds/madeinstl.wav", 1, false, true,doneMadeInSound);
-		FlxTween.tween(_txtWave, { alpha:.8, strength:20, center:Std.int(_txtText.height * .33), y:_startYB }, 1, { type:FlxTween.ONESHOT, ease:FlxEase.sineInOut } );
+		FlxG.sound.play("sounds/madeinstl.wav", 1, false, true, doneMadeInSound);
+		
+		FlxTween.tween(_txtWave, { alpha:.8, strength:20, y:_startYB }, 1, { type:FlxTween.ONESHOT, ease:FlxEase.sineInOut } );
+		FlxTween.num(0, _txtText.height * .33, 1, { type:FlxTween.ONESHOT, ease:FlxEase.sineInOut }, changeCenter);
+	}
+	
+	private function changeCenter(Value:Float):Void
+	{
+		_txtWave.center = Value;
 	}
 	
 	private function doneMadeInSound():Void
