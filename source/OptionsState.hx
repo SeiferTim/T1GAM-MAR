@@ -46,10 +46,42 @@ class OptionsState extends FlxState
 		add(txtScreen);
 		
 		_optScreen = new GameButton(txtScreen.x + txtScreen.width + 16, txtScreen.y + (txtScreen.height / 2) - 16, FlxG.fullscreen ? "Fullscreen" : "Window", changeScreen,GameButton.STYLE_BLUE , false, 200, 32,24);
+		FlxSpriteUtil.screenCenter(_optScreen, true, false);		
 		add(_optScreen);
 		
 		_optScreen.active = false;
 		#end
+		
+		
+		var _txtControls:GameFont = new GameFont(0, txtVol.y + txtVol.height + 96, "Controls", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "center", 32);
+		FlxSpriteUtil.screenCenter(_txtControls, true, false);
+		add(_txtControls);
+		
+		var _txtLeft:GameFont = new GameFont(0, _txtControls.y + _txtControls.height + 32, "LEFT:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		_txtLeft.x = (FlxG.width / 2) - 96 - _txtLeft.width;
+		add(_txtLeft);
+		
+		var _txtRight:GameFont = new GameFont(0, _txtLeft.y + _txtLeft.height + 16, "RIGHT:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		_txtRight.x = (FlxG.width / 2) - 96 - _txtRight.width;
+		add(_txtRight);
+		
+		var _txtUp:GameFont = new GameFont(0, _txtRight.y + _txtRight.height + 16, "UP:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		_txtUp.x = (FlxG.width / 2) - 96 - _txtUp.width;
+		add(_txtUp);
+		
+		var _txtDown:GameFont = new GameFont(0, _txtUp.y + _txtUp.height + 16, "DOWN:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		_txtDown.x = (FlxG.width / 2) - 96 - _txtDown.width;
+		add(_txtDown);
+		
+		var _txtFire:GameFont = new GameFont(0, _txtUp.y + _txtUp.height + 16, "FIRE:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		_txtFire.x = (FlxG.width / 2) - 96 - _txtFire.width;
+		add(_txtFire);
+		
+		var _txtPause:GameFont = new GameFont(0, _txtFire.y + _txtFire.height + 16, "FIRE:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
+		_txtPause.x = (FlxG.width / 2) - 96 - _txtPause.width;
+		add(_txtPause);
+		
+		
 		
 		
 		_btnDone = new GameButton(0, 0, "Done", goDone, GameButton.STYLE_GREEN, true);
