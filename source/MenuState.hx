@@ -287,8 +287,8 @@ class MenuState extends FlxState
 		if (!_shownText)
 		{
 			_shownText = true;
-			var tTween:FlxTween = FlxTween.tween(_textMainWave, { alpha:.9, center:_textMainWave.height*.33, strength: 40, y:-16}, 4, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:textMainBob } );
-			
+			var tTween:FlxTween = FlxTween.tween(_textMainWave, { alpha:.9,  strength: 40, y:-16}, 4, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut, complete:textMainBob } );
+			FlxTween.num(0, Std.int(_textMainWave.height * .33), 4, { type:FlxTween.ONESHOT, ease:FlxEase.quartInOut }, waveCenter);
 			FlxTimer.start(.33, startSubTextIn);
 			FlxTimer.start(.66, startButtonIn);
 		}
@@ -298,8 +298,14 @@ class MenuState extends FlxState
 	{
 		FlxTween.tween(_textMainWave, { alpha:.66 }, 3, { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
 		FlxTween.tween(_textMainWave, { y:0 }, 2, { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
-		FlxTween.tween(_textMainWave, {center:_textMain.height*.5}, 4,{ type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
+		//FlxTween.tween(_textMainWave, {center:Std.int(_textMain.height*.5)}, 4,{ type:FlxTween.PINGPONG, ease:FlxEase.sineInOut } );
+		FlxTween.num(_textMain.height * .33, _textMain.height * .5, 4, { type:FlxTween.PINGPONG, ease:FlxEase.sineInOut }, waveCenter);
 		FlxTween.tween(_textMainWave, {strength:20}, 3,{ type:FlxTween.PINGPONG, ease:FlxEase.backInOut } );
+	}
+	
+	private function waveCenter(V:Float):Void
+	{
+		_textMainWave.center = Std.int(V);
 	}
 	
 	

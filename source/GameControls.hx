@@ -68,18 +68,18 @@ class GameControls
 		buttons[RIGHT] = [LogitechButtonID.DPAD_RIGHT];
 		buttons[UP] = [LogitechButtonID.DPAD_UP];
 		buttons[DOWN] = [LogitechButtonID.DPAD_DOWN];
+		#else
+		buttons[LEFT] = [-1];
+		buttons[RIGHT] = [-1];
+		buttons[UP] = [-1];
+		buttons[DOWN] = [-1];
+		#end
 		buttons[SELRIGHT] = buttons[RIGHT].concat(buttons[DOWN]);
 		buttons[SELLEFT] = buttons[LEFT].concat(buttons[UP]);
-		#else
-		/*buttons[LEFT] = [LogitechButtonID.DPAD_LEFT];
-		buttons[RIGHT] = [LogitechButtonID.DPAD_RIGHT];
-		buttons[UP] = [LogitechButtonID.DPAD_UP];
-		buttons[DOWN] = [LogitechButtonID.DPAD_DOWN];*/
-		#end
-		
 		buttons[FIRE] = [LogitechButtonID.ONE, LogitechButtonID.TWO];
 		buttons[PAUSE] = [LogitechButtonID.TEN];
 		buttons[BACK] = [LogitechButtonID.NINE];
+		
 		
 		#end
 		#if !FLX_NO_MOUSE
@@ -156,24 +156,29 @@ class GameControls
 				if (gamepad.dpadRight || gamepad.dpadDown)
 				{
 					rightPressed = downPressed = true;
+					gamepad.reset();
 				}
 				else if (gamepad.dpadLeft || gamepad.dpadUp)
 				{
 					leftPressed = upPressed = true;
+					gamepad.reset();
 				}
 				#else
 				if (gamepad.anyPressed(buttons[SELRIGHT]))
 				{
 					rightPressed = downPressed = true;
+					gamepad.reset();
 				}
 				else if (gamepad.anyPressed(buttons[SELLEFT]))
 				{
 					leftPressed = upPressed = true;
+					gamepad.reset();
 				}
 				#end
 				if (gamepad.anyPressed(buttons[FIRE]))
 				{
 					xPressed = true;
+					gamepad.reset();
 				}
 			}
 			else

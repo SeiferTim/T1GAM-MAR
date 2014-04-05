@@ -76,24 +76,28 @@ class GameButton extends FlxUITypedButton<GameFont>
 		label = l;
 		
 		_sprSelected = new FlxSprite(0, 0);
-		_sprSelected.makeGraphic(w + 4, h + 4, 0x0);
 		var b:BitmapData = new BitmapData(w, h, true, FlxColor.WHITE);
-		var spr:FlxSprite = new FlxSprite();
-		spr.makeGraphic(Std.int(_sprSelected.width), Std.int(_sprSelected.height), 0x0);
-		FlxSpriteUtil.alphaMask(spr, b, framePixels);
+		//var spr:FlxSprite = new FlxSprite();
+		//spr.makeGraphic(Std.int(_sprSelected.width), Std.int(_sprSelected.height), 0x0, true);
+		//FlxSpriteUtil.alphaMask(spr, b, framePixels);
+		updateFrameData();
+		var b2:BitmapData = new BitmapData(w + 4, h + 4, true, 0x0);
+		
 		for (sx in 0...5)
 		{
 			for (sy in 0...5)
 			{
-				_sprSelected.pixels.copyPixels(spr.pixels, spr.pixels.rect,new Point(sx,sy),spr.pixels, new Point(0, 0), true);
+				b2.copyPixels(b, b.rect,new Point(sx,sy),framePixels, new Point(0, 0), true);
 			}
 		}
+		_sprSelected.pixels = b2;
+		_sprSelected.updateFrameData();
 		_sprSelected.dirty = true;
 		
 		_sprSelected.x = x - 2;
 		_sprSelected.y = y - 2;
 		b = FlxDestroyUtil.dispose(b);
-		spr = FlxDestroyUtil.destroy(spr);
+		//spr = FlxDestroyUtil.destroy(spr);
 		
 		up_toggle_color = over_toggle_color = over_color = down_color = down_toggle_color = up_color = 0xffffff;
 		
@@ -122,7 +126,7 @@ class GameButton extends FlxUITypedButton<GameFont>
 	{
 		
 		label.alpha = alpha;
-	
+		
 		if (selected)
 		{
 			_sprSelected.alpha = alpha*.8;
@@ -134,6 +138,5 @@ class GameButton extends FlxUITypedButton<GameFont>
 		}
 		
 		super.draw();
-	}
-	
+	}	
 }

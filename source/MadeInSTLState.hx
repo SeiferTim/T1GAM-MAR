@@ -85,7 +85,7 @@ class MadeInSTLState extends FlxState
 	
 	private function changeCenter(Value:Float):Void
 	{
-		_txtWave.center = Value;
+		_txtWave.center = Std.int(Value);
 	}
 	
 	private function doneMadeInSound():Void

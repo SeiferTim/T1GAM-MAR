@@ -102,7 +102,7 @@ class ScoreState extends FlxState
 			return;
 		_leaving = true;
 		GameControls.canInteract = false;
-		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, doneGoAgain);
+		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*2, false, doneGoAgain);
 		FlxG.sound.music.fadeOut(Reg.FADE_DUR);
 	}
 	
@@ -117,7 +117,7 @@ class ScoreState extends FlxState
 			return;
 		_leaving = true;
 		GameControls.canInteract = false;
-		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, doneGoMenu);
+		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR*2, false, doneGoMenu);
 		FlxG.sound.music.fadeOut(Reg.FADE_DUR);
 	}
 	

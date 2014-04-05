@@ -1306,10 +1306,18 @@ class PlayState extends FlxState
 		#if !FLX_NO_GAMEPAD
 		if (GameControls.hasGamepad)
 		{
+			
+			#if !flash
+			_pressingUp =  GameControls.gamepad.dpadUp;
+			_pressingDown =  GameControls.gamepad.dpadDown;
+			_pressingLeft =  GameControls.gamepad.dpadLeft;
+			_pressingRight =  GameControls.gamepad.dpadRight;
+			#else
 			_pressingUp = GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.UP]);
 			_pressingDown = GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.DOWN]);
 			_pressingLeft = GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.LEFT]);
 			_pressingRight = GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.RIGHT]);
+			#end
 			_pressingShoot = GameControls.gamepad.anyPressed(GameControls.buttons[GameControls.FIRE]);
 		}
 		#end
