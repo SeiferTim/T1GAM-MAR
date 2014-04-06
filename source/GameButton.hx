@@ -12,7 +12,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
 
-class GameButton extends FlxUITypedButton<GameFont>
+class GameButton extends FlxUITypedButton<GameFont> implements IUIElement
 {
 	
 	public static inline var STYLE_GREEN:Int = 0;
@@ -70,16 +70,11 @@ class GameButton extends FlxUITypedButton<GameFont>
 			h = Height;
 		}
 		
-		
-		
 		loadGraphicSlice9([img], w, h,_slices, FlxUI9SliceSprite.TILE_NONE, -1, false, 49, 49);
 		label = l;
 		
 		_sprSelected = new FlxSprite(0, 0);
 		var b:BitmapData = new BitmapData(w, h, true, FlxColor.WHITE);
-		//var spr:FlxSprite = new FlxSprite();
-		//spr.makeGraphic(Std.int(_sprSelected.width), Std.int(_sprSelected.height), 0x0, true);
-		//FlxSpriteUtil.alphaMask(spr, b, framePixels);
 		updateFrameData();
 		var b2:BitmapData = new BitmapData(w + 4, h + 4, true, 0x0);
 		

@@ -5,7 +5,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
 import haxe.Constraints.Function;
 
-class FakeUIElement extends FlxSprite
+class FakeUIElement extends FlxSprite implements IUIElement
 {
 
 	public var selected:Bool = false;
@@ -20,7 +20,7 @@ class FakeUIElement extends FlxSprite
 	public static inline var DOWN_EVENT:String = "down_button";
 	public static inline var OUT_EVENT:String = "out_button";
 	
-	public function new(X:Float = 0, Y:Float = 0, Width:Int = 1, Height:Int = 1, OnX:Void->Void, OnInput:Int->Void, KeepToggled:Bool = true )
+	public function new(X:Float = 0, Y:Float = 0, Width:Int = 1, Height:Int = 1, OnX:Void->Void=null, OnInput:Int->Void=null, KeepToggled:Bool = true)
 	{
 		super(X, Y);
 		onX = OnX;

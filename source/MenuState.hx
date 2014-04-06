@@ -125,14 +125,14 @@ class MenuState extends FlxState
 		_btnPlay.active = false;
 		add(_btnPlay);
 		
-		_btnOptions = new GameButton(8, 0, "Options", goOptions, GameButton.STYLE_BLUE, true, 0, 0, 18);
+		_btnOptions = new GameButton(32, 0, "Options", goOptions, GameButton.STYLE_BLUE, true, 0, 0, 18);
 		_btnOptions.y = FlxG.height - _btnOptions.height - 16;
 		_btnOptions.alpha = 0;
 		_btnOptions.active = false;
 		add(_btnOptions);
 		
 		_btnCredits = new GameButton(0, 0, "Credits", goCredits, GameButton.STYLE_BLUE, false, Std.int(_btnOptions.width), Std.int(_btnOptions.height), 18);
-		_btnCredits.x = _btnOptions.x + _btnOptions.width + 16;
+		_btnCredits.x = _btnOptions.x + _btnOptions.width + 32;
 		_btnCredits.y = FlxG.height - _btnCredits.height - 16;
 		_btnCredits.alpha = 0;
 		_btnCredits.active = false;

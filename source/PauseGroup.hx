@@ -34,8 +34,8 @@ class PauseGroup extends FlxGroup
 	private var _btnNo:GameButton;
 	private var _txtConfirm:GameFont;
 	
-	public var _btnsMain(default, null):Array<Dynamic>;
-	public var _btnsConf(default, null):Array<Dynamic>;
+	public var _btnsMain(default, null):Array<IUIElement>;
+	public var _btnsConf(default, null):Array<IUIElement>;
 	
 	
 	public function new() 

@@ -1306,7 +1306,6 @@ class PlayState extends FlxState
 		#if !FLX_NO_GAMEPAD
 		if (GameControls.hasGamepad)
 		{
-			
 			#if !flash
 			_pressingUp =  GameControls.gamepad.dpadUp;
 			_pressingDown =  GameControls.gamepad.dpadDown;
@@ -1416,7 +1415,6 @@ class PlayState extends FlxState
 					_lastRoar = 4;
 					
 					roar();
-					
 					
 					for (c in _grpCopters.members)
 					{

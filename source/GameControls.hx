@@ -1,7 +1,9 @@
 package ;
 import flixel.addons.tile.FlxTileSpecial.AnimParams;
 import flixel.addons.ui.FlxUITypedButton;
+import flixel.FlxBasic;
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.input.gamepad.LogitechButtonID;
 import flixel.util.FlxArrayUtil;
@@ -22,9 +24,11 @@ class GameControls
 	public static inline var SELRIGHT:Int = 7;
 	public static inline var SELLEFT:Int = 8;
 	
+	public static var commandList:Array<String>;
+	
 	private static var _selButton:Int = -1;
 	
-	private static var _uis:Array<Dynamic>;
+	private static var _uis:Array<IUIElement>;
 	
 	public static inline var INPUT_DELAY:Float = .1;
 	
@@ -39,6 +43,7 @@ class GameControls
 	static public var hasGamepad:Bool = false;
 	static public var gamepad:FlxGamepad = null;
 	public static var buttons:Array<Array<Int>>;
+	public static var idStringMap = new Map<Int, String>();
 	#end
 	
 	#if !FLX_NO_MOUSE
@@ -49,6 +54,7 @@ class GameControls
 	
 	public static function init() 
 	{
+		buildCommandList();
 		#if !FLX_NO_KEYBOAD
 		keys = [];
 		keys[LEFT] = ["LEFT", "A"];
@@ -63,6 +69,7 @@ class GameControls
 		#end
 		#if !FLX_NO_GAMEPAD
 		buttons = [];
+		buildButtonStrings();
 		#if flash
 		buttons[LEFT] = [LogitechButtonID.DPAD_LEFT];
 		buttons[RIGHT] = [LogitechButtonID.DPAD_RIGHT];
@@ -79,24 +86,87 @@ class GameControls
 		buttons[FIRE] = [LogitechButtonID.ONE, LogitechButtonID.TWO];
 		buttons[PAUSE] = [LogitechButtonID.TEN];
 		buttons[BACK] = [LogitechButtonID.NINE];
-		
-		
 		#end
 		#if !FLX_NO_MOUSE
 		lastMouseMove = 0;
 		lastMousePos = FlxPoint.get();
 		#end
-		_uis = new Array<Dynamic>();
+		_uis = new Array<IUIElement>();
 	}
 	
-	public static function newState(Buttons:Array<Dynamic>):Void
+	private static function buildCommandList():Void
+	{
+		commandList = new Array<String>();
+		commandList.push("LEFT");
+		commandList.push("RIGHT");
+		commandList.push("UP");
+		commandList.push("DOWN");
+		commandList.push("FIRE");
+		commandList.push("PAUSE");
+	}
+	#if !FLX_NO_KEYBOARD
+	public static function remapKey(CommandNo:Int, NewKey:String):Void
+	{
+		for (k in keys)
+		{
+			k.remove(NewKey);
+		}
+		keys[CommandNo].push(NewKey);
+		keys[SELRIGHT] = keys[RIGHT].concat(keys[DOWN]);
+		keys[SELLEFT] = keys[LEFT].concat(keys[UP]);
+	}
+	#end
+	#if !FLX_NO_GAMEPAD
+	public static function remapButton(CommandNo:Int, NewButton:Int):Void
+	{
+		for (b in buttons)
+		{
+			b.remove(NewButton);
+		}
+		buttons[CommandNo].push(NewButton);
+		buttons[SELRIGHT] = buttons[RIGHT].concat(buttons[DOWN]);
+		buttons[SELLEFT] = buttons[LEFT].concat(buttons[UP]);
+	}
+	#end
+	
+	private static function buildButtonStrings():Void
+	{
+		var buttons:Array<String> = Type.getClassFields(LogitechButtonID);
+		var value:Int;
+		for (field in buttons)
+		{
+			value = cast Reflect.getProperty(LogitechButtonID, field);
+			idStringMap.set(value, field);
+		}
+	}
+	
+	public static function getKeyList(KeyValue:Int):String
+	{
+		var strList:String = keys[KeyValue].join(", ");
+		return strList;
+	}
+	
+	public static function getButtonList(BtnValue:Int):String
+	{
+		var isFirst:Bool = true;
+		var strList:String = "";
+		for (b in buttons[BtnValue])
+		{
+			strList += (!isFirst ? ', ' : '') + idStringMap[b];
+			isFirst = false;
+		}
+		return strList;
+		
+	}
+	
+	public static function newState(Buttons:Array<IUIElement>):Void
 	{
 		_selButton = -1;
 		_uis = Buttons;
 		canInteract = false;
 	}
 	
-	public static function changeUIs(UIs:Array<Dynamic>):Void
+	public static function changeUIs(UIs:Array<IUIElement>):Void
 	{
 		if (_uis != null)
 		{
@@ -107,7 +177,6 @@ class GameControls
 					b.selected = false;
 					b.toggled = false;
 				}
-			
 			}
 		}
 		
@@ -196,6 +265,8 @@ class GameControls
 				if (xPressed || rightPressed || leftPressed || downPressed || upPressed)
 				{
 					_pressDelay = INPUT_DELAY;
+					lastMouseMove = 0;
+					FlxG.mouse.visible = false;
 					_selButton=0;
 				}
 			}
@@ -241,7 +312,6 @@ class GameControls
 						}
 					}
 				}
-				
 			}
 		}
 		if (_uis.length > 0)
@@ -277,6 +347,21 @@ class GameControls
 		else
 		{
 			FlxG.mouse.visible = false;
+		}
+		if (FlxG.mouse.visible)
+		{
+			var overAny:Bool = false;
+			for (i in 0..._uis.length)
+			{
+				
+				if (_uis[i].overlapsPoint(FlxG.mouse))
+				{
+					_selButton = i;
+					overAny = true;
+				}
+			}
+			if (!overAny)
+				_selButton = -1;
 		}
 	}
 	#end

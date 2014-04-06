@@ -1,8 +1,13 @@
 package ;
 
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.group.FlxGroup;
+import flixel.input.keyboard.FlxKey;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
 
@@ -18,6 +23,26 @@ class OptionsState extends FlxState
 	
 	private var _btnDone:GameButton;
 	private var _optSlide1:CustomSlider;
+	
+	private var _uiElements:Array<IUIElement>;
+	
+	#if !FLX_NO_KEYBOARD
+	private var _txtKeys:Array<GameFont>;
+	private var _fakeKeys:Array<FakeUIElement>;
+	private var _newKey:Int = -1;
+	#end
+	#if !FLX_NO_GAMEPAD
+	private var _txtBtns:Array<GameFont>;
+	private var _fakeBtns:Array<FakeUIElement>;
+	private var _newBtn:Int = -1;
+	#end
+	
+	private var _grpModal:FlxGroup;
+	private var _txtModal:GameFont;
+	private var _txtModal2:GameFont;
+	private var _modalAlpha:Float = 0;
+	
+	
 	
 	override public function create():Void 
 	{
@@ -57,51 +82,124 @@ class OptionsState extends FlxState
 		FlxSpriteUtil.screenCenter(_txtControls, true, false);
 		add(_txtControls);
 		
-		var _txtLeft:GameFont = new GameFont(0, _txtControls.y + _txtControls.height + 32, "LEFT:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
-		_txtLeft.x = (FlxG.width / 2) - 96 - _txtLeft.width;
+		var _txtLeft:GameFont = new GameFont(64, _txtControls.y + _txtControls.height + 16, "LEFT:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
 		add(_txtLeft);
 		
-		var _txtRight:GameFont = new GameFont(0, _txtLeft.y + _txtLeft.height + 16, "RIGHT:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
-		_txtRight.x = (FlxG.width / 2) - 96 - _txtRight.width;
+		var _txtRight:GameFont = new GameFont(64, _txtLeft.y + _txtLeft.height + 8, "RIGHT:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
 		add(_txtRight);
 		
-		var _txtUp:GameFont = new GameFont(0, _txtRight.y + _txtRight.height + 16, "UP:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
-		_txtUp.x = (FlxG.width / 2) - 96 - _txtUp.width;
+		var _txtUp:GameFont = new GameFont(64, _txtRight.y + _txtRight.height + 8, "UP:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
 		add(_txtUp);
 		
-		var _txtDown:GameFont = new GameFont(0, _txtUp.y + _txtUp.height + 16, "DOWN:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
-		_txtDown.x = (FlxG.width / 2) - 96 - _txtDown.width;
+		var _txtDown:GameFont = new GameFont(64, _txtUp.y + _txtUp.height + 8, "DOWN:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
 		add(_txtDown);
 		
-		var _txtFire:GameFont = new GameFont(0, _txtUp.y + _txtUp.height + 16, "FIRE:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
-		_txtFire.x = (FlxG.width / 2) - 96 - _txtFire.width;
+		var _txtFire:GameFont = new GameFont(64, _txtDown.y + _txtDown.height + 8, "FIRE:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
 		add(_txtFire);
 		
-		var _txtPause:GameFont = new GameFont(0, _txtFire.y + _txtFire.height + 16, "FIRE:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
-		_txtPause.x = (FlxG.width / 2) - 96 - _txtPause.width;
+		var _txtPause:GameFont = new GameFont(64, _txtFire.y + _txtFire.height + 8, "PAUSE:", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "right", 24);
 		add(_txtPause);
-		
-		
-		
 		
 		_btnDone = new GameButton(0, 0, "Done", goDone, GameButton.STYLE_GREEN, true);
 		_btnDone.y = FlxG.height - _btnDone.height - 16;
 		FlxSpriteUtil.screenCenter(_btnDone, true, false);
-		add(_btnDone);
 		_btnDone.active = false;
 		
-		
-		
+		_uiElements = new Array<IUIElement>();
+		_uiElements.push(_btnDone);
+		_uiElements.push(_uiVolume);
 		#if desktop
-		GameControls.newState([_btnDone, _uiVolume, _optScreen]);
-		#else
-		GameControls.newState([_btnDone, _uiVolume]);
+		_uiElements.push(_optScreen);
 		#end
+		
+		#if !FLX_NO_KEYBOARD
+		_txtKeys = new Array<GameFont>();
+		_fakeKeys = new Array<FakeUIElement>();
+		#end
+		#if !FLX_NO_GAMEPAD
+		_txtBtns = new Array<GameFont>();
+		_fakeBtns = new Array<FakeUIElement>();
+		#end
+		
+		for (i in 0...6)
+		{		
+			#if !FLX_NO_KEYBOARD
+			_txtKeys.push(new GameFont(164, _txtLeft.y + ((_txtLeft.height + 8)*i), GameControls.getKeyList(i), GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGREEN, "left", 24));
+			_fakeKeys.push(new FakeUIElement(_txtKeys[i].x - 4, _txtKeys[i].y - 2, 382, Std.int(_txtKeys[i].height - 4), promptNewKey.bind(i), null, false));
+			add(_fakeKeys[i]);
+			add(_txtKeys[i]);
+			_uiElements.push(_fakeKeys[i]);
+			#end
+			#if !FLX_NO_GAMEPAD
+			_txtBtns.push(new GameFont(546, _txtLeft.y + ((_txtLeft.height + 8)*i), GameControls.getButtonList(i), GameFont.STYLE_SMSIMPLE, i > 3 ? GameFont.COLOR_SIMPLEGREEN : GameFont.COLOR_SIMPLEGOLD, "left", 24));
+			if (i > 3)
+			{
+				_fakeBtns.push(new FakeUIElement(_txtBtns[i].x - 4, _txtBtns[i].y - 2, 382, Std.int(_txtBtns[i].height - 4), promptNewButton.bind(i), null, false));
+				add(_fakeBtns[_fakeBtns.length-1]);
+				_uiElements.push(_fakeBtns[_fakeBtns.length-1]);
+			}
+			add(_txtBtns[i]);
+			#end
+		}
+		
+		add(_btnDone);
+		
+		_grpModal = new FlxGroup();
+		_grpModal.add(new FlxSprite((FlxG.width / 2) - 400, (FlxG.height / 2) - 40).makeGraphic(800, 80, FlxColor.WHITE));
+		_grpModal.add(new FlxSprite((FlxG.width / 2) - 398, (FlxG.height / 2) - 38).makeGraphic(796, 76, FlxColor.BLACK));
+		_txtModal = new GameFont(0, 0, "Press a key to bind it to LEFT", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "left", 32);
+		FlxSpriteUtil.screenCenter(_txtModal);
+		_txtModal.y -= 16;
+		_grpModal.add(_txtModal);
+		
+		_txtModal2 = new GameFont(0, 0, "Press ", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "left", 16);
+		#if !FLX_NO_KEYBOARD
+		_txtModal2.text += "ESCAPE";
+		#end
+		#if (!FLX_NO_KEYBOARD && !FLX_NO_GAMEPAD)
+		_txtModal2.text += " or ";
+		#end
+		#if !FLX_NO_GAMEPAD
+		_txtModal2.text += "BACK";
+		#end
+		_txtModal2.text += " to Cancel";
+		FlxSpriteUtil.screenCenter(_txtModal2, true, true);
+		_txtModal2.y += 24;
+		_grpModal.add(_txtModal2);
+		
+		for (o in _grpModal.members)
+		{
+			cast(o).alpha = _modalAlpha;
+		}
+		add(_grpModal);
+		_grpModal.visible = false;
+		
+		GameControls.newState(_uiElements);
 		
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, true, doneFadeIn);
 		
 		super.create();
 		
+	}
+	
+	private function promptNewKey(NewKey:Int):Void
+	{
+		_newKey = NewKey;
+		_txtModal.text = "Press a key to bind it to " + GameControls.commandList[NewKey];
+		FlxTween.num(0, 1, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quadInOut }, modalAlpha);
+		
+	}
+	
+	private function promptNewButton(NewButton:Int):Void
+	{
+		_newBtn = NewButton;
+		_txtModal.text = "Press a button to bind it to " + GameControls.commandList[_newBtn];
+		FlxTween.num(0, 1, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quadInOut }, modalAlpha);
+	}
+	
+	private function modalAlpha(Value:Float):Void
+	{
+		_modalAlpha = Value;
 	}
 	
 	private function changeVol(Input:Int = 0):Void
@@ -172,7 +270,101 @@ class OptionsState extends FlxState
 	{
 		if (FlxG.sound.volume != _optSlide1.value)
 			_optSlide1.value = FlxG.sound.volume;
-		GameControls.checkScreenControls();
+		if (_modalAlpha >= 1)
+		{
+			var stopCheck:Bool = false;
+			#if !FLX_NO_KEYBOARD
+			if (FlxG.keys.anyJustReleased(["ESCAPE"]))
+			{
+				_newKey = -1;
+				#if !FLX_NO_GAMEPAD
+				_newBtn = -1;
+				#end
+				FlxTween.num(1, 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quadInOut }, modalAlpha);
+				stopCheck = true;
+			}
+			#end
+			#if !FLX_NO_GAMEPAD
+			if (GameControls.gamepad.anyJustReleased([GameControls.BACK]))
+			{
+				#if !FLX_NO_KEYBOARD
+				_newKey = -1;
+				#end
+				_newBtn = -1;
+				FlxTween.num(1, 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quadInOut }, modalAlpha);
+				stopCheck = true;
+			}
+			#end
+			if (!stopCheck)
+			{
+				#if !FLX_NO_KEYBOARD
+				if (_newKey != -1)
+				{
+					if (FlxG.keys.justReleased.ANY)
+					{
+						var k:FlxKey = FlxG.keys.getFirstJustReleased();
+						if (k != null)
+						{
+							var keyName:String = k.name;
+							GameControls.remapKey(_newKey, keyName);
+							rebuildCommandList();
+							_newKey = -1;
+							FlxTween.num(1, 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quadInOut }, modalAlpha);
+						}
+					}
+				}
+				else 
+				{
+					#end
+					#if !FLX_NO_GAMEPAD
+					if (_newBtn != -1)
+					{
+						if (GameControls.gamepad.anyButton())
+						{
+							var b:Int = GameControls.gamepad.firstJustReleasedButtonID();
+							GameControls.gamepad.reset();
+							GameControls.remapButton(_newBtn, b);
+							_newBtn = -1;
+							rebuildCommandList();
+							FlxTween.num(1, 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quadInOut }, modalAlpha);
+						}
+					}
+					#end
+				#if !FLX_NO_KEYBOARD
+				}
+				#end
+			}
+		}
+		else
+		{			
+			GameControls.checkScreenControls();
+		}
+		if (_modalAlpha > 0)
+		{
+			_grpModal.visible = true;
+			for (o in _grpModal.members)
+			{
+				cast(o,FlxSprite).alpha = _modalAlpha;
+			}
+		}
+		else
+			_grpModal.visible = false;
 		super.update();
+	}
+	
+	private function rebuildCommandList():Void
+	{
+		for (i in 0...6)
+		{
+			#if !FLX_NO_KEYBOARD
+			_txtKeys[i].text = GameControls.getKeyList(i);
+			#end
+			#if !FLX_NO_GAMEPAD
+			if (i > 3)
+			{
+				_txtBtns[i].text = GameControls.getButtonList(i);
+			}
+			#end
+		}
 	}
 }
