@@ -174,14 +174,7 @@ class OptionsState extends FlxState
 		_uiElements.push(_resetKeyBindings);
 		
 		GameControls.newState(_uiElements);
-		
-		
-		var _txtVer = new FlxText(0,0,0, "DOWN:", 8);
-		_txtVer.setFormat(null, 8, 0xffffff, "right", FlxText.BORDER_OUTLINE);
-		_txtVer.x = FlxG.width - _txtVer.width;
-		_txtVer.y = FlxG.height - _txtVer.height;
-		add(_txtVer);
-		
+				
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, true, doneFadeIn);
 		
 		super.create();
@@ -306,17 +299,7 @@ class OptionsState extends FlxState
 				stopCheck = true;
 			}
 			#end
-			#if !FLX_NO_GAMEPAD
-			if (GameControls.gamepad.anyJustReleased([GameControls.BACK]))
-			{
-				#if !FLX_NO_KEYBOARD
-				_newKey = -1;
-				#end
-				_newBtn = -1;
-				FlxTween.num(1, 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quadInOut }, modalAlpha);
-				stopCheck = true;
-			}
-			#end
+			
 			if (!stopCheck)
 			{
 				#if !FLX_NO_KEYBOARD
@@ -341,15 +324,26 @@ class OptionsState extends FlxState
 					#if !FLX_NO_GAMEPAD
 					if (_newBtn != -1)
 					{
-						var b:Int = GameControls.gamepad.firstJustReleasedButtonID();
-						if (b!=-1)
+						if (!GameControls.hasGamepad)
 						{
-							
-							GameControls.gamepad.reset();
-							GameControls.remapButton(_newBtn, b);
-							_newBtn = -1;
-							rebuildCommandList();
-							FlxTween.num(1, 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quadInOut }, modalAlpha);
+							GameControls.gamepad = FlxG.gamepads.lastActive;
+							if (GameControls.gamepad != null)
+							{
+								GameControls.hasGamepad = true;
+							}
+						}
+						if (GameControls.hasGamepad)
+						{
+							var b:Int = GameControls.gamepad.firstJustReleasedButtonID();
+							if (b!=-1)
+							{
+								
+								GameControls.gamepad.reset();
+								GameControls.remapButton(_newBtn, b);
+								_newBtn = -1;
+								rebuildCommandList();
+								FlxTween.num(1, 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quadInOut }, modalAlpha);
+							}
 						}
 					}
 					#end

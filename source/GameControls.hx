@@ -144,8 +144,6 @@ class GameControls
 	#if !FLX_NO_GAMEPAD
 	public static function remapButton(CommandNo:Int, NewButton:Int):Void
 	{
-		trace(CommandNo + " - " + NewButton);
-		trace(buttons);
 		for (b in buttons)
 		{
 			b.remove(NewButton);
@@ -153,7 +151,6 @@ class GameControls
 		buttons[CommandNo].push(NewButton);
 		buttons[SELRIGHT] = buttons[RIGHT].concat(buttons[DOWN]);
 		buttons[SELLEFT] = buttons[LEFT].concat(buttons[UP]);
-		trace(buttons);
 	}
 	#end
 	
@@ -424,6 +421,8 @@ class GameControls
 				if (_uis[i].overlapsPoint(FlxG.mouse))
 				{
 					_selButton = i;
+					if (FlxG.mouse.justReleased)
+						_uis[i].forceStateHandler(FakeUIElement.CLICK_EVENT);
 					overAny = true;
 				}
 			}

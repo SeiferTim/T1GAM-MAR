@@ -5,7 +5,7 @@
 	<app title="Dinosaur-Ghost Rampage" file="DinosaurGhostRampage" main="Main" version="1.0.2" company="Tile Isle" />
 	
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file, or you can set the actual size of your file manually at "Flxpreloader-onUpdate-bytesTotal"!-->
-	<!--<app preloader="flixel.system.FlxPreloader" />-->
+	<app preloader="flixel.system.FlxPreloader" />
 	
 	<!--The swf version should be at least 11.2 without FLX_NO_MOUSE_ADVANCED -->
 	<set name="SWF_VERSION" value="11.8" />
@@ -34,6 +34,7 @@
 	<assets path="assets/images" rename="images" include="*.png" />
 	<assets path="assets/fonts" rename="fonts" include="*.ttf" />
 	<assets path="assets/sounds" rename="sounds" include="*.wav" />
+	<assets path="assets/icons" include="*.png" />
 	
 	<assets path="assets/music" if="flash" >
 		<music path="game-music.mp3" id="game-music" />
@@ -49,10 +50,21 @@
 	</assets>
 	
 	
+
+	<icon path="assets/icons/16.png" height="16" width="16" />
+	<icon path="assets/icons/32.png" height="32" width="32" />
+	<icon path="assets/icons/36.png" height="36" width="36" />
+	<icon path="assets/icons/48.png" height="48" width="48" />
+	<icon path="assets/icons/64.png" height="64" width="64" />
+	<icon path="assets/icons/72.png" height="72" width="72" />
+	<icon path="assets/icons/96.png" height="96" width="96" />
+	<icon path="assets/icons/144.png" height="144" width="144" />
+	<icon path="assets/icons/192.png" height="192" width="192" />
+	<icon path="assets/icons/256.png" height="256" width="256" />
 	
 	<!--------------------------------LIBRARIES------------------------------------->
 	
-	<haxelib name="openfl" />
+	
 	<haxelib name="flixel"/>
 	
 	<!--In case you want to use the addons package-->
