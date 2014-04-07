@@ -285,6 +285,7 @@ class GameControls
 			#if !FLX_NO_GAMEPAD
 			if (hasGamepad)
 			{
+				
 				#if !flash
 				if (gamepad.dpadRight || gamepad.dpadDown)
 				{
