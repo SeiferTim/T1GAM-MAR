@@ -37,6 +37,7 @@ class GameControls
 	
 	#if !FLX_NO_KEYBOAD
 	public static var keys:Array<Array<String>>;
+	private static var _defaultKeys:Array<Array<String>>;
 	#end
 	
 	#if !FLX_NO_GAMEPAD
@@ -44,6 +45,7 @@ class GameControls
 	static public var gamepad:FlxGamepad = null;
 	public static var buttons:Array<Array<Int>>;
 	public static var idStringMap = new Map<Int, String>();
+	private static var _defaultBtns:Array<Array<Int>>;
 	#end
 	
 	#if !FLX_NO_MOUSE
@@ -66,6 +68,7 @@ class GameControls
 		keys[BACK] = ["ESCAPE"];
 		keys[SELRIGHT] = keys[RIGHT].concat(keys[DOWN]);
 		keys[SELLEFT] = keys[LEFT].concat(keys[UP]);
+		_defaultKeys = keys.copy();
 		#end
 		#if !FLX_NO_GAMEPAD
 		buttons = [];
@@ -86,12 +89,33 @@ class GameControls
 		buttons[FIRE] = [LogitechButtonID.ONE, LogitechButtonID.TWO];
 		buttons[PAUSE] = [LogitechButtonID.TEN];
 		buttons[BACK] = [LogitechButtonID.NINE];
+		_defaultBtns = buttons.copy();
 		#end
 		#if !FLX_NO_MOUSE
 		lastMouseMove = 0;
 		lastMousePos = FlxPoint.get();
 		#end
 		_uis = new Array<IUIElement>();
+		Reg.save.bind("flixel");
+		#if !FLX_NO_KEYBOARD
+		if (Reg.save.data.keys != null)
+			keys = Reg.save.data.keys;
+		#end
+		#if !FLX_NO_GAMEPAD
+		if (Reg.save.data.buttons != null)
+			buttons = Reg.save.data.buttons;
+		#end
+		Reg.save.close;
+	}
+	
+	public static function resetBindings():Void
+	{
+		#if !FLX_NO_KEYBOARD
+		keys = _defaultKeys.copy();
+		#end
+		#if !FLX_NO_GAMEPAD
+		buttons = _defaultBtns.copy();
+		#end
 	}
 	
 	private static function buildCommandList():Void

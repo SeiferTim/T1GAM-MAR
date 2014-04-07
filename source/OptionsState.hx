@@ -42,6 +42,7 @@ class OptionsState extends FlxState
 	private var _txtModal2:GameFont;
 	private var _modalAlpha:Float = 0;
 	
+	private var _resetKeyBindings:GameButton;
 	
 	
 	override public function create():Void 
@@ -151,18 +152,8 @@ class OptionsState extends FlxState
 		FlxSpriteUtil.screenCenter(_txtModal);
 		_txtModal.y -= 16;
 		_grpModal.add(_txtModal);
-		
-		_txtModal2 = new GameFont(0, 0, "Press ", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "left", 16);
-		#if !FLX_NO_KEYBOARD
-		_txtModal2.text += "ESCAPE";
-		#end
-		#if (!FLX_NO_KEYBOARD && !FLX_NO_GAMEPAD)
-		_txtModal2.text += " or ";
-		#end
-		#if !FLX_NO_GAMEPAD
-		_txtModal2.text += "BACK";
-		#end
-		_txtModal2.text += " to Cancel";
+
+		_txtModal2 = new GameFont(0, 0, "Press ESCAPE to Cancel", GameFont.STYLE_SMSIMPLE, GameFont.COLOR_SIMPLEGOLD, "left", 16);
 		FlxSpriteUtil.screenCenter(_txtModal2, true, true);
 		_txtModal2.y += 24;
 		_grpModal.add(_txtModal2);
@@ -174,12 +165,24 @@ class OptionsState extends FlxState
 		add(_grpModal);
 		_grpModal.visible = false;
 		
+		_resetKeyBindings = new GameButton(0, 0, "Reset Controls", resetControls, GameButton.STYLE_RED, true, 0, 0, 18);
+		_resetKeyBindings.x = FlxG.width - _resetKeyBindings.width - 16;
+		_resetKeyBindings.y = FlxG.height - _resetKeyBindings.height - 16;
+		add(_resetKeyBindings);
+		_uiElements.push(_resetKeyBindings);
+		
 		GameControls.newState(_uiElements);
 		
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, true, doneFadeIn);
 		
 		super.create();
 		
+	}
+	
+	private function resetControls():Void
+	{
+		GameControls.resetBindings();
+		rebuildCommandList();
 	}
 	
 	private function promptNewKey(NewKey:Int):Void
@@ -239,6 +242,16 @@ class OptionsState extends FlxState
 		_optScreen.active = false;
 		#end
 		GameControls.canInteract = false;
+		
+		//save keybindings
+		Reg.save.bind("flixel");
+		#if !FLX_NO_KEYBOARD
+		Reg.save.data.keys = GameControls.keys;
+		#end
+		#if !FLX_NO_GAMEPAD
+		Reg.save.data.buttons = GameControls.buttons;
+		#end
+		Reg.save.flush();
 		FlxG.sound.soundTrayEnabled = true;
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, false, goDoneDone);
 	}
@@ -319,9 +332,10 @@ class OptionsState extends FlxState
 					#if !FLX_NO_GAMEPAD
 					if (_newBtn != -1)
 					{
-						if (GameControls.gamepad.anyButton())
+						var b:Int = GameControls.gamepad.firstJustReleasedButtonID();
+						if (b!=-1)
 						{
-							var b:Int = GameControls.gamepad.firstJustReleasedButtonID();
+							
 							GameControls.gamepad.reset();
 							GameControls.remapButton(_newBtn, b);
 							_newBtn = -1;
