@@ -84,11 +84,11 @@ class GameControls
 		buttons[UP] = [-1];
 		buttons[DOWN] = [-1];
 		#end
-		buttons[SELRIGHT] = buttons[RIGHT].concat(buttons[DOWN]);
-		buttons[SELLEFT] = buttons[LEFT].concat(buttons[UP]);
 		buttons[FIRE] = [LogitechButtonID.ONE, LogitechButtonID.TWO];
 		buttons[PAUSE] = [LogitechButtonID.TEN];
 		buttons[BACK] = [LogitechButtonID.NINE];
+		buttons[SELRIGHT] = buttons[RIGHT].concat(buttons[DOWN]);
+		buttons[SELLEFT] = buttons[LEFT].concat(buttons[UP]);
 		_defaultBtns = buttons.copy();
 		#end
 		#if !FLX_NO_MOUSE
@@ -106,6 +106,7 @@ class GameControls
 			buttons = Reg.save.data.buttons;
 		#end
 		Reg.save.close;
+		
 	}
 	
 	public static function resetBindings():Void
@@ -143,6 +144,8 @@ class GameControls
 	#if !FLX_NO_GAMEPAD
 	public static function remapButton(CommandNo:Int, NewButton:Int):Void
 	{
+		trace(CommandNo + " - " + NewButton);
+		trace(buttons);
 		for (b in buttons)
 		{
 			b.remove(NewButton);
@@ -150,18 +153,35 @@ class GameControls
 		buttons[CommandNo].push(NewButton);
 		buttons[SELRIGHT] = buttons[RIGHT].concat(buttons[DOWN]);
 		buttons[SELLEFT] = buttons[LEFT].concat(buttons[UP]);
+		trace(buttons);
 	}
 	#end
 	
 	private static function buildButtonStrings():Void
 	{
+		#if flash
 		var buttons:Array<String> = Type.getClassFields(LogitechButtonID);
 		var value:Int;
 		for (field in buttons)
 		{
-			value = cast Reflect.getProperty(LogitechButtonID, field);
+			
+			value = Reflect.getProperty(LogitechButtonID, field);
 			idStringMap.set(value, field);
+			
 		}
+		#else
+		idStringMap.set(0, "ONE");
+		idStringMap.set(1, "TWO");
+		idStringMap.set(2, "THREE");
+		idStringMap.set(3, "FOUR");
+		idStringMap.set(4, "FIVE");
+		idStringMap.set(5, "SIX");
+		idStringMap.set(6, "SEVEN");
+		idStringMap.set(7, "EIGHT");
+		idStringMap.set(8, "NINE");
+		idStringMap.set(9, "TEN");
+
+		#end
 	}
 	
 	public static function getKeyList(KeyValue:Int):String
@@ -174,11 +194,34 @@ class GameControls
 	{
 		var isFirst:Bool = true;
 		var strList:String = "";
+		#if !flash
+		if (BtnValue <= 3)
+		{
+			switch (BtnValue)
+			{
+				case LEFT:
+					return "DPAD_LEFT";
+				case RIGHT:
+					return "DPAD_RIGHT";
+				case UP:
+					return "DPAD_UP";
+				case DOWN:
+					return "DPAD_DOWN";
+					
+			}
+		}
+		else
+		{
+		#end
 		for (b in buttons[BtnValue])
 		{
 			strList += (!isFirst ? ', ' : '') + idStringMap[b];
 			isFirst = false;
 		}
+		#if !flash
+		}
+		#end
+
 		return strList;
 		
 	}

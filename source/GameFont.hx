@@ -180,12 +180,11 @@ class GameFont extends FlxSprite
 			spr = new FlxSprite();
 			
 			pixels = new BitmapData(Std.int(r.width), Std.int(r.height), true, 0x0);
-			
 			if (style == STYLE_SMSIMPLE)
 			{
 				var shadowColor:Int = colors.pop();
 				b2 = FlxGradient.createGradientBitmapData(Std.int(r.width), Std.int(r.height), colors);
-				spr = new FlxSprite();
+				spr = new FlxSprite();				
 				FlxSpriteUtil.alphaMask(spr, b2, b1);
 				makeGraphic(Std.int(spr.width + 4), Std.int(spr.height + 14), 0x0, true);
 				pixels.copyPixels(spr.pixels, spr.pixels.rect, new Point(2, 2));
@@ -288,6 +287,8 @@ class GameFont extends FlxSprite
 				spr2 = FlxDestroyUtil.destroy(spr2);
 				
 			}
+			FlxG.bitmap.remove(FlxG.bitmap.getCacheKeyFor(b1));
+			FlxG.bitmap.remove(FlxG.bitmap.getCacheKeyFor(b2));
 			b1 = FlxDestroyUtil.dispose(b1);
 			b2 = FlxDestroyUtil.dispose(b2);
 			

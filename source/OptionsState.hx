@@ -6,6 +6,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
 import flixel.input.keyboard.FlxKey;
+import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
@@ -121,7 +122,7 @@ class OptionsState extends FlxState
 		_txtBtns = new Array<GameFont>();
 		_fakeBtns = new Array<FakeUIElement>();
 		#end
-		
+				
 		for (i in 0...6)
 		{		
 			#if !FLX_NO_KEYBOARD
@@ -132,7 +133,8 @@ class OptionsState extends FlxState
 			_uiElements.push(_fakeKeys[i]);
 			#end
 			#if !FLX_NO_GAMEPAD
-			_txtBtns.push(new GameFont(546, _txtLeft.y + ((_txtLeft.height + 8)*i), GameControls.getButtonList(i), GameFont.STYLE_SMSIMPLE, i > 3 ? GameFont.COLOR_SIMPLEGREEN : GameFont.COLOR_SIMPLEGOLD, "left", 24));
+			
+			_txtBtns.push(new GameFont(546, _txtLeft.y + ((_txtLeft.height + 8) * i), GameControls.getButtonList(i), GameFont.STYLE_SMSIMPLE, i > 3 ? GameFont.COLOR_SIMPLEGREEN : GameFont.COLOR_SIMPLEGOLD, "left", 24));
 			if (i > 3)
 			{
 				_fakeBtns.push(new FakeUIElement(_txtBtns[i].x - 4, _txtBtns[i].y - 2, 382, Std.int(_txtBtns[i].height - 4), promptNewButton.bind(i), null, false));
@@ -172,6 +174,13 @@ class OptionsState extends FlxState
 		_uiElements.push(_resetKeyBindings);
 		
 		GameControls.newState(_uiElements);
+		
+		
+		var _txtVer = new FlxText(0,0,0, "DOWN:", 8);
+		_txtVer.setFormat(null, 8, 0xffffff, "right", FlxText.BORDER_OUTLINE);
+		_txtVer.x = FlxG.width - _txtVer.width;
+		_txtVer.y = FlxG.height - _txtVer.height;
+		add(_txtVer);
 		
 		FlxG.camera.fade(FlxColor.BLACK, Reg.FADE_DUR, true, doneFadeIn);
 		
