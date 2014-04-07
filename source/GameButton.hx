@@ -31,7 +31,8 @@ class GameButton extends FlxUITypedButton<GameFont> implements IUIElement
 	
 	public function new(X:Float=0, Y:Float=0, ?Label:String, ?OnClick:Void -> Void, Style:Int = 0, FitText:Bool = true, Width:Int = 0, Height:Int =0, LabelFontSize:Int = -1) 
 	{
-		super(X, Y, Label, OnClick);
+		super(X, Y, OnClick);
+		
 		
 		var col:Int=0;
 		var img:String="";
