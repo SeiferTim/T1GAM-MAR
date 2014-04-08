@@ -283,9 +283,33 @@ class GameControls
 			#end
 			
 			#if !FLX_NO_GAMEPAD
+			
+			if (!hasGamepad)
+			{
+				gamepad = FlxG.gamepads.lastActive;
+				if (gamepad != null)
+				{
+					hasGamepad = true;
+					
+				}
+			}
+			
 			if (hasGamepad)
 			{
 				
+				var xAxisValue = gamepad.getXAxis(LogitechButtonID.LEFT_ANALOGUE_X);
+				var yAxisValue = gamepad.getYAxis(LogitechButtonID.LEFT_ANALOGUE_Y);
+				
+				if (xAxisValue < 0 || yAxisValue < 0)
+				{
+					leftPressed = upPressed = true;
+					gamepad.reset();
+				}
+				else if (xAxisValue > 0 || yAxisValue > 0)
+				{
+					rightPressed = downPressed = true;
+					gamepad.reset();
+				}
 				#if !flash
 				if (gamepad.dpadRight || gamepad.dpadDown)
 				{
@@ -315,15 +339,7 @@ class GameControls
 					gamepad.reset();
 				}
 			}
-			else
-			{
-				gamepad = FlxG.gamepads.lastActive;
-				if (gamepad != null)
-				{
-					hasGamepad = true;
-					
-				}
-			}
+
 			#end
 			if (_selButton == -1)
 			{

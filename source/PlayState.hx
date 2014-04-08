@@ -8,6 +8,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
 import flixel.group.FlxTypedGroup.FlxTypedGroup;
+import flixel.input.gamepad.LogitechButtonID;
 import flixel.system.FlxSound;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -1306,6 +1307,15 @@ class PlayState extends FlxState
 		#if !FLX_NO_GAMEPAD
 		if (GameControls.hasGamepad)
 		{
+			
+			var xAxisValue = GameControls.gamepad.getXAxis(LogitechButtonID.LEFT_ANALOGUE_X);
+			var yAxisValue = GameControls.gamepad.getYAxis(LogitechButtonID.LEFT_ANALOGUE_Y);
+			
+			_pressingUp = yAxisValue < 0;
+			_pressingDown = yAxisValue > 0;
+			_pressingLeft = xAxisValue < 0;
+			_pressingRight = xAxisValue > 0;
+			
 			#if !flash
 			_pressingUp =  GameControls.gamepad.dpadUp;
 			_pressingDown =  GameControls.gamepad.dpadDown;

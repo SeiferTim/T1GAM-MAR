@@ -39,7 +39,7 @@ class Tank extends DisplaySprite
 		_turret.loadGraphic("images/tank-turret.png", false, false, 64, 64);		
 		_turret.relativeX = (width / 2) - (_turret.width/2);
 		_turret.relativeY = (height / 2) - (_turret.width / 2);
-		_turret.setOriginToCenter();
+		_turret.centerOrigin();
 		animation.add("lr", [0, 1], 12);
 		animation.add("u", [2, 3], 12);
 		animation.add("d", [4, 5], 12);
