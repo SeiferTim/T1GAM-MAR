@@ -45,6 +45,7 @@ class GameClass extends FlxGame
 		#if desktop
 		startFullscreen = Reg.IsFullscreen;
 		#end
+		
 		super(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen);
 	}
 }
