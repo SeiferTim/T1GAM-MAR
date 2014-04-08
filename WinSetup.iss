@@ -23,7 +23,7 @@ DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 OutputBaseFilename={#MyAppName}-Install
-SetupIconFile=T:\Users\Tim\Documents\Repos\T1GAM-MAR\export\windows\cpp\bin\icon.ico
+SetupIconFile=C:\Users\Tim\Documents\repos\T1GAM-MAR\export\windows\cpp\bin\icon.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -35,8 +35,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "T:\Users\Tim\Documents\Repos\T1GAM-MAR\export\windows\cpp\bin\DinosaurGhostRampage.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "T:\Users\Tim\Documents\Repos\T1GAM-MAR\export\windows\cpp\bin\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\Tim\Documents\repos\T1GAM-MAR\export\windows\cpp\bin\DinosaurGhostRampage.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Tim\Documents\repos\T1GAM-MAR\export\windows\cpp\bin\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
