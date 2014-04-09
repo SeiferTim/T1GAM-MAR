@@ -307,11 +307,11 @@ class OptionsState extends FlxState
 				{
 					if (FlxG.keys.justReleased.ANY)
 					{
-						var k:FlxKey = FlxG.keys.getFirstJustReleased();
-						if (k != null)
+						var k:String = FlxG.keys.firstJustReleased();
+						if (k != "")
 						{
-							var keyName:String = k.name;
-							GameControls.remapKey(_newKey, keyName);
+							//var keyName:String = k.name;
+							GameControls.remapKey(_newKey, k);
 							rebuildCommandList();
 							_newKey = -1;
 							FlxTween.num(1, 0, Reg.FADE_DUR, { type:FlxTween.ONESHOT, ease:FlxEase.quadInOut }, modalAlpha);
